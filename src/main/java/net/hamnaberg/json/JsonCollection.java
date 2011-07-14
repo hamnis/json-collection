@@ -9,7 +9,7 @@ public class JsonCollection implements WithHref {
     private final Version version;
     private final ImmutableList<Link> links;
     private final ImmutableList<Item> items;
-    private Error error;
+    private ErrorMessage error;
 
     public JsonCollection(URI href) {
         this(href, Version.ONE);
@@ -42,7 +42,7 @@ public class JsonCollection implements WithHref {
         return items;
     }
 
-    public Error getError() {
+    public ErrorMessage getError() {
         return error;
     }
 }

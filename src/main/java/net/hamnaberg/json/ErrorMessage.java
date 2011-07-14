@@ -1,0 +1,56 @@
+package net.hamnaberg.json;
+
+public class ErrorMessage {
+    private final String title;
+    private final String code;
+    private final String message;
+
+    public ErrorMessage(String title, String code, String message) {
+        this.title = title;
+        this.code = code;
+        this.message = message;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ErrorMessage error = (ErrorMessage) o;
+
+        if (code != null ? !code.equals(error.code) : error.code != null) return false;
+        if (message != null ? !message.equals(error.message) : error.message != null) return false;
+        if (title != null ? !title.equals(error.title) : error.title != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = title != null ? title.hashCode() : 0;
+        result = 31 * result + (code != null ? code.hashCode() : 0);
+        result = 31 * result + (message != null ? message.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorMessage{" +
+                "title='" + title + '\'' +
+                ", code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
+}
