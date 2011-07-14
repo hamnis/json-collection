@@ -3,7 +3,11 @@ package net.hamnaberg.json;
 import com.google.common.collect.ImmutableList;
 
 public class Template {
-    private ImmutableList<Property> properties;
+    private final ImmutableList<Property> properties;
+
+    public Template() {
+        this(ImmutableList.<Property>of());
+    }
 
     public Template(ImmutableList<Property> properties) {
         this.properties = properties;

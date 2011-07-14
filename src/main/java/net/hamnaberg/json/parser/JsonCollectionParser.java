@@ -33,21 +33,40 @@ public class JsonCollectionParser {
     }
 
     private JsonCollection parseCollection(JsonNode collectionNode) {
-        ImmutableList<Link> links = parseLinks(collectionNode);
-        ImmutableList<Item> items = parseItems(collectionNode);
+        URI href = createURI(collectionNode);
         Version version = getVersion(collectionNode);
         ErrorMessage error = parseError(collectionNode);
-        URI href = createURI(collectionNode);
 
         if (error != null) {
             return new ErrorJsonCollection(href, version, error);
         }
 
-        return new ItemsJsonCollection(href, version, links, items);
+        ImmutableList<Link> links = parseLinks(collectionNode);
+        ImmutableList<Item> items = parseItems(collectionNode);
+
+        return new DefaultJsonCollection(href, version, links, items, new Template());
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {
+        JsonNode errorNode = collectionNode.get("error");
+        if (errorNode != null) {
+            String title = getStringValue(errorNode.get("title"));
+            String code = getStringValue(errorNode.get("code"));
+            String message = getStringValue(errorNode.get("message"));
+            if (isEmpty(title) && isEmpty(code) && isEmpty(message)) {
+                return ErrorMessage.EMPTY;
+            }
+            return new ErrorMessage(title, code, message);
+        }
         return null;
+    }
+
+    private boolean isEmpty(String title) {
+        return title == null || title.trim().isEmpty();
+    }
+
+    private String getStringValue(JsonNode errorNode) {
+        return errorNode == null ? null : errorNode.getTextValue();
     }
 
     private ImmutableList<Item> parseItems(JsonNode collectionNode) {

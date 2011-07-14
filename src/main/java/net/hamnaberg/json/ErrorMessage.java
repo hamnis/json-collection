@@ -1,6 +1,8 @@
 package net.hamnaberg.json;
 
 public class ErrorMessage {
+    public static final ErrorMessage EMPTY = new ErrorMessage(null, null, null);
+
     private final String title;
     private final String code;
     private final String message;

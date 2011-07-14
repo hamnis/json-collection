@@ -10,4 +10,6 @@ public interface JsonCollection extends WithHref {
     ImmutableList<Item> getItems();
 
     ErrorMessage getError();
+
+    Template getTemplate();
 }

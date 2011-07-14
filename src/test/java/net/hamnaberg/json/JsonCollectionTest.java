@@ -47,12 +47,10 @@ public class JsonCollectionTest {
     }
 
     @Test
-    @Ignore
     public void parseErrorCollection() throws IOException {
         JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/error.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
-        assertEquals(0, collection.getLinks().size());
         assertNotNull("Error was null", collection.getError());
     }
 }
