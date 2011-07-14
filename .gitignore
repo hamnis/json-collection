@@ -1,0 +1,15 @@
+*.iml
+*.ipr
+*.iws
+*.log
+*~
+.classpath
+.project
+.settings
+.svn
+catalog.xml
+nbactions.xml
+nbproject
+private
+profiles.xml
+target
