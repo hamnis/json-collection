@@ -2,7 +2,7 @@ package net.hamnaberg.json;
 
 import java.net.URI;
 
-public class Link {
+public class Link implements WithPrompt {
     private final URI uri;
     private final String rel;
     private final String prompt;
