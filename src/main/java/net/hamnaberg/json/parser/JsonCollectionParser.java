@@ -35,10 +35,15 @@ public class JsonCollectionParser {
     private JsonCollection parseCollection(JsonNode collectionNode) {
         ImmutableList<Link> links = parseLinks(collectionNode);
         ImmutableList<Item> items = parseItems(collectionNode);
-        ErrorMessage error = parseError(collectionNode);
-
         Version version = getVersion(collectionNode);
-        return new JsonCollection(createURI(collectionNode), version, links, items);
+        ErrorMessage error = parseError(collectionNode);
+        URI href = createURI(collectionNode);
+
+        if (error != null) {
+            return new ErrorJsonCollection(href, version, error);
+        }
+
+        return new ItemsJsonCollection(href, version, links, items);
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {
