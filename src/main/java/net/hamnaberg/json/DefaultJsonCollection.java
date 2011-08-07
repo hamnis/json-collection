@@ -16,9 +16,13 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 import java.net.URI;
+import java.util.Collection;
 
 public class DefaultJsonCollection extends AbstractJsonCollection {
     private final ImmutableList<Link> links;
@@ -55,6 +59,38 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     @Override
     public ImmutableList<Query> getQueries() {
         return queries;
+    }
+
+    public Link findLink(Predicate<Link> predicate) {
+        return find(links, predicate);
+    }
+
+    public Collection<Link> findLinks(Predicate<Link> predicate) {
+        return Collections2.filter(links, predicate);
+    }
+
+    public Item findItem(Predicate<Item> predicate) {
+        return find(items, predicate);
+    }
+
+    public Collection<Item> findItems(Predicate<Item> predicate) {
+        return Collections2.filter(items, predicate);
+    }
+
+    public Query findQuery(Predicate<Query> predicate) {
+        return find(queries, predicate);
+    }
+
+    public Collection<Query> findQueries(Predicate<Query> predicate) {
+        return Collections2.filter(queries, predicate);
+    }
+
+    private <T> T find(Collection<T> collection, Predicate<T> predicate) {
+        Collection<T> filter = Collections2.filter(collection, predicate);
+        if (filter.isEmpty()) {
+            return null;
+        }
+        return filter.iterator().next();
     }
 
     public Item getFirst() {
