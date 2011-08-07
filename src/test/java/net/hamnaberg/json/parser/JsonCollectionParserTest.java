@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json.parser;
 
-import net.hamnaberg.json.JsonCollection;
-import net.hamnaberg.json.Version;
+import com.google.common.collect.ImmutableList;
+import net.hamnaberg.json.*;
 import net.hamnaberg.json.parser.JsonCollectionParser;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,11 +59,15 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseSingleItemCollection() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
+        DefaultJsonCollection collection = (DefaultJsonCollection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(3, collection.getLinks().size());
         assertEquals(1, collection.getItems().size());
+        Item item = collection.getFirst();
+        assertNotNull("Item was null", item);
+        assertEquals(URI.create("http://example.org/friends/jdoe"), item.getHref());
+        assertEquals(new Property("full-name", ValueFactory.createValue("J. Doe"), "Full Name"), item.getProperties().get(0));
     }
 
     @Test

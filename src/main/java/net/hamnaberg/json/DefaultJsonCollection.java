@@ -50,6 +50,13 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         return items;
     }
 
+    public Item getFirst() {
+        if (items.isEmpty()) {
+            return null;
+        }
+        return items.get(0);
+    }
+
     @Override
     public Template getTemplate() {
         return template;

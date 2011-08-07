@@ -23,10 +23,12 @@ import java.net.URI;
 public class Item implements WithHref {
     private URI href;
     private ImmutableList<Property> properties;
+    private final ImmutableList<Link> links;
 
-    public Item(URI href, ImmutableList<Property> properties) {
+    public Item(URI href, ImmutableList<Property> properties, ImmutableList<Link> links) {
         this.href = href;
         this.properties = properties;
+        this.links = links;
     }
 
     public URI getHref() {
@@ -37,6 +39,11 @@ public class Item implements WithHref {
         return properties;
     }
 
+    public ImmutableList<Link> getLinks() {
+        return links;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -45,6 +52,7 @@ public class Item implements WithHref {
         Item item = (Item) o;
 
         if (href != null ? !href.equals(item.href) : item.href != null) return false;
+        if (links != null ? !links.equals(item.links) : item.links != null) return false;
         if (properties != null ? !properties.equals(item.properties) : item.properties != null) return false;
 
         return true;
@@ -54,11 +62,12 @@ public class Item implements WithHref {
     public int hashCode() {
         int result = href != null ? href.hashCode() : 0;
         result = 31 * result + (properties != null ? properties.hashCode() : 0);
+        result = 31 * result + (links != null ? links.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return String.format("Item with href %s and properties %s", href, properties);
+        return String.format("Item with href %s, properties %s and links %s", href, properties, links);
     }
 }

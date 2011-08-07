@@ -91,7 +91,7 @@ public class JsonCollectionParser {
         if (items != null) {
             for (JsonNode node : items) {
                 URI uri = createURI(node);
-                builder.add(new Item(uri, parseData(node.get("data"))));
+                builder.add(new Item(uri, parseData(node.get("data")), parseLinks(items)));
             }
         }
         return builder.build();
