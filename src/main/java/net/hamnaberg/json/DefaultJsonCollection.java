@@ -23,6 +23,7 @@ import java.net.URI;
 public class DefaultJsonCollection extends AbstractJsonCollection {
     private final ImmutableList<Link> links;
     private final ImmutableList<Item> items;
+    private final ImmutableList<Query> queries;
     private final Template template;
 
     public DefaultJsonCollection(URI href) {
@@ -30,13 +31,14 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     }
 
     public DefaultJsonCollection(URI href, Version version) {
-        this(href, version, ImmutableList.<Link>of(), ImmutableList.<Item>of(), new Template());
+        this(href, version, ImmutableList.<Link>of(), ImmutableList.<Item>of(), ImmutableList.<Query>of(), null);
     }
 
-    public DefaultJsonCollection(URI href, Version version, ImmutableList<Link> links, ImmutableList<Item> items, Template template) {
+    public DefaultJsonCollection(URI href, Version version, ImmutableList<Link> links, ImmutableList<Item> items, ImmutableList<Query> queries, Template template) {
         super(href, version);
         this.links = links;
         this.items = items;
+        this.queries = queries;
         this.template = template;
     }
 
@@ -48,6 +50,11 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     @Override
     public ImmutableList<Item> getItems() {
         return items;
+    }
+
+    @Override
+    public ImmutableList<Query> getQueries() {
+        return queries;
     }
 
     public Item getFirst() {

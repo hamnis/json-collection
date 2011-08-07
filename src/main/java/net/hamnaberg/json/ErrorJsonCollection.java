@@ -34,6 +34,11 @@ public class ErrorJsonCollection extends AbstractJsonCollection {
     }
 
     @Override
+    public ImmutableList<Query> getQueries() {
+        throw new UnsupportedOperationException("Incorrect Collection type");
+    }
+
+    @Override
     public ImmutableList<Link> getLinks() {
         throw new UnsupportedOperationException("Incorrect Collection type");
     }

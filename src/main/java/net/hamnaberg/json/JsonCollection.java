@@ -28,4 +28,6 @@ public interface JsonCollection extends WithHref {
     ErrorMessage getError();
 
     Template getTemplate();
+
+    ImmutableList<Query> getQueries();
 }

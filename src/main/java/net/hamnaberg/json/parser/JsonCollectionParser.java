@@ -57,24 +57,10 @@ public class JsonCollectionParser {
 
         ImmutableList<Link> links = parseLinks(collectionNode);
         ImmutableList<Item> items = parseItems(collectionNode);
+        ImmutableList<Query> queries = parseQueries(collectionNode);
         Template template = parseTemplate(collectionNode);
 
-        return new DefaultJsonCollection(href, version, links, items, template);
-    }
-
-    private Template parseTemplate(JsonNode collectionNode) {
-        JsonNode node = collectionNode.get("template");
-        if (node != null) {
-            ImmutableList.Builder<Property> properties = ImmutableList.builder();
-            JsonNode data = node.get("data");
-            if (data != null) {
-                for (JsonNode dataNode : data) {
-                    properties.add(toProperty(dataNode));
-                }
-            }
-            return new Template(properties.build());
-        }
-        return null;
+        return new DefaultJsonCollection(href, version, links, items, queries, template);
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {
@@ -105,22 +91,46 @@ public class JsonCollectionParser {
         if (items != null) {
             for (JsonNode node : items) {
                 URI uri = createURI(node);
-                builder.add(new Item(uri, parseData(node.get("data")), parseLinks(node)));
+                builder.add(new Item(uri, parseData(node), parseLinks(node)));
             }
         }
         return builder.build();
     }
 
-    private ImmutableList<Property> parseData(JsonNode data) {
+    private ImmutableList<Query> parseQueries(JsonNode collectionNode) {
+        ImmutableList.Builder<Query> builder = ImmutableList.builder();
+        JsonNode queriesNode = collectionNode.get("queries");
+        if (queriesNode != null) {
+            for (JsonNode node : queriesNode) {
+                Link link = toLink(node);
+                ImmutableList<Property> properties = parseData(node);
+                builder.add(new Query(link, properties));
+            }
+        }
+        return builder.build();
+    }
+
+    private Template parseTemplate(JsonNode collectionNode) {
+        JsonNode node = collectionNode.get("template");
+        if (node != null) {
+            return new Template(parseData(node));
+        }
+        return null;
+    }
+
+    private ImmutableList<Property> parseData(JsonNode node) {
+        JsonNode data = node.get("data");
         ImmutableList.Builder<Property> builder = ImmutableList.builder();
-        for (JsonNode node : data) {
-            builder.add(toProperty(node));
+        if (data != null) {
+            for (JsonNode property : data) {
+                builder.add(toProperty(property));
+            }
         }
         return builder.build();
     }
 
     private Property toProperty(JsonNode node) {
-        return new Property(node.get("name").getTextValue(), ValueFactory.createValue(node.get("value")), getStringValue(node.get("prompt")));
+        return new Property(getStringValue(node.get("name")), ValueFactory.createValue(node.get("value")), getStringValue(node.get("prompt")));
     }
 
     private URI createURI(JsonNode node) {
@@ -137,15 +147,18 @@ public class JsonCollectionParser {
         ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
         if (linkCollection != null) {
             for (JsonNode linkNode : linkCollection) {
-                JsonNode prompt = linkNode.get("prompt");
-                Link link = new Link(
-                        createURI(linkNode),
-                        linkNode.get("rel").getTextValue(),
-                        prompt != null ? prompt.getTextValue() : null
-                );
-                linkBuilder.add(link);
+                linkBuilder.add(toLink(linkNode));
             }
         }
         return linkBuilder.build();
+    }
+
+    private Link toLink(JsonNode linkNode) {
+        JsonNode prompt = linkNode.get("prompt");
+        return new Link(
+                createURI(linkNode),
+                linkNode.get("rel").getTextValue(),
+                prompt != null ? prompt.getTextValue() : null
+        );
     }
 }

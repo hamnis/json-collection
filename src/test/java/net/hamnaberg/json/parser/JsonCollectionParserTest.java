@@ -82,4 +82,14 @@ public class JsonCollectionParserTest {
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertNotNull("Template was null", collection.getTemplate());
     }
+
+    @Test
+    public void parseQueriesCollection() throws IOException {
+        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/queries.json")));
+        assertNotNull(collection);
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
+        assertEquals(1, collection.getQueries().size());
+        Query query = collection.getQueries().get(0);
+        assertEquals("search", query.getProperties().get(0).getName());
+    }
 }
