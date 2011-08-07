@@ -68,6 +68,7 @@ public class JsonCollectionParserTest {
         assertNotNull("Item was null", item);
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.getHref());
         assertEquals(new Property("full-name", ValueFactory.createValue("J. Doe"), "Full Name"), item.getProperties().get(0));
+        assertEquals(2, item.getLinks().size());
     }
 
     @Test
