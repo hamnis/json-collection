@@ -27,8 +27,6 @@ import java.net.URI;
 
 /**
  * Parser for a vnd.collection+json document.
- *
- * 
  */
 public class JsonCollectionParser {
     private final ObjectMapper mapper = new ObjectMapper();
@@ -59,8 +57,24 @@ public class JsonCollectionParser {
 
         ImmutableList<Link> links = parseLinks(collectionNode);
         ImmutableList<Item> items = parseItems(collectionNode);
+        Template template = parseTemplate(collectionNode);
 
-        return new DefaultJsonCollection(href, version, links, items, new Template());
+        return new DefaultJsonCollection(href, version, links, items, template);
+    }
+
+    private Template parseTemplate(JsonNode collectionNode) {
+        JsonNode node = collectionNode.get("template");
+        if (node != null) {
+            ImmutableList.Builder<Property> properties = ImmutableList.builder();
+            JsonNode data = node.get("data");
+            if (data != null) {
+                for (JsonNode dataNode : data) {
+                    properties.add(toProperty(dataNode));
+                }
+            }
+            return new Template(properties.build());
+        }
+        return null;
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {
@@ -127,7 +141,7 @@ public class JsonCollectionParser {
                 Link link = new Link(
                         createURI(linkNode),
                         linkNode.get("rel").getTextValue(),
-                        prompt != null ?  prompt.getTextValue() : null
+                        prompt != null ? prompt.getTextValue() : null
                 );
                 linkBuilder.add(link);
             }

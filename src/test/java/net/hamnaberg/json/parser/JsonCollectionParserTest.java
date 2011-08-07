@@ -16,20 +16,16 @@
 
 package net.hamnaberg.json.parser;
 
-import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.*;
-import net.hamnaberg.json.parser.JsonCollectionParser;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class JsonCollectionParserTest {
     private JsonCollectionParser parser;
@@ -77,5 +73,13 @@ public class JsonCollectionParserTest {
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertNotNull("Error was null", collection.getError());
+    }
+
+    @Test
+    public void parseTemplateCollection() throws IOException {
+        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/template.json")));
+        assertNotNull(collection);
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
+        assertNotNull("Template was null", collection.getTemplate());
     }
 }
