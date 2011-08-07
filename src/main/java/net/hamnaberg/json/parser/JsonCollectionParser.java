@@ -81,12 +81,32 @@ public class JsonCollectionParser {
         return title == null || title.trim().isEmpty();
     }
 
-    private String getStringValue(JsonNode errorNode) {
-        return errorNode == null ? null : errorNode.getTextValue();
+    private String getStringValue(JsonNode node) {
+        return node == null ? null : node.getTextValue();
     }
 
     private ImmutableList<Item> parseItems(JsonNode collectionNode) {
-        return ImmutableList.of();
+        ImmutableList.Builder<Item> builder = ImmutableList.builder();
+        JsonNode items = collectionNode.get("items");
+        if (items != null) {
+            for (JsonNode node : items) {
+                URI uri = createURI(node);
+                builder.add(new Item(uri, parseData(node.get("data"))));
+            }
+        }
+        return builder.build();
+    }
+
+    private ImmutableList<Property> parseData(JsonNode data) {
+        ImmutableList.Builder<Property> builder = ImmutableList.builder();
+        for (JsonNode node : data) {
+            builder.add(toProperty(node));
+        }
+        return builder.build();
+    }
+
+    private Property toProperty(JsonNode node) {
+        return new Property(node.get("name").getTextValue(), ValueFactory.createValue(node.get("value")), getStringValue(node.get("prompt")));
     }
 
     private URI createURI(JsonNode node) {

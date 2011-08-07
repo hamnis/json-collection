@@ -22,7 +22,7 @@ public class ValueImpl implements Value {
 
     ValueImpl(Object value) {
         this.value = value;
-        this.type = value.getClass();
+        this.type = value == null ? null : value.getClass();
     }
 
     @Override

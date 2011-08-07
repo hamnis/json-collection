@@ -17,8 +17,28 @@
 package net.hamnaberg.json;
 
 import com.google.common.base.Preconditions;
+import org.codehaus.jackson.JsonNode;
 
 public class ValueFactory {
+    public static Value createValue(JsonNode node) {
+        if (node == null) {
+            return new ValueImpl(null);
+        }
+        else if (node.isNumber()) {
+            return new ValueImpl(node.getDoubleValue());
+        }
+        else if (node.isBoolean()) {
+            return new ValueImpl(node.getBooleanValue());
+        }
+        else if (node.isTextual()) {
+            return new ValueImpl(node.getTextValue());
+        }
+        else if (node.isNull()) {
+            return new ValueImpl(null);
+        }
+        throw new IllegalArgumentException("Illegal value " + node);
+    }
+
     public static Value createValue(Object value) {
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);
         return new ValueImpl(value);

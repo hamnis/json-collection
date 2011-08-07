@@ -63,6 +63,7 @@ public class JsonCollectionParserTest {
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(3, collection.getLinks().size());
+        assertEquals(1, collection.getItems().size());
     }
 
     @Test
