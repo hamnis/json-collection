@@ -28,7 +28,7 @@ import java.net.URI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class JsonCollectionTest {
+public class JsonCollectionParserTest {
     private JsonCollectionParser parser;
 
     @Before
