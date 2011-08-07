@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package net.hamnaberg.json;
+package net.hamnaberg.json.parser;
 
+import net.hamnaberg.json.JsonCollection;
+import net.hamnaberg.json.Version;
 import net.hamnaberg.json.parser.JsonCollectionParser;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,7 +44,7 @@ public class JsonCollectionParserTest {
         JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
-        assertEquals(Version.ONE, collection.getVersion());
+        Assert.assertEquals(Version.ONE, collection.getVersion());
         assertEquals(0, collection.getLinks().size());
     }
 
