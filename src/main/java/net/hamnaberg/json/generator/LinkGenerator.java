@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package net.hamnaberg.json;
+package net.hamnaberg.json.generator;
 
+import net.hamnaberg.json.Link;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
-public interface Value {
-    boolean isBoolean();
-    boolean isString();
-    boolean isNumeric();
-    boolean isNull();
+public class LinkGenerator extends AbstractGenerator<Link> {
+    public LinkGenerator(ObjectMapper mapper) {
+        super(mapper);
+    }
 
-    String asString();
-
-    boolean asBoolean();
-
-    Number asNumber();
+    @Override
+    public JsonNode toNode(Link object) {
+        ObjectNode node = mapper.createObjectNode();
+        node.put("href", object.getHref().toString());
+        node.put("rel", object.getRel());
+        node.put("prompt", object.getPrompt());
+        return node;
+    }
 }

@@ -57,8 +57,18 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     }
 
     @Override
+    public boolean hasError() {
+        return false;
+    }
+
+    @Override
     public ImmutableList<Query> getQueries() {
         return queries;
+    }
+
+    @Override
+    public boolean hasTemplate() {
+        return template != null;
     }
 
     public Link findLink(Predicate<Link> predicate) {

@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package net.hamnaberg.json;
+package net.hamnaberg.json.generator;
 
+import net.hamnaberg.json.ErrorMessage;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
-public interface Value {
-    boolean isBoolean();
-    boolean isString();
-    boolean isNumeric();
-    boolean isNull();
+public class ErrorMessageGenerator extends AbstractGenerator<ErrorMessage> {
+    public ErrorMessageGenerator(ObjectMapper mapper) {
+        super(mapper);
+    }
 
-    String asString();
-
-    boolean asBoolean();
-
-    Number asNumber();
+    @Override
+    public JsonNode toNode(ErrorMessage object) {
+        ObjectNode node = mapper.createObjectNode();
+        node.put("title", object.getTitle());
+        node.put("code", object.getCode());
+        node.put("message", object.getMessage());
+        return node;
+    }
 }

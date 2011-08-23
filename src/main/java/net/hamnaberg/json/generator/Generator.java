@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-package net.hamnaberg.json;
+package net.hamnaberg.json.generator;
 
-import com.google.common.collect.ImmutableList;
+import org.codehaus.jackson.JsonNode;
 
-public interface JsonCollection extends WithHref {
-    Version getVersion();
-
-    ImmutableList<Link> getLinks();
-
-    ImmutableList<Item> getItems();
-
-    boolean hasError();
-
-    ErrorMessage getError();
-
-    Template getTemplate();
-
-    ImmutableList<Query> getQueries();
-
-    boolean hasTemplate();
+public interface Generator<T> {
+    JsonNode toNode(T object);
 }

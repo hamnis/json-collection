@@ -62,12 +62,13 @@ public class ValueImpl implements Value {
     }
 
     @Override
-    public Number getNumber() {
+    public Number asNumber() {
         if (!isNumeric()) {
             throw new IllegalStateException("Trying to get a Number when its not; It is a " + getTypeName());
         }
         return (Number) value;
     }
+
 
     private String getTypeName() {
         return (type == null ? "Null" : type.getSimpleName());
