@@ -16,13 +16,13 @@
 
 package net.hamnaberg.json.parser;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 
 /**
@@ -39,6 +39,19 @@ public class JsonCollectionParser {
                 reader.close();
             }
         }
+    }
+
+    /**
+     * Parses a JsonCollection from the given stream.
+     * The stream is wrapped in a BufferedReader.
+     *
+     * The stream is expected to be UTF-8 encoded.
+     * @param stream the stream
+     * @return a jsonCollection
+     * @throws IOException
+     */
+    public JsonCollection parse(InputStream stream) throws IOException {
+        return parse(new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8)));
     }
 
     private JsonCollection parse(JsonNode node) throws IOException {
