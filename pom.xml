@@ -24,6 +24,10 @@
   <packaging>jar</packaging>
   <name>RESTful JSON Collection</name>
 
+  <properties>
+    <scala.version>2.9.1</scala.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
@@ -39,6 +43,21 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>r09</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-compiler</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.liftweb</groupId>
+      <artifactId>lift-json_${scala.version}</artifactId>
+      <version>2.4-M4</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
