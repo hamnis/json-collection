@@ -31,19 +31,15 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     private final Template template;
 
     public DefaultJsonCollection(URI href) {
-        this(href, Version.ONE);
+        this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null);
     }
 
-    public DefaultJsonCollection(URI href, Version version) {
-        this(href, version, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null);
+    public DefaultJsonCollection(URI href, List<Item> items) {
+        this(href, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null);
     }
 
-    public DefaultJsonCollection(URI href, Version version, List<Item> items) {
-        this(href, version, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null);
-    }
-
-    public DefaultJsonCollection(URI href, Version version, List<Link> links, List<Item> items, List<Query> queries, Template template) {
-        super(href, version);
+    public DefaultJsonCollection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template) {
+        super(href);
         if (links != null) {
             this.links.addAll(links);
         }
@@ -132,7 +128,6 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
 
     public static class Builder {
         private final URI href;
-        private Version version = Version.ONE;
         private final List<Item> itemBuilder = new ArrayList<Item>();
         private final List<Link> linkBuilder = new ArrayList<Link>();
         private final List<Query> queryBuilder = new ArrayList<Query>();
@@ -141,12 +136,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         public Builder(URI href) {
             this.href = href;
         }
-
-        public Builder withVersion(Version version) {
-            this.version = version;
-            return this;
-        }
-
+        
         public Builder withTemplate(Template template) {
             this.template = template;
             return this;
@@ -189,7 +179,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         }
 
         public JsonCollection build() {
-            return new DefaultJsonCollection(href, version, linkBuilder, itemBuilder, queryBuilder, template);
+            return new DefaultJsonCollection(href, linkBuilder, itemBuilder, queryBuilder, template);
         }
     }
 }

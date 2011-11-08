@@ -17,6 +17,7 @@
 package net.hamnaberg.json.parser;
 
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -64,10 +65,11 @@ public class JsonCollectionParser {
     private JsonCollection parseCollection(JsonNode collectionNode) {
         URI href = createURI(collectionNode);
         Version version = getVersion(collectionNode);
+        Preconditions.checkArgument(version == Version.ONE, "Version was %s, may only be %s", version.getIdentifier(), Version.ONE.getIdentifier());
         ErrorMessage error = parseError(collectionNode);
 
         if (error != null) {
-            return new ErrorJsonCollection(href, version, error);
+            return new ErrorJsonCollection(href, error);
         }
 
         List<Link> links = parseLinks(collectionNode);
@@ -76,7 +78,7 @@ public class JsonCollectionParser {
         List<Query> queries = parseQueries(collectionNode);
         Template template = parseTemplate(collectionNode);
 
-        return new DefaultJsonCollection(href, version, links, items, queries, template);
+        return new DefaultJsonCollection(href, links, items, queries, template);
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {

@@ -22,12 +22,8 @@ import java.util.List;
 public class ErrorJsonCollection extends AbstractJsonCollection {
     private final ErrorMessage error;
 
-    public ErrorJsonCollection(URI href, ErrorMessage message) {
-        this(href, Version.ONE, message);
-    }
-
-    public ErrorJsonCollection(URI href, Version version, ErrorMessage error) {
-        super(href, version);
+    public ErrorJsonCollection(URI href, ErrorMessage error) {
+        super(href);
         this.error = error;
     }
 

@@ -18,6 +18,10 @@ public class Lists {
         return Arrays.asList(values);
     }
 
+    public static <A> ArrayList<A> newArrayList() {
+        return new ArrayList<A>();
+    }
+
     public static <A, B> List<B> map(final List<A> list, final F<A, B> f) {
         return new AbstractList<B>() {
             @Override

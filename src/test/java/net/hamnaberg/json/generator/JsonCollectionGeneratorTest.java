@@ -69,7 +69,7 @@ public class JsonCollectionGeneratorTest {
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
         items.add(new Item(COLLECTION_URI.resolve("item/1"), Lists.<Property>of(new Property("one", ValueFactory.createValue(1), "One")), Collections.<Link>emptyList()));
-        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Version.ONE, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
+        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
         assertNotNull(jsonNode);
         assertEquals("1.0", jsonNode.get("version").getValueAsText());
         assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
