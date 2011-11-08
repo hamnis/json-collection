@@ -16,26 +16,28 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import net.hamnaberg.json.util.Preconditions;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Query implements WithHref, WithPrompt {
     private final Link link;
-    private final ImmutableList<Property> properties;
+    private final List<Property> properties = new ArrayList<Property>();
 
-    public Query(Link link, ImmutableList<Property> properties) {
+    public Query(Link link, List<Property> properties) {
         this.link = Preconditions.checkNotNull(link, "Null link was passed");
-        this.properties = Preconditions.checkNotNull(properties, "Null properties was passed");
+        this.properties.addAll(Preconditions.checkNotNull(properties, "Null properties was passed"));
     }
 
-    public Query(URI uri, String rel, String prompt, ImmutableList<Property> properties) {
+    public Query(URI uri, String rel, String prompt, List<Property> properties) {
         this(new Link(uri, rel, prompt), properties);
     }
 
     public Query(Link link) {
-        this(link, ImmutableList.<Property>of());
+        this(link, Collections.<Property>emptyList());
     }
 
     public Link getLink() {
@@ -52,8 +54,8 @@ public class Query implements WithHref, WithPrompt {
         return link.getPrompt();
     }
 
-    public ImmutableList<Property> getProperties() {
-        return properties;
+    public List<Property> getProperties() {
+        return Collections.unmodifiableList(properties);
     }
 
     @Override

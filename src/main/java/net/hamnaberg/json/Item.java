@@ -16,31 +16,36 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.collect.ImmutableList;
-
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Item implements WithHref {
     private URI href;
-    private ImmutableList<Property> properties;
-    private final ImmutableList<Link> links;
+    private final List<Property> properties = new ArrayList<Property>();
+    private final List<Link> links = new ArrayList<Link>();
 
-    public Item(URI href, ImmutableList<Property> properties, ImmutableList<Link> links) {
+    public Item(URI href, List<Property> properties, List<Link> links) {
         this.href = href;
-        this.properties = properties;
-        this.links = links;
+        if (properties != null) {
+            this.properties.addAll(properties);
+        }
+        if (links != null) {
+            this.links.addAll(links);
+        }
     }
 
     public URI getHref() {
         return href;
     }
 
-    public ImmutableList<Property> getProperties() {
-        return properties;
+    public List<Property> getProperties() {
+        return Collections.unmodifiableList(properties);
     }
 
-    public ImmutableList<Link> getLinks() {
-        return links;
+    public List<Link> getLinks() {
+        return Collections.unmodifiableList(links);
     }
 
 

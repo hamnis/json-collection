@@ -16,21 +16,26 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Template {
-    private final ImmutableList<Property> properties;
+    private final List<Property> properties = new ArrayList<Property>();
 
     public Template() {
-        this(ImmutableList.<Property>of());
+        this(Collections.<Property>emptyList());
     }
 
-    public Template(ImmutableList<Property> properties) {
-        this.properties = properties;
+    public Template(List<Property> properties) {
+        if (properties != null) {
+            this.properties.addAll(properties);
+        }
     }
 
-    public ImmutableList<Property> getProperties() {
-        return properties;
+    public List<Property> getProperties() {
+        return Collections.unmodifiableList(properties);
     }
 
     @Override

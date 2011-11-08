@@ -16,18 +16,18 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import net.hamnaberg.json.util.Lists;
+import net.hamnaberg.json.util.Predicate;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DefaultJsonCollection extends AbstractJsonCollection {
-    private final ImmutableList<Link> links;
-    private final ImmutableList<Item> items;
-    private final ImmutableList<Query> queries;
+    private final List<Link> links = new ArrayList<Link>();
+    private final List<Item> items = new ArrayList<Item>();
+    private final List<Query> queries = new ArrayList<Query>();
     private final Template template;
 
     public DefaultJsonCollection(URI href) {
@@ -35,29 +35,35 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     }
 
     public DefaultJsonCollection(URI href, Version version) {
-        this(href, version, ImmutableList.<Link>of(), ImmutableList.<Item>of(), ImmutableList.<Query>of(), null);
+        this(href, version, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null);
     }
 
-    public DefaultJsonCollection(URI href, Version version, ImmutableList<Item> items) {
-        this(href, version, ImmutableList.<Link>of(), items, ImmutableList.<Query>of(), null);
+    public DefaultJsonCollection(URI href, Version version, List<Item> items) {
+        this(href, version, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null);
     }
 
-    public DefaultJsonCollection(URI href, Version version, ImmutableList<Link> links, ImmutableList<Item> items, ImmutableList<Query> queries, Template template) {
+    public DefaultJsonCollection(URI href, Version version, List<Link> links, List<Item> items, List<Query> queries, Template template) {
         super(href, version);
-        this.links = links;
-        this.items = items;
-        this.queries = queries;
+        if (links != null) {
+            this.links.addAll(links);
+        }
+        if (items != null) {
+            this.items.addAll(items);
+        }
+        if (queries != null) {
+            this.queries.addAll(queries);
+        }
         this.template = template;
     }
 
     @Override
-    public ImmutableList<Link> getLinks() {
-        return links;
+    public List<Link> getLinks() {
+        return Collections.unmodifiableList(links);
     }
 
     @Override
-    public ImmutableList<Item> getItems() {
-        return items;
+    public List<Item> getItems() {
+        return Collections.unmodifiableList(items);
     }
 
     @Override
@@ -66,8 +72,8 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     }
 
     @Override
-    public ImmutableList<Query> getQueries() {
-        return queries;
+    public List<Query> getQueries() {
+        return Collections.unmodifiableList(queries);
     }
 
     @Override
@@ -76,35 +82,35 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     }
 
     public Link findLink(Predicate<Link> predicate) {
-        return find(links, predicate);
+        return findFirst(links, predicate);
     }
 
-    public Collection<Link> findLinks(Predicate<Link> predicate) {
-        return Collections2.filter(links, predicate);
+    public List<Link> findLinks(Predicate<Link> predicate) {
+        return Lists.filter(links, predicate);
     }
 
     public Item findItem(Predicate<Item> predicate) {
-        return find(items, predicate);
+        return findFirst(items, predicate);
     }
 
-    public Collection<Item> findItems(Predicate<Item> predicate) {
-        return Collections2.filter(items, predicate);
+    public List<Item> findItems(Predicate<Item> predicate) {
+        return Lists.filter(items, predicate);
     }
 
     public Query findQuery(Predicate<Query> predicate) {
-        return find(queries, predicate);
+        return findFirst(queries, predicate);
     }
 
-    public Collection<Query> findQueries(Predicate<Query> predicate) {
-        return Collections2.filter(queries, predicate);
+    public List<Query> findQueries(Predicate<Query> predicate) {
+        return Lists.filter(queries, predicate);
     }
 
-    private <T> T find(Collection<T> collection, Predicate<T> predicate) {
-        Collection<T> filter = Collections2.filter(collection, predicate);
+    private <T> T findFirst(List<T> collection, Predicate<T> predicate) {
+        List<T> filter = Lists.filter(collection, predicate);
         if (filter.isEmpty()) {
             return null;
         }
-        return filter.iterator().next();
+        return filter.get(0);
     }
 
     public Item getFirst() {
@@ -127,9 +133,9 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     public static class Builder {
         private final URI href;
         private Version version = Version.ONE;
-        private final ImmutableList.Builder<Item> itemBuilder = ImmutableList.builder();
-        private final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
-        private final ImmutableList.Builder<Query> queryBuilder = ImmutableList.builder();
+        private final List<Item> itemBuilder = new ArrayList<Item>();
+        private final List<Link> linkBuilder = new ArrayList<Link>();
+        private final List<Query> queryBuilder = new ArrayList<Query>();
         private Template template;
 
         public Builder(URI href) {
@@ -152,7 +158,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         }
 
         public Builder addItems(Iterable<Item> items) {
-            itemBuilder.addAll(items);
+            addToList(items, itemBuilder);
             return this;
         }
 
@@ -162,7 +168,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         }
 
         public Builder addQueries(Iterable<Query> queries) {
-            queryBuilder.addAll(queries);
+            addToList(queries, queryBuilder);
             return this;
         }
 
@@ -172,12 +178,18 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         }
 
         public Builder addLinks(Iterable<Link> links) {
-            linkBuilder.addAll(links);
+            addToList(links, linkBuilder);
             return this;
         }
 
+        private <A> void addToList(Iterable<A> iterable, List<A> list) {
+            for (A a : iterable) {
+                list.add(a);
+            }
+        }
+
         public JsonCollection build() {
-            return new DefaultJsonCollection(href, version, linkBuilder.build(), itemBuilder.build(), queryBuilder.build(), template);
+            return new DefaultJsonCollection(href, version, linkBuilder, itemBuilder, queryBuilder, template);
         }
     }
 }

@@ -16,9 +16,8 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.collect.ImmutableList;
-
 import java.net.URI;
+import java.util.List;
 
 public class ErrorJsonCollection extends AbstractJsonCollection {
     private final ErrorMessage error;
@@ -38,7 +37,7 @@ public class ErrorJsonCollection extends AbstractJsonCollection {
     }
 
     @Override
-    public ImmutableList<Query> getQueries() {
+    public List<Query> getQueries() {
         throw new UnsupportedOperationException("Incorrect Collection type");
     }
 
@@ -48,12 +47,12 @@ public class ErrorJsonCollection extends AbstractJsonCollection {
     }
 
     @Override
-    public ImmutableList<Link> getLinks() {
+    public List<Link> getLinks() {
         throw new UnsupportedOperationException("Incorrect Collection type");
     }
 
     @Override
-    public ImmutableList<Item> getItems() {
+    public List<Item> getItems() {
         throw new UnsupportedOperationException("Incorrect Collection type");
     }
 

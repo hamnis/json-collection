@@ -16,7 +16,7 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Preconditions;
+import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 
 public class ValueFactory {

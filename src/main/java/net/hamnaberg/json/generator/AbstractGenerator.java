@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json.generator;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
+import net.hamnaberg.json.util.F;
+import net.hamnaberg.json.util.Lists;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
@@ -38,9 +38,9 @@ public abstract class AbstractGenerator<T> implements Generator<T> {
         }
     }
 
-    protected <T> ArrayNode createArray(List<T> value, Function<T, JsonNode> function) {
+    protected <T> ArrayNode createArray(List<T> value, F<T, JsonNode> function) {
         ArrayNode itemsArray = mapper.createArrayNode();
-        itemsArray.addAll(Collections2.transform(value, function));
+        itemsArray.addAll(Lists.map(value, function));
         return itemsArray;
     }
 }

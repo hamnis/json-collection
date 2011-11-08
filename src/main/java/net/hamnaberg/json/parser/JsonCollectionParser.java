@@ -16,19 +16,21 @@
 
 package net.hamnaberg.json.parser;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parser for a vnd.collection+json document.
  */
 public class JsonCollectionParser {
+    private Charset UTF_8 = Charset.forName("UTF-8");
     private final ObjectMapper mapper = new ObjectMapper();
 
     public JsonCollection parse(Reader reader) throws IOException {
@@ -51,7 +53,7 @@ public class JsonCollectionParser {
      * @throws IOException
      */
     public JsonCollection parse(InputStream stream) throws IOException {
-        return parse(new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8)));
+        return parse(new BufferedReader(new InputStreamReader(stream, UTF_8)));
     }
 
     private JsonCollection parse(JsonNode node) throws IOException {
@@ -68,9 +70,10 @@ public class JsonCollectionParser {
             return new ErrorJsonCollection(href, version, error);
         }
 
-        ImmutableList<Link> links = parseLinks(collectionNode);
-        ImmutableList<Item> items = parseItems(collectionNode);
-        ImmutableList<Query> queries = parseQueries(collectionNode);
+        List<Link> links = parseLinks(collectionNode);
+        List<Item> items = parseItems(collectionNode);
+        
+        List<Query> queries = parseQueries(collectionNode);
         Template template = parseTemplate(collectionNode);
 
         return new DefaultJsonCollection(href, version, links, items, queries, template);
@@ -98,8 +101,8 @@ public class JsonCollectionParser {
         return node == null ? null : node.getTextValue();
     }
 
-    private ImmutableList<Item> parseItems(JsonNode collectionNode) {
-        ImmutableList.Builder<Item> builder = ImmutableList.builder();
+    private List<Item> parseItems(JsonNode collectionNode) {
+        List<Item> builder = new ArrayList<Item>();
         JsonNode items = collectionNode.get("items");
         if (items != null) {
             for (JsonNode node : items) {
@@ -107,20 +110,20 @@ public class JsonCollectionParser {
                 builder.add(new Item(uri, parseData(node), parseLinks(node)));
             }
         }
-        return builder.build();
+        return builder;
     }
 
-    private ImmutableList<Query> parseQueries(JsonNode collectionNode) {
-        ImmutableList.Builder<Query> builder = ImmutableList.builder();
+    private List<Query> parseQueries(JsonNode collectionNode) {
+        List<Query> builder = new ArrayList<Query>();
         JsonNode queriesNode = collectionNode.get("queries");
         if (queriesNode != null) {
             for (JsonNode node : queriesNode) {
                 Link link = toLink(node);
-                ImmutableList<Property> properties = parseData(node);
+                List<Property> properties = parseData(node);
                 builder.add(new Query(link, properties));
             }
         }
-        return builder.build();
+        return builder;
     }
 
     private Template parseTemplate(JsonNode collectionNode) {
@@ -131,15 +134,15 @@ public class JsonCollectionParser {
         return null;
     }
 
-    private ImmutableList<Property> parseData(JsonNode node) {
+    private List<Property> parseData(JsonNode node) {
         JsonNode data = node.get("data");
-        ImmutableList.Builder<Property> builder = ImmutableList.builder();
+        List<Property> builder = new ArrayList<Property>();
         if (data != null) {
             for (JsonNode property : data) {
                 builder.add(toProperty(property));
             }
         }
-        return builder.build();
+        return builder;
     }
 
     private Property toProperty(JsonNode node) {
@@ -155,15 +158,15 @@ public class JsonCollectionParser {
         return Version.getVersion(version != null ? version.getTextValue() : null);
     }
 
-    private ImmutableList<Link> parseLinks(JsonNode collectionNode) {
+    private List<Link> parseLinks(JsonNode collectionNode) {
         JsonNode linkCollection = collectionNode.get("links");
-        ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
+        List<Link> linkBuilder = new ArrayList<Link>();
         if (linkCollection != null) {
             for (JsonNode linkNode : linkCollection) {
                 linkBuilder.add(toLink(linkNode));
             }
         }
-        return linkBuilder.build();
+        return linkBuilder;
     }
 
     private Link toLink(JsonNode linkNode) {

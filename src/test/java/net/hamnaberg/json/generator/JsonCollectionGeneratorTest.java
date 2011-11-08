@@ -16,17 +16,19 @@
 
 package net.hamnaberg.json.generator;
 
-import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.util.Lists;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.NullNode;
 import org.codehaus.jackson.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -65,9 +67,9 @@ public class JsonCollectionGeneratorTest {
 
     @Test
     public void itemsCollection() throws Exception {
-        ImmutableList.Builder<Item> items = ImmutableList.builder();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), ImmutableList.<Property>of(new Property("one", ValueFactory.createValue(1), "One")), ImmutableList.<Link>of()));
-        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Version.ONE, ImmutableList.<Link>of(), items.build(), ImmutableList.<Query>of(), null));
+        List<Item> items = new ArrayList<Item>();
+        items.add(new Item(COLLECTION_URI.resolve("item/1"), Lists.<Property>of(new Property("one", ValueFactory.createValue(1), "One")), Collections.<Link>emptyList()));
+        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Version.ONE, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
         assertNotNull(jsonNode);
         assertEquals("1.0", jsonNode.get("version").getValueAsText());
         assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());

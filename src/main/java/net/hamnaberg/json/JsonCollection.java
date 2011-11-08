@@ -16,14 +16,14 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 public interface JsonCollection extends WithHref {
     Version getVersion();
 
-    ImmutableList<Link> getLinks();
+    List<Link> getLinks();
 
-    ImmutableList<Item> getItems();
+    List<Item> getItems();
 
     boolean hasError();
 
@@ -31,7 +31,7 @@ public interface JsonCollection extends WithHref {
 
     Template getTemplate();
 
-    ImmutableList<Query> getQueries();
+    List<Query> getQueries();
 
     boolean hasTemplate();
 }

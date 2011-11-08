@@ -16,15 +16,11 @@
 
 package net.hamnaberg.json.generator;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.util.F;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
-
-import java.util.List;
 
 public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
     private final GeneratorFactory factory;
@@ -52,7 +48,7 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
         return node;
     }
 
-    protected class Value2JsonNode<T> implements Function<T, JsonNode> {
+    protected class Value2JsonNode<T> implements F<T, JsonNode> {
         @Override
         public JsonNode apply(T input) {
             return factory.generate(input);
