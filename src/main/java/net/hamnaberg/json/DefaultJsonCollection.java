@@ -38,6 +38,10 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         this(href, version, ImmutableList.<Link>of(), ImmutableList.<Item>of(), ImmutableList.<Query>of(), null);
     }
 
+    public DefaultJsonCollection(URI href, Version version, ImmutableList<Item> items) {
+        this(href, version, ImmutableList.<Link>of(), items, ImmutableList.<Query>of(), null);
+    }
+
     public DefaultJsonCollection(URI href, Version version, ImmutableList<Link> links, ImmutableList<Item> items, ImmutableList<Query> queries, Template template) {
         super(href, version);
         this.links = links;
@@ -118,5 +122,62 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     @Override
     public ErrorMessage getError() {
         throw new UnsupportedOperationException("Incorrect Collection type.");
+    }
+
+    public static class Builder {
+        private final URI href;
+        private Version version = Version.ONE;
+        private final ImmutableList.Builder<Item> itemBuilder = ImmutableList.builder();
+        private final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
+        private final ImmutableList.Builder<Query> queryBuilder = ImmutableList.builder();
+        private Template template;
+
+        public Builder(URI href) {
+            this.href = href;
+        }
+
+        public Builder withVersion(Version version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder withTemplate(Template template) {
+            this.template = template;
+            return this;
+        }
+
+        public Builder addItem(Item item) {
+            itemBuilder.add(item);
+            return this;
+        }
+
+        public Builder addItems(Iterable<Item> items) {
+            itemBuilder.addAll(items);
+            return this;
+        }
+
+        public Builder addQuery(Query query) {
+            queryBuilder.add(query);
+            return this;
+        }
+
+        public Builder addQueries(Iterable<Query> queries) {
+            queryBuilder.addAll(queries);
+            return this;
+        }
+
+        public Builder addLink(Link link) {
+            linkBuilder.add(link);
+            return this;
+        }
+
+        public Builder addLinks(Iterable<Link> links) {
+            linkBuilder.addAll(links);
+            return this;
+        }
+
+        public JsonCollection build() {
+            return new DefaultJsonCollection(href, version, linkBuilder.build(), itemBuilder.build(), queryBuilder.build(), template);
+        }
     }
 }
