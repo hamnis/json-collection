@@ -67,64 +67,9 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.2.2</version>
-        <configuration>
-          <tagNameFormat>v@{project.version}</tagNameFormat>
-          <preparationGoals>clean install</preparationGoals>
-        </configuration>
-      </plugin>	  
-    </plugins>
-  </build>
-  <profiles>
-	<profile>
-      <id>sign-pgp</id>
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>1.0</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-                <configuration>
-                  <failFast>true</failFast>
-                  <fail>true</fail>
-                  <rules>
-                    <requireProperty>
-                      <property>gpg.keyname</property>
-                      <message>"You must have a gpg.keyname defined"</message>
-                    </requireProperty>
-                    <requireProperty>
-                      <property>gpg.passphrase</property>
-                      <message>"You must have a gpg.passphrase defined"</message>
-                    </requireProperty>
-                  </rules>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
+	<pluginManagement>
+	  <plugins>
+		<plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.4</version>
@@ -138,11 +83,29 @@
               </execution>
             </executions>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>2.3</version>
+	        <configuration>
+	          <source>1.6</source>
+	          <target>1.6</target>
+	        </configuration>
+	      </plugin>
+       </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.2.2</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <preparationGoals>clean install</preparationGoals>
+        </configuration>
+      </plugin>	  
+    </plugins>
+  </build>
   <scm>
     <connection>scm:git:https://hamnis@github.com/hamnis/json-collection.git</connection>
     <developerConnection>scm:git:git@github.com:hamnis/json-collection.git</developerConnection>
