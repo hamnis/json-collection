@@ -39,7 +39,7 @@
     </license>
   </licenses>
 
-    <developers>
+  <developers>
     <developer>
       <id>erlend.hamnaberg</id>
       <name>Erlend Hamnaberg</name>
@@ -77,8 +77,71 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.2.2</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <preparationGoals>clean install</preparationGoals>
+        </configuration>
+      </plugin>	  
     </plugins>
   </build>
+  <profiles>
+	<profile>
+      <id>sign-pgp</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <failFast>true</failFast>
+                  <fail>true</fail>
+                  <rules>
+                    <requireProperty>
+                      <property>gpg.keyname</property>
+                      <message>"You must have a gpg.keyname defined"</message>
+                    </requireProperty>
+                    <requireProperty>
+                      <property>gpg.passphrase</property>
+                      <message>"You must have a gpg.passphrase defined"</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <scm>
     <connection>scm:git:https://hamnis@github.com/hamnis/json-collection.git</connection>
