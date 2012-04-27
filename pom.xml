@@ -26,7 +26,7 @@
   </parent>
   <groupId>net.hamnaberg.rest</groupId>
   <artifactId>json-collection</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>RESTful JSON Collection</name>
   <url>https://github.com/hamnis/json-collection</url>
