@@ -17,6 +17,7 @@
 package net.hamnaberg.json;
 
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import java.net.URI;
@@ -33,7 +34,7 @@ public class Query implements WithHref, WithPrompt {
         this.properties.addAll(Preconditions.checkNotNull(properties, "Null properties was passed"));
     }
 
-    public Query(URI uri, String rel, String prompt, List<Property> properties) {
+    public Query(URI uri, String rel, Optional<String> prompt, List<Property> properties) {
         this(new Link(uri, rel, prompt), properties);
     }
 
@@ -51,7 +52,7 @@ public class Query implements WithHref, WithPrompt {
     }
 
     @Override
-    public String getPrompt() {
+    public Optional<String> getPrompt() {
         return link.getPrompt();
     }
 

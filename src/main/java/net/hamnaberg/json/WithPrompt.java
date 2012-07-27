@@ -16,6 +16,8 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Optional;
+
 public interface WithPrompt {
-    String getPrompt();
+    Optional<String> getPrompt();
 }

@@ -32,7 +32,9 @@ public class PropertyGenerator extends AbstractGenerator<Property> {
     public JsonNode toNode(Property object) {
         ObjectNode node = mapper.createObjectNode();
         node.put("name", object.getName());
-        node.put("prompt", object.getPrompt());
+        if (object.getPrompt().isPresent()) {
+            node.put("prompt", object.getPrompt().get());
+        }
         if (object.getValue().isPresent()) {
             node.put("value", getJsonValue(object.getValue().get()));
         }

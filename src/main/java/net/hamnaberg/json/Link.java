@@ -16,16 +16,19 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
 import java.net.URI;
 
 public class Link implements WithPrompt, WithHref {
     private final URI href;
     private final String rel;
-    private final String prompt;
+    private final Optional<String> prompt;
 
-    public Link(URI href, String rel, String prompt) {
+    public Link(URI href, String rel, Optional<String> prompt) {
         this.href = href;
-        this.rel = rel;
+        this.rel = Preconditions.checkNotNull(rel, "Relation may not be null");
         this.prompt = prompt;
     }
 
@@ -37,7 +40,7 @@ public class Link implements WithPrompt, WithHref {
         return rel;
     }
 
-    public String getPrompt() {
+    public Optional<String> getPrompt() {
         return prompt;
     }
 

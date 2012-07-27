@@ -64,7 +64,7 @@ public class JsonCollectionParserTest {
         Optional<Item> item = collection.getFirst();
         assertTrue("Item was null", item.isPresent());
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
-        assertEquals(new Property("full-name", ValueFactory.createValue("J. Doe"), "Full Name"), item.get().getProperties().get(0));
+        assertEquals(new Property("full-name", Optional.of("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getProperties().get(0));
         assertEquals(2, item.get().getLinks().size());
     }
 

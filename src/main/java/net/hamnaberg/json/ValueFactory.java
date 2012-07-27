@@ -16,38 +16,39 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.codehaus.jackson.JsonNode;
 
 public class ValueFactory {
-    public static Value createValue(JsonNode node) {
+    public static Optional<Value> createValue(JsonNode node) {
         if (node == null) {
-            return new ValueImpl(null);
+            return Optional.absent();
         }
         else if (node.isNumber()) {
-            return new ValueImpl(node.getDoubleValue());
+            return Optional.<Value>of(new ValueImpl(node.getDoubleValue()));
         }
         else if (node.isBoolean()) {
-            return new ValueImpl(node.getBooleanValue());
+            return Optional.<Value>of(new ValueImpl(node.getBooleanValue()));
         }
         else if (node.isTextual()) {
-            return new ValueImpl(node.getTextValue());
+            return Optional.<Value>of(new ValueImpl(node.getTextValue()));
         }
         else if (node.isNull()) {
-            return new ValueImpl(null);
+            return Optional.absent();
         }
         throw new IllegalArgumentException("Illegal value " + node);
     }
 
-    public static Value createValue(Object value) {
+    public static Optional<Value> createValue(Object value) {
+        if (value == null) {
+            return Optional.absent();
+        }
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);
-        return new ValueImpl(value);
+        return Optional.<Value>of(new ValueImpl(value));
     }
 
     private static boolean checkValue(Object value) {
-        if (value == null) {
-            return true;
-        }
         if (value instanceof String) {
             return true;
         }

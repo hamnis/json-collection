@@ -31,7 +31,9 @@ public class LinkGenerator extends AbstractGenerator<Link> {
         ObjectNode node = mapper.createObjectNode();
         node.put("href", object.getHref().toString());
         node.put("rel", object.getRel());
-        node.put("prompt", object.getPrompt());
+        if (object.getPrompt().isPresent()) {
+            node.put("prompt", object.getPrompt().get());
+        }
         return node;
     }
 }

@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json.parser;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.hamnaberg.json.*;
 import org.codehaus.jackson.JsonNode;
@@ -148,7 +149,7 @@ public class JsonCollectionParser {
     }
 
     private Property toProperty(JsonNode node) {
-        return new Property(getStringValue(node.get("name")), ValueFactory.createValue(node.get("value")), getStringValue(node.get("prompt")));
+        return new Property(getStringValue(node.get("name")), Optional.fromNullable(getStringValue(node.get("prompt"))), ValueFactory.createValue(node.get("value")));
     }
 
     private URI createURI(JsonNode node) {
@@ -172,11 +173,12 @@ public class JsonCollectionParser {
     }
 
     private Link toLink(JsonNode linkNode) {
-        JsonNode prompt = linkNode.get("prompt");
         return new Link(
                 createURI(linkNode),
                 linkNode.get("rel").getTextValue(),
-                prompt != null ? prompt.getTextValue() : null
+                linkNode.has("prompt") ?
+                        Optional.fromNullable(linkNode.get("prompt").getTextValue()) :
+                        Optional.<String>absent()
         );
     }
 }
