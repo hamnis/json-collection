@@ -66,6 +66,14 @@ public class Property implements WithPrompt, Nameable {
         return prompt;
     }
 
+    public List<Value> getArray() {
+        return array;
+    }
+
+    public Map<String, Value> getObject() {
+        return object;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

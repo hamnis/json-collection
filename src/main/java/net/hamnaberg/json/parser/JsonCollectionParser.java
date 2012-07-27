@@ -18,6 +18,7 @@ package net.hamnaberg.json.parser;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -25,8 +26,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Parser for a vnd.collection+json document.
@@ -48,8 +48,9 @@ public class JsonCollectionParser {
     /**
      * Parses a JsonCollection from the given stream.
      * The stream is wrapped in a BufferedReader.
-     *
+     * <p/>
      * The stream is expected to be UTF-8 encoded.
+     *
      * @param stream the stream
      * @return a jsonCollection
      * @throws IOException
@@ -75,7 +76,7 @@ public class JsonCollectionParser {
 
         List<Link> links = parseLinks(collectionNode);
         List<Item> items = parseItems(collectionNode);
-        
+
         List<Query> queries = parseQueries(collectionNode);
         Template template = parseTemplate(collectionNode);
 
@@ -96,8 +97,8 @@ public class JsonCollectionParser {
         return null;
     }
 
-    private boolean isEmpty(String title) {
-        return title == null || title.trim().isEmpty();
+    private boolean isEmpty(String input) {
+        return input == null || input.trim().isEmpty();
     }
 
     private String getStringValue(JsonNode node) {
@@ -149,16 +150,45 @@ public class JsonCollectionParser {
     }
 
     private Property toProperty(JsonNode node) {
-        return new Property(getStringValue(node.get("name")), Optional.fromNullable(getStringValue(node.get("prompt"))), ValueFactory.createValue(node.get("value")));
+        String name = getStringValue(node.get("name"));
+        Optional<String> prompt = Optional.fromNullable(getStringValue(node.get("prompt")));
+
+        Map<String, Value> object = new LinkedHashMap<String, Value>();
+        if (node.has("object")) {
+            Iterator<Map.Entry<String, JsonNode>> fields = node.get("object").getFields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> i = fields.next();
+                Optional<Value> value = ValueFactory.createValue(i.getValue());
+                if (value.isPresent()) {
+                    object.put(i.getKey(), value.get());
+                }
+            }
+        }
+        List<Value> arr = new ArrayList<Value>();
+        if (node.has("array")) {
+            for (JsonNode i : node.get("array")) {
+                Optional<Value> v = ValueFactory.createValue(i);
+                if (v.isPresent()) {
+                    arr.add(v.get());
+                }
+            }
+        }
+        if (!object.isEmpty()) {
+            return new Property(name, prompt, object);
+        }
+        if (!arr.isEmpty()) {
+            return new Property(name, prompt, arr);
+        }
+        Optional<Value> value = ValueFactory.createValue(node.get("value"));
+        return new Property(name, prompt, value);
     }
 
     private URI createURI(JsonNode node) {
-        return URI.create(node.get("href").getTextValue());
+        return URI.create(getStringValue(node.get("href")));
     }
 
     private Version getVersion(JsonNode collectionNode) {
-        JsonNode version = collectionNode.get("version");
-        return Version.getVersion(version != null ? version.getTextValue() : null);
+        return Version.getVersion(getStringValue(collectionNode.get("version")));
     }
 
     private List<Link> parseLinks(JsonNode collectionNode) {
@@ -175,10 +205,8 @@ public class JsonCollectionParser {
     private Link toLink(JsonNode linkNode) {
         return new Link(
                 createURI(linkNode),
-                linkNode.get("rel").getTextValue(),
-                linkNode.has("prompt") ?
-                        Optional.fromNullable(linkNode.get("prompt").getTextValue()) :
-                        Optional.<String>absent()
+                getStringValue(linkNode.get("rel")),
+                Optional.fromNullable(getStringValue(linkNode.get("prompt")))
         );
     }
 }

@@ -17,14 +17,17 @@
 package net.hamnaberg.json.parser;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import net.hamnaberg.json.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -92,5 +95,26 @@ public class JsonCollectionParserTest {
         assertEquals(1, collection.getQueries().size());
         Query query = collection.getQueries().get(0);
         assertEquals("search", query.getProperties().get(0).getName());
+    }
+
+    @Test
+    public void parseValuesExtension() throws IOException {
+        DefaultJsonCollection collection = (DefaultJsonCollection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
+        assertNotNull(collection);
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
+        assertEquals(1, collection.getItems().size());
+        Optional<Item> first = collection.getFirst();
+        assertTrue(first.isPresent());
+        Optional<Property> complex = first.get().findProperty(new Predicate<Property>() {
+            @Override
+            public boolean apply(Property input) {
+                return "complex".equals(input.getName());
+            }
+        });
+        assertTrue(complex.isPresent());
+        assertFalse(complex.get().getValue().isPresent());
+        Map<String,Value> object = complex.get().getObject();
+        assertTrue(object.containsKey("foo"));
+        assertEquals(ValueFactory.createValue("bar").get(), object.get("foo"));
     }
 }
