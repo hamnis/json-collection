@@ -16,12 +16,13 @@
 
 package net.hamnaberg.json.generator;
 
-import com.google.common.base.Optional;
 import net.hamnaberg.json.Property;
 import net.hamnaberg.json.Value;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.*;
+
+import java.util.Map;
 
 public class PropertyGenerator extends AbstractGenerator<Property> {
     protected PropertyGenerator(ObjectMapper mapper) {
@@ -29,15 +30,30 @@ public class PropertyGenerator extends AbstractGenerator<Property> {
     }
 
     @Override
-    public JsonNode toNode(Property object) {
+    public JsonNode toNode(Property property) {
         ObjectNode node = mapper.createObjectNode();
-        node.put("name", object.getName());
-        if (object.getPrompt().isPresent()) {
-            node.put("prompt", object.getPrompt().get());
+        node.put("name", property.getName());
+        if (property.getPrompt().isPresent()) {
+            node.put("prompt", property.getPrompt().get());
         }
-        if (object.getValue().isPresent()) {
-            node.put("value", getJsonValue(object.getValue().get()));
+        if (property.getValue().isPresent()) {
+            node.put("value", getJsonValue(property.getValue().get()));
         }
+        else if (!property.getObject().isEmpty()) {
+            ObjectNode object = mapper.createObjectNode();
+            for (Map.Entry<String, Value> entry : property.getObject().entrySet()) {
+                object.put(entry.getKey(), getJsonValue(entry.getValue()));
+            }
+            node.put("object", object);
+        }
+        else if (!property.getArray().isEmpty()) {
+            ArrayNode array = mapper.createArrayNode();
+            for (Value value : property.getArray()) {
+                array.add(getJsonValue(value));
+            }
+            node.put("array", array);
+        }
+
         return node;
     }
 
