@@ -17,7 +17,7 @@
 package net.hamnaberg.json.generator;
 
 import net.hamnaberg.json.*;
-import net.hamnaberg.json.util.Lists;
+import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
@@ -68,7 +68,7 @@ public class JsonCollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), Lists.<Property>of(new Property("one", ValueFactory.createValue(1), "One")), Collections.<Link>emptyList()));
+        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", ValueFactory.createValue(1), "One")), Collections.<Link>emptyList()));
         JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
         assertNotNull(jsonNode);
         assertEquals("1.0", jsonNode.get("version").getValueAsText());

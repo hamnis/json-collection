@@ -16,14 +16,16 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Optional;
+
 public class Property implements WithPrompt, Nameable {
     private final String name;
-    private final Value value;
+    private final Optional<Value> value;
     private final String prompt;
 
     public Property(String name, Value value, String prompt) {
         this.name = name;
-        this.value = value;
+        this.value = Optional.fromNullable(value);
         this.prompt = prompt;
     }
 
@@ -31,7 +33,7 @@ public class Property implements WithPrompt, Nameable {
         return name;
     }
 
-    public Value getValue() {
+    public Optional<Value> getValue() {
         return value;
     }
 
@@ -63,6 +65,6 @@ public class Property implements WithPrompt, Nameable {
 
     @Override
     public String toString() {
-        return String.format("Property with name %s, value %s, prompt %s", name, value, prompt);
+        return String.format("Property with name %s, value %s, prompt %s", name, value.orNull(), prompt);
     }
 }

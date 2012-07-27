@@ -16,8 +16,6 @@
 
 package net.hamnaberg.json;
 
-import org.codehaus.jackson.JsonNode;
-
 public interface Value {
     boolean isBoolean();
     boolean isString();

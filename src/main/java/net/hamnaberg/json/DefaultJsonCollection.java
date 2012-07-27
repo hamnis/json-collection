@@ -16,8 +16,11 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.util.Lists;
-import net.hamnaberg.json.util.Predicate;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import net.hamnaberg.json.util.ListOps;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,7 +31,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     private final List<Link> links = new ArrayList<Link>();
     private final List<Item> items = new ArrayList<Item>();
     private final List<Query> queries = new ArrayList<Query>();
-    private final Template template;
+    private final Optional<Template> template;
 
     public DefaultJsonCollection(URI href) {
         this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null);
@@ -49,7 +52,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         if (queries != null) {
             this.queries.addAll(queries);
         }
-        this.template = template;
+        this.template = Optional.fromNullable(template);
     }
 
     @Override
@@ -74,51 +77,40 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
 
     @Override
     public boolean hasTemplate() {
-        return template != null;
+        return template.isPresent();
     }
 
-    public Link findLink(Predicate<Link> predicate) {
-        return findFirst(links, predicate);
+    public Optional<Link> findLink(Predicate<Link> predicate) {
+        return ListOps.find(links, predicate);
     }
 
     public List<Link> findLinks(Predicate<Link> predicate) {
-        return Lists.filter(links, predicate);
+        return ListOps.filter(links, predicate);
     }
 
-    public Item findItem(Predicate<Item> predicate) {
-        return findFirst(items, predicate);
+    public Optional<Item> findItem(Predicate<Item> predicate) {
+        return ListOps.find(items, predicate);
     }
 
     public List<Item> findItems(Predicate<Item> predicate) {
-        return Lists.filter(items, predicate);
+        return ListOps.filter(items, predicate);
     }
 
-    public Query findQuery(Predicate<Query> predicate) {
-        return findFirst(queries, predicate);
+    public Optional<Query> findQuery(Predicate<Query> predicate) {
+        return ListOps.find(queries, predicate);
     }
 
     public List<Query> findQueries(Predicate<Query> predicate) {
-        return Lists.filter(queries, predicate);
+        return ListOps.filter(queries, predicate);
     }
 
-    private <T> T findFirst(List<T> collection, Predicate<T> predicate) {
-        List<T> filter = Lists.filter(collection, predicate);
-        if (filter.isEmpty()) {
-            return null;
-        }
-        return filter.get(0);
-    }
-
-    public Item getFirst() {
-        if (items.isEmpty()) {
-            return null;
-        }
-        return items.get(0);
+    public Optional<Item> getFirst() {
+        return findItem(Predicates.<Item>alwaysTrue());
     }
 
     @Override
     public Template getTemplate() {
-        return template;
+        return template.orNull();
     }
 
     @Override

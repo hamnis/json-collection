@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json.parser;
 
+import com.google.common.base.Preconditions;
 import net.hamnaberg.json.*;
-import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 

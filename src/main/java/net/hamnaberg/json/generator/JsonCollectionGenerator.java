@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json.generator;
 
+import com.google.common.base.Function;
 import net.hamnaberg.json.*;
-import net.hamnaberg.json.util.F;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
@@ -48,7 +48,7 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
         return node;
     }
 
-    protected class Value2JsonNode<T> implements F<T, JsonNode> {
+    protected class Value2JsonNode<T> implements Function<T, JsonNode> {
         @Override
         public JsonNode apply(T input) {
             return factory.generate(input);

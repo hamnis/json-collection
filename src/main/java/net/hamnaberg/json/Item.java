@@ -16,6 +16,10 @@
 
 package net.hamnaberg.json;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import net.hamnaberg.json.util.ListOps;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +52,17 @@ public class Item implements WithHref {
         return Collections.unmodifiableList(links);
     }
 
+    public Optional<Link> findLink(Predicate<Link> predicate) {
+        return ListOps.find(links, predicate);
+    }
+
+    public List<Link> findLinks(Predicate<Link> predicate) {
+        return ListOps.filter(links, predicate);
+    }
+
+    public Optional<Property> findProperty(Predicate<Property> predicate) {
+        return ListOps.find(properties, predicate);
+    }
 
     @Override
     public boolean equals(Object o) {

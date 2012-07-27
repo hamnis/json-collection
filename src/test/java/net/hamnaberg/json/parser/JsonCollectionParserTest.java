@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json.parser;
 
+import com.google.common.base.Optional;
 import net.hamnaberg.json.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,11 +61,11 @@ public class JsonCollectionParserTest {
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(3, collection.getLinks().size());
         assertEquals(1, collection.getItems().size());
-        Item item = collection.getFirst();
-        assertNotNull("Item was null", item);
-        assertEquals(URI.create("http://example.org/friends/jdoe"), item.getHref());
-        assertEquals(new Property("full-name", ValueFactory.createValue("J. Doe"), "Full Name"), item.getProperties().get(0));
-        assertEquals(2, item.getLinks().size());
+        Optional<Item> item = collection.getFirst();
+        assertTrue("Item was null", item.isPresent());
+        assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
+        assertEquals(new Property("full-name", ValueFactory.createValue("J. Doe"), "Full Name"), item.get().getProperties().get(0));
+        assertEquals(2, item.get().getLinks().size());
     }
 
     @Test

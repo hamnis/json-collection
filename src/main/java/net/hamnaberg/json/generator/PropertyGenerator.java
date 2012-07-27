@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json.generator;
 
+import com.google.common.base.Optional;
 import net.hamnaberg.json.Property;
 import net.hamnaberg.json.Value;
 import org.codehaus.jackson.JsonNode;
@@ -32,7 +33,9 @@ public class PropertyGenerator extends AbstractGenerator<Property> {
         ObjectNode node = mapper.createObjectNode();
         node.put("name", object.getName());
         node.put("prompt", object.getPrompt());
-        node.put("value", getJsonValue(object.getValue()));
+        if (object.getValue().isPresent()) {
+            node.put("value", getJsonValue(object.getValue().get()));
+        }
         return node;
     }
 

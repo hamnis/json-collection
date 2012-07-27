@@ -16,7 +16,8 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.util.Preconditions;
+
+import com.google.common.base.Preconditions;
 
 import java.net.URI;
 import java.util.ArrayList;
