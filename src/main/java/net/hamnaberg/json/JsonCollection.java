@@ -16,6 +16,9 @@
 
 package net.hamnaberg.json;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.List;
 
 public interface JsonCollection extends WithHref {
@@ -34,4 +37,16 @@ public interface JsonCollection extends WithHref {
     List<Query> getQueries();
 
     boolean hasTemplate();
+
+    /*
+     * Writes to the supplied outputstream.
+     * Note: Does NOT close the stream.
+     */
+    void writeTo(OutputStream stream) throws IOException;
+
+    /*
+     * Writes to the supplied Writer.
+     * Note: Does NOT close the writer.
+     */
+    void writeTo(Writer reader) throws IOException;
 }

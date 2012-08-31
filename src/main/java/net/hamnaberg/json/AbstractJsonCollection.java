@@ -16,7 +16,12 @@
 
 package net.hamnaberg.json;
 
+import net.hamnaberg.json.generator.JsonCollectionGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.*;
 import java.net.URI;
+import java.nio.charset.Charset;
 
 public abstract class AbstractJsonCollection implements JsonCollection {
     private final URI href;
@@ -31,5 +36,26 @@ public abstract class AbstractJsonCollection implements JsonCollection {
 
     public Version getVersion() {
         return Version.ONE;
+    }
+
+    @Override
+    public void writeTo(OutputStream stream) throws IOException {
+        writeTo(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
+    }
+
+    @Override
+    public void writeTo(Writer writer) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(writer, new JsonCollectionGenerator().toNode(this));
+    }
+
+    @Override
+    public String toString() {
+        StringWriter writer = new StringWriter();
+        try {
+            writeTo(writer);
+        } catch (IOException ignore) {
+        }
+        return writer.toString();
     }
 }
