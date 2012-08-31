@@ -54,6 +54,18 @@ public class Property implements WithPrompt, Nameable {
         this.prompt = prompt;
     }
 
+    public static Property value(String name, Optional<Value> value) {
+        return new Property(name, Optional.<String>absent(), value);
+    }
+
+    public static Property array(String name, List<Value> array) {
+        return new Property(name, Optional.<String>absent(), array);
+    }
+
+    public static Property object(String name, Map<String, Value> object) {
+        return new Property(name, Optional.<String>absent(), object);
+    }
+
     public String getName() {
         return name;
     }
