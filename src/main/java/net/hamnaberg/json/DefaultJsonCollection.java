@@ -108,6 +108,15 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         return findItem(Predicates.<Item>alwaysTrue());
     }
 
+    public Builder toBuilder() {
+        Builder builder = builder(getHref());
+        builder.addItems(items);
+        builder.addLinks(links);
+        builder.addQueries(queries);
+        builder.withTemplate(template.orNull());
+        return builder;
+    }
+
     @Override
     public Template getTemplate() {
         return template.orNull();
@@ -116,6 +125,10 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
     @Override
     public ErrorMessage getError() {
         throw new UnsupportedOperationException("Incorrect Collection type.");
+    }
+
+    public static Builder builder(URI href) {
+        return new Builder(href);
     }
 
     public static class Builder {
