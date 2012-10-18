@@ -27,7 +27,7 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
 
     public JsonCollectionGenerator() {
         super(new ObjectMapper());
-        factory = new MyGeneratorFactory(mapper);
+        factory = new CollectionJsonGenerator(mapper);
     }
 
     @Override
@@ -55,12 +55,13 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
         }
     }
 
-    private static class MyGeneratorFactory extends GeneratorFactory {
-        private MyGeneratorFactory(ObjectMapper mapper) {
+    private static class CollectionJsonGenerator extends GeneratorFactory {
+        private CollectionJsonGenerator(ObjectMapper mapper) {
             register(Link.class, new LinkGenerator(mapper));
             register(Property.class, new PropertyGenerator(mapper));
             register(Item.class, new ItemGenerator(mapper));
             register(ErrorMessage.class, new ErrorMessageGenerator(mapper));
+            register(Template.class, new TemplateGenerator(mapper));
         }
     }
 }

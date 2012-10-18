@@ -30,6 +30,14 @@ public class Property implements WithPrompt, Nameable {
     private final Map<String, Value> object;
     private final Optional<String> prompt;
 
+    public Property(String name, Optional<String> prompt) {
+        this.name = name;
+        this.prompt = prompt;
+        this.value = Optional.absent();
+        this.array = ImmutableList.of();
+        this.object = ImmutableMap.of();
+    }
+
     public Property(String name, Optional<String> prompt, Optional<Value> value) {
         this.name = name;
         this.value = value;

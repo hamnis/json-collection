@@ -77,6 +77,32 @@ public class JsonCollectionGeneratorTest {
         assertEquals(createItems(), jsonNode.get("items"));
     }
 
+    @Test
+    public void templateCollection() throws Exception {
+        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(
+                COLLECTION_URI,
+                Collections.<Link>emptyList(),
+                Collections.<Item>emptyList(),
+                Collections.<Query>emptyList(),
+                new Template(ListOps.<Property>of(new Property("one", Optional.of("One")))))
+        );
+        assertNotNull(jsonNode);
+        assertEquals("1.0", jsonNode.get("version").getValueAsText());
+        assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
+        assertEquals(createTemplate(), jsonNode.get("template"));
+    }
+
+    private ObjectNode createTemplate() {
+        ArrayNode arrayNode = mapper.createArrayNode();
+        ObjectNode property = mapper.createObjectNode();
+        property.put("name", "one");
+        property.put("prompt", "One");
+        arrayNode.add(property);
+        ObjectNode template = mapper.createObjectNode();
+        template.put("data", arrayNode);
+        return template;
+    }
+
     private ArrayNode createItems() {
         ArrayNode array = mapper.createArrayNode();
         ObjectNode objectNode = mapper.createObjectNode();
