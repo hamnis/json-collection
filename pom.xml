@@ -122,7 +122,6 @@
         <configuration>
           <pushChanges>false</pushChanges>
           <localCheckout>true</localCheckout>
-          <mavenExecutorId>forked-path</mavenExecutorId>
           <tagNameFormat>v@{project.version}</tagNameFormat>
           <preparationGoals>clean install</preparationGoals>
           <goals>deploy</goals>
@@ -137,6 +136,31 @@
       <id>oss-release</id>
       <build>
         <plugins>
+          <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.1.1</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <failFast>true</failFast>
+                  <fail>true</fail>
+                  <rules>
+                    <requireProperty>
+                      <property>gpg.keyname</property>
+                      <message>"You must have a gpg.keyname defined"</message>
+                    </requireProperty>
+                    <requireProperty>
+                      <property>gpg.passphrase</property>
+                      <message>"You must have a gpg.passphrase defined"</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
