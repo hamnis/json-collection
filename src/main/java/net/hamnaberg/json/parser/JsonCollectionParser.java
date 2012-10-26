@@ -59,6 +59,30 @@ public class JsonCollectionParser {
         return parse(new BufferedReader(new InputStreamReader(stream, UTF_8)));
     }
 
+    public Template parseTemplate(Reader reader) throws IOException {
+        try {
+            return parseTemplate(mapper.readTree(reader));
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+    }
+
+    /**
+     * Parses a JsonCollection from the given stream.
+     * The stream is wrapped in a BufferedReader.
+     * <p/>
+     * The stream is expected to be UTF-8 encoded.
+     *
+     * @param stream the stream
+     * @return a jsonCollection
+     * @throws IOException
+     */
+    public Template parseTemplate(InputStream stream) throws IOException {
+        return parseTemplate(new BufferedReader(new InputStreamReader(stream, UTF_8)));
+    }
+
     private JsonCollection parse(JsonNode node) throws IOException {
         JsonNode collectionNode = node.get("collection");
         return parseCollection(collectionNode);
