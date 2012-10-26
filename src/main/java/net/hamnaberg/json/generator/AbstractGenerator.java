@@ -21,16 +21,13 @@ import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.List;
 
 public abstract class AbstractGenerator<T> implements Generator<T> {
-    protected final ObjectMapper mapper;
-
-    protected AbstractGenerator(ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
+    protected final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
     protected void addArrayIfNotEmpty(ObjectNode node, String name, ArrayNode array) {
         if (array.size() != 0) {
@@ -39,7 +36,7 @@ public abstract class AbstractGenerator<T> implements Generator<T> {
     }
 
     protected <T> ArrayNode createArray(List<T> value, Function<T, JsonNode> function) {
-        ArrayNode itemsArray = mapper.createArrayNode();
+        ArrayNode itemsArray = nodeFactory.arrayNode();
         itemsArray.addAll(ListOps.transform(value, function));
         return itemsArray;
     }

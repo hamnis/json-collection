@@ -18,9 +18,10 @@ package net.hamnaberg.json.parser;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.*;
+import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
@@ -33,11 +34,13 @@ import java.util.*;
  */
 public class JsonCollectionParser {
     private Charset UTF_8 = Charset.forName("UTF-8");
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    private final JsonFactory factory = new JsonFactory(new ObjectMapper());
 
     public JsonCollection parse(Reader reader) throws IOException {
         try {
-            return parse(mapper.readTree(reader));
+            JsonParser jsonParser = factory.createJsonParser(reader);
+            return parse(jsonParser.readValueAsTree());
         } finally {
             if (reader != null) {
                 reader.close();
@@ -61,7 +64,7 @@ public class JsonCollectionParser {
 
     public Template parseTemplate(Reader reader) throws IOException {
         try {
-            return parseTemplate(mapper.readTree(reader));
+            return parseTemplate(factory.createJsonParser(reader).readValueAsTree());
         } finally {
             if (reader != null) {
                 reader.close();

@@ -26,13 +26,12 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
     private final GeneratorFactory factory;
 
     public JsonCollectionGenerator() {
-        super(new ObjectMapper());
-        factory = new CollectionJsonGenerator(mapper);
+        factory = new CollectionJsonGenerator();
     }
 
     @Override
     public JsonNode toNode(JsonCollection object) {
-        ObjectNode node = mapper.createObjectNode();
+        ObjectNode node = nodeFactory.objectNode();
         node.put("href", object.getHref().toString());
         node.put("version", object.getVersion().getIdentifier());
         if (object.hasError()) {
@@ -45,7 +44,9 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
                 node.put("template", factory.generate(object.getTemplate()));
             }
         }
-        return node;
+        ObjectNode outer = nodeFactory.objectNode();
+        outer.put("collection", node);
+        return outer;
     }
 
     protected class Value2JsonNode<T> implements Function<T, JsonNode> {
@@ -56,12 +57,12 @@ public class JsonCollectionGenerator extends AbstractGenerator<JsonCollection> {
     }
 
     private static class CollectionJsonGenerator extends GeneratorFactory {
-        private CollectionJsonGenerator(ObjectMapper mapper) {
-            register(Link.class, new LinkGenerator(mapper));
-            register(Property.class, new PropertyGenerator(mapper));
-            register(Item.class, new ItemGenerator(mapper));
-            register(ErrorMessage.class, new ErrorMessageGenerator(mapper));
-            register(Template.class, new TemplateGenerator(mapper));
+        private CollectionJsonGenerator() {
+            register(Link.class, new LinkGenerator());
+            register(Property.class, new PropertyGenerator());
+            register(Item.class, new ItemGenerator());
+            register(ErrorMessage.class, new ErrorMessageGenerator());
+            register(Template.class, new TemplateGenerator());
         }
     }
 }

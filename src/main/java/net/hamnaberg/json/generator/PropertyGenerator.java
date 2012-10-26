@@ -25,13 +25,12 @@ import org.codehaus.jackson.node.*;
 import java.util.Map;
 
 public class PropertyGenerator extends AbstractGenerator<Property> {
-    protected PropertyGenerator(ObjectMapper mapper) {
-        super(mapper);
+    public PropertyGenerator() {
     }
 
     @Override
     public JsonNode toNode(Property property) {
-        ObjectNode node = mapper.createObjectNode();
+        ObjectNode node = nodeFactory.objectNode();
         node.put("name", property.getName());
         if (property.getPrompt().isPresent()) {
             node.put("prompt", property.getPrompt().get());
@@ -40,14 +39,14 @@ public class PropertyGenerator extends AbstractGenerator<Property> {
             node.put("value", getJsonValue(property.getValue().get()));
         }
         else if (!property.getObject().isEmpty()) {
-            ObjectNode object = mapper.createObjectNode();
+            ObjectNode object = nodeFactory.objectNode();
             for (Map.Entry<String, Value> entry : property.getObject().entrySet()) {
                 object.put(entry.getKey(), getJsonValue(entry.getValue()));
             }
             node.put("object", object);
         }
         else if (!property.getArray().isEmpty()) {
-            ArrayNode array = mapper.createArrayNode();
+            ArrayNode array = nodeFactory.arrayNode();
             for (Value value : property.getArray()) {
                 array.add(getJsonValue(value));
             }
