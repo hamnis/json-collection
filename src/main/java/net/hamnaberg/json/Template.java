@@ -20,6 +20,9 @@ package net.hamnaberg.json;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 public class Template {
     private final List<Property> properties = new ArrayList<Property>();
@@ -36,6 +39,14 @@ public class Template {
 
     public List<Property> getProperties() {
         return Collections.unmodifiableList(properties);
+    }
+
+    public ImmutableMap<String, Property> getPropertiesAsMap() {
+        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+        for (Property property : properties) {
+            builder.put(property.getName(), property);
+        }
+        return builder.build();
     }
 
     @Override

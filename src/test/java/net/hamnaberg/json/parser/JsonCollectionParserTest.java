@@ -18,10 +18,13 @@ package net.hamnaberg.json.parser;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import net.hamnaberg.json.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -85,6 +88,14 @@ public class JsonCollectionParserTest {
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertNotNull("Template was null", collection.getTemplate());
+    }
+
+    @Test
+    public void parseOnlyTemplate() throws IOException {
+        Template template = parser.parseTemplate(new InputStreamReader(getClass().getResourceAsStream("/only-template.json")));
+        assertNotNull("Template was null", template);
+        ImmutableMap<String,Property> properties = template.getPropertiesAsMap();
+        assertThat(properties.keySet(), JUnitMatchers.hasItems("full-name", "email", "blog", "avatar"));
     }
 
     @Test
