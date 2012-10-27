@@ -17,9 +17,22 @@
 package net.hamnaberg.json;
 
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
+import net.hamnaberg.json.generator.TemplateGenerator;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 public class Template {
     private final List<Property> properties = new ArrayList<Property>();
@@ -38,6 +51,14 @@ public class Template {
         return Collections.unmodifiableList(properties);
     }
 
+    public ImmutableMap<String, Property> getPropertiesAsMap() {
+        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+        for (Property property : properties) {
+            builder.put(property.getName(), property);
+        }
+        return builder.build();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,4 +75,25 @@ public class Template {
     public int hashCode() {
         return properties != null ? properties.hashCode() : 0;
     }
+
+        /*
+     * Writes to the supplied outputstream.
+     * Note: Does NOT close the stream.
+     */
+    public void writeTo(OutputStream stream) throws IOException {
+        writeTo(new OutputStreamWriter(stream, Charsets.UTF_8));
+    }
+
+    /*
+     * Writes to the supplied Writer.
+     * Note: Does NOT close the writer.
+     */
+    public void writeTo(Writer writer) throws IOException {
+        JsonFactory factory = new JsonFactory();
+        JsonGenerator generator = factory.createJsonGenerator(writer);
+        ObjectNode template = JsonNodeFactory.instance.objectNode();
+        template.put("template", new TemplateGenerator().toNode(this));
+        generator.writeTree(template);
+    }
+
 }

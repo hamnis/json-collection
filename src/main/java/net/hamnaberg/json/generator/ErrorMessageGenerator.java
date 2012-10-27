@@ -22,13 +22,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
 public class ErrorMessageGenerator extends AbstractGenerator<ErrorMessage> {
-    public ErrorMessageGenerator(ObjectMapper mapper) {
-        super(mapper);
+    public ErrorMessageGenerator() {
     }
 
     @Override
     public JsonNode toNode(ErrorMessage object) {
-        ObjectNode node = mapper.createObjectNode();
+        ObjectNode node = nodeFactory.objectNode();
         node.put("title", object.getTitle());
         node.put("code", object.getCode());
         node.put("message", object.getMessage());

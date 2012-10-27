@@ -13,21 +13,21 @@ import org.codehaus.jackson.node.ObjectNode;
  * @author Erlend Hamnaberg<erlend@hamnaberg.net>
  */
 public class TemplateGenerator extends AbstractGenerator<Template> {
-    private final PropertyGenerator propertyGenerator;
-    public TemplateGenerator(ObjectMapper mapper) {
-        super(mapper);
-        propertyGenerator = new PropertyGenerator(mapper);
+    private final PropertyGenerator propertyGenerator = new PropertyGenerator();
+
+    public TemplateGenerator() {
     }
 
     @Override
     public JsonNode toNode(Template object) {
-        ObjectNode node = mapper.createObjectNode();
-        node.put("data", mapper.createArrayNode().addAll(Lists.transform(object.getProperties(), new Function<Property, JsonNode>() {
+        ObjectNode node = nodeFactory.objectNode();
+
+        node.put("data", createArray(object.getProperties(), new Function<Property, JsonNode>() {
             @Override
             public JsonNode apply(Property input) {
                 return propertyGenerator.toNode(input);
             }
-        })));
+        }));
         return node;
     }
 }

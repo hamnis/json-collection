@@ -22,13 +22,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
 public class LinkGenerator extends AbstractGenerator<Link> {
-    public LinkGenerator(ObjectMapper mapper) {
-        super(mapper);
+    public LinkGenerator() {
     }
 
     @Override
     public JsonNode toNode(Link object) {
-        ObjectNode node = mapper.createObjectNode();
+        ObjectNode node = nodeFactory.objectNode();
         node.put("href", object.getHref().toString());
         node.put("rel", object.getRel());
         if (object.getPrompt().isPresent()) {

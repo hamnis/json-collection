@@ -20,8 +20,8 @@ import com.google.common.base.Optional;
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +36,8 @@ import static org.junit.Assert.*;
 public class JsonCollectionGeneratorTest {
     private static final URI COLLECTION_URI = URI.create("http://example.com/collection");
 
-    private final ObjectMapper mapper = new ObjectMapper();
     private JsonCollectionGenerator generator;
+    private final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
     @Before
     public void setUp() throws Exception {
@@ -48,18 +48,22 @@ public class JsonCollectionGeneratorTest {
     public void minimalCollection() throws Exception {
         JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI));
         assertNotNull(jsonNode);
-        assertEquals("1.0", jsonNode.get("version").getValueAsText());
-        assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
+        JsonNode collection = jsonNode.get("collection");
+        assertEquals("1.0", collection.get("version").asText());
+        assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
     }
 
     @Test
     public void errorCollection() throws Exception {
         JsonNode jsonNode = generator.toNode(new ErrorJsonCollection(COLLECTION_URI, new ErrorMessage("Hello", "Warning", "Hello")));
         assertNotNull(jsonNode);
-        assertEquals("1.0", jsonNode.get("version").getValueAsText());
-        assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
-        JsonNode errorNode = jsonNode.get("error");
-        ObjectNode node = mapper.createObjectNode();
+        JsonNode collection = jsonNode.get("collection");
+        assertNotNull(collection);
+
+        assertEquals("1.0", collection.get("version").asText());
+        assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
+        JsonNode errorNode = collection.get("error");
+        ObjectNode node = nodeFactory.objectNode();
         node.put("title", "Hello");
         node.put("code", "Warning");
         node.put("message", "Hello");
@@ -69,12 +73,15 @@ public class JsonCollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
+
         items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
         JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
         assertNotNull(jsonNode);
-        assertEquals("1.0", jsonNode.get("version").getValueAsText());
-        assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
-        assertEquals(createItems(), jsonNode.get("items"));
+        JsonNode collection = jsonNode.get("collection");
+        assertNotNull(collection);
+        assertEquals("1.0", collection.get("version").asText());
+        assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
+        assertEquals(createItems(), collection.get("items"));
     }
 
     @Test
@@ -87,28 +94,30 @@ public class JsonCollectionGeneratorTest {
                 new Template(ListOps.<Property>of(new Property("one", Optional.of("One")))))
         );
         assertNotNull(jsonNode);
-        assertEquals("1.0", jsonNode.get("version").getValueAsText());
-        assertEquals(COLLECTION_URI.toString(), jsonNode.get("href").getValueAsText());
-        assertEquals(createTemplate(), jsonNode.get("template"));
+        JsonNode collection = jsonNode.get("collection");
+        assertNotNull(collection);
+        assertEquals("1.0", collection.get("version").asText());
+        assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
+        assertEquals(createTemplate(), collection.get("template"));
     }
 
     private ObjectNode createTemplate() {
-        ArrayNode arrayNode = mapper.createArrayNode();
-        ObjectNode property = mapper.createObjectNode();
+        ArrayNode arrayNode = nodeFactory.arrayNode();
+        ObjectNode property = nodeFactory.objectNode();
         property.put("name", "one");
         property.put("prompt", "One");
         arrayNode.add(property);
-        ObjectNode template = mapper.createObjectNode();
+        ObjectNode template = nodeFactory.objectNode();
         template.put("data", arrayNode);
         return template;
     }
 
     private ArrayNode createItems() {
-        ArrayNode array = mapper.createArrayNode();
-        ObjectNode objectNode = mapper.createObjectNode();
+        ArrayNode array = nodeFactory.arrayNode();
+        ObjectNode objectNode = nodeFactory.objectNode();
         objectNode.put("href", COLLECTION_URI.resolve("item/1").toString());
-        ArrayNode properties = mapper.createArrayNode();
-        ObjectNode property = mapper.createObjectNode();
+        ArrayNode properties = nodeFactory.arrayNode();
+        ObjectNode property = nodeFactory.objectNode();
         property.put("name", "one");
         property.put("value", 1.0);
         property.put("prompt", "One");

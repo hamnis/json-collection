@@ -26,14 +26,13 @@ import org.codehaus.jackson.node.ObjectNode;
 
 public class ItemGenerator extends AbstractGenerator<Item> {
     private final GeneratorFactory factory;
-    public ItemGenerator(ObjectMapper mapper) {
-        super(mapper);
-        factory = new MyGeneratorFactory(mapper);
+    public ItemGenerator() {
+        factory = new MyGeneratorFactory();
     }
 
     @Override
     public JsonNode toNode(Item object) {
-        ObjectNode node = mapper.createObjectNode();
+        ObjectNode node = nodeFactory.objectNode();
         node.put("href", object.getHref().toString());
         addArrayIfNotEmpty(node, "data", createArray(object.getProperties(), new Value2JsonNode<Property>()));
         addArrayIfNotEmpty(node, "links", createArray(object.getLinks(), new Value2JsonNode<Link>()));
@@ -49,9 +48,9 @@ public class ItemGenerator extends AbstractGenerator<Item> {
     }
 
     private static class MyGeneratorFactory extends GeneratorFactory {
-        public MyGeneratorFactory(ObjectMapper mapper) {
-            register(Link.class, new LinkGenerator(mapper));
-            register(Property.class, new PropertyGenerator(mapper));
+        public MyGeneratorFactory() {
+            register(Link.class, new LinkGenerator());
+            register(Property.class, new PropertyGenerator());
         }
     }
 }
