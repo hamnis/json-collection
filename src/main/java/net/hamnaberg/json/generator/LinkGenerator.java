@@ -27,12 +27,6 @@ public class LinkGenerator extends AbstractGenerator<Link> {
 
     @Override
     public JsonNode toNode(Link object) {
-        ObjectNode node = nodeFactory.objectNode();
-        node.put("href", object.getHref().toString());
-        node.put("rel", object.getRel());
-        if (object.getPrompt().isPresent()) {
-            node.put("prompt", object.getPrompt().get());
-        }
-        return node;
+        return object.asJson();
     }
 }

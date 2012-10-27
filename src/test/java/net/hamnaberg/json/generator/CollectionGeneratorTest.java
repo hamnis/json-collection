@@ -76,7 +76,7 @@ public class CollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
         JsonNode jsonNode = generator.toNode(new Collection(COLLECTION_URI, items));
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
@@ -90,7 +90,7 @@ public class CollectionGeneratorTest {
     public void templateCollection() throws Exception {
         JsonNode jsonNode = generator.toNode(new Collection.Builder(
                 COLLECTION_URI).withTemplate(
-                new Template(ListOps.<Property>of(new Property("one", Optional.of("One"))))
+                new Template(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())))
         ).build()
         );
         assertNotNull(jsonNode);
@@ -103,7 +103,7 @@ public class CollectionGeneratorTest {
 
     @Test
     public void canParseGeneratedTemplate() throws Exception {
-        Template template = new Template(ListOps.<Property>of(new Property("one", Optional.of("One"))));
+        Template template = new Template(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())));
         StringWriter writer = new StringWriter();
         template.writeTo(writer);
         Template parsed = new CollectionParser().parseTemplate(writer.toString());
@@ -113,7 +113,7 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
 
         Collection collection = new Collection(COLLECTION_URI, items);
         String generated = collection.toString();

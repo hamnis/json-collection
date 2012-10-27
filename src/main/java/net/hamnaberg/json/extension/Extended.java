@@ -28,6 +28,10 @@ public abstract class Extended<T> {
         return copied;
     }
 
+    public ObjectNode asJson() {
+        return copyDelegate();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

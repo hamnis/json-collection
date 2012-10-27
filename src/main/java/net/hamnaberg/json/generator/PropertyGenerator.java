@@ -30,42 +30,7 @@ public class PropertyGenerator extends AbstractGenerator<Property> {
 
     @Override
     public JsonNode toNode(Property property) {
-        ObjectNode node = nodeFactory.objectNode();
-        node.put("name", property.getName());
-        if (property.getPrompt().isPresent()) {
-            node.put("prompt", property.getPrompt().get());
-        }
-        if (property.getValue().isPresent()) {
-            node.put("value", getJsonValue(property.getValue().get()));
-        }
-        else if (!property.getObject().isEmpty()) {
-            ObjectNode object = nodeFactory.objectNode();
-            for (Map.Entry<String, Value> entry : property.getObject().entrySet()) {
-                object.put(entry.getKey(), getJsonValue(entry.getValue()));
-            }
-            node.put("object", object);
-        }
-        else if (!property.getArray().isEmpty()) {
-            ArrayNode array = nodeFactory.arrayNode();
-            for (Value value : property.getArray()) {
-                array.add(getJsonValue(value));
-            }
-            node.put("array", array);
-        }
-
-        return node;
+        return property.asJson();
     }
 
-    private JsonNode getJsonValue(Value value) {
-        if (value.isNumeric()) {
-            return new DoubleNode(value.asNumber().doubleValue());
-        }
-        else if (value.isString()) {
-            return new TextNode(value.asString());
-        }
-        else if (value.isBoolean()) {
-            return BooleanNode.valueOf(value.asBoolean());
-        }
-        return NullNode.getInstance();
-    }
 }

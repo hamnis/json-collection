@@ -18,51 +18,59 @@ package net.hamnaberg.json;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import net.hamnaberg.json.extension.Extended;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
 
-public class Link implements WithPrompt, WithHref {
-    private final URI href;
-    private final String rel;
-    private final Optional<String> prompt;
+public final class Link extends Extended<Link> {
+    public Link(ObjectNode delegate) {
+        super(delegate);
+    }
 
-    public Link(URI href, String rel, Optional<String> prompt) {
-        this.href = href;
-        this.rel = Preconditions.checkNotNull(rel, "Relation may not be null");
-        this.prompt = prompt;
+    @Override
+    protected Link copy(ObjectNode value) {
+        return new Link(value);
+    }
+
+    public static Link of(URI href, String rel, Optional<String> prompt) {
+        return of(href, rel, prompt, Optional.<Render>absent());
+    }
+
+    public static Link of(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("href", Preconditions.checkNotNull(href, "Href may not be null").toString());
+        node.put("rel", Preconditions.checkNotNull(rel, "Relation may not be null"));
+        if (prompt.isPresent()) {
+            node.put("prompt", prompt.get());
+        }
+        if (render.isPresent()) {
+            node.put("render", render.get().getName());
+        }
+        return new Link(node);
     }
 
     public URI getHref() {
-        return href;
+        return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
     }
 
     public String getRel() {
-        return rel;
+        return delegate.get("rel").asText();
     }
 
     public Optional<String> getPrompt() {
-        return prompt;
+        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>absent();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Link link = (Link) o;
-
-        if (prompt != null ? !prompt.equals(link.prompt) : link.prompt != null) return false;
-        if (rel != null ? !rel.equals(link.rel) : link.rel != null) return false;
-        if (href != null ? !href.equals(link.href) : link.href != null) return false;
-
-        return true;
+    public Render getRender() {
+        return delegate.has("render") ? Render.valueOf(delegate.get("render").asText()) : Render.Link;
     }
 
-    @Override
-    public int hashCode() {
-        int result = href != null ? href.hashCode() : 0;
-        result = 31 * result + (rel != null ? rel.hashCode() : 0);
-        result = 31 * result + (prompt != null ? prompt.hashCode() : 0);
-        return result;
+    public void validate() {
+        Preconditions.checkArgument(getHref() != null, "Href was null");
+        Preconditions.checkArgument(getRel() != null, "Rel was null");
+        Preconditions.checkArgument(getPrompt() != null, "Prompt was null");
+        Preconditions.checkArgument(getRender() != null, "Render was null");
     }
 }

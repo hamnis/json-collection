@@ -6,9 +6,6 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.*;
 
-/**
- * @author Erlend Hamnaberg<erlend.hamnaberg@arktekk.no>
- */
 public abstract class Extension<A> {
     public abstract A extract(ObjectNode node);
     public abstract Map<String, JsonNode> apply(A value);

@@ -36,7 +36,7 @@ public class Query implements WithHref, WithPrompt {
     }
 
     public Query(URI uri, String rel, Optional<String> prompt, List<Property> properties) {
-        this(new Link(uri, rel, prompt), properties);
+        this(Link.of(uri, rel, prompt, Optional.<Render>absent()), properties);
     }
 
     public Query(Link link) {

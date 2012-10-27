@@ -19,109 +19,119 @@ package net.hamnaberg.json;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.hamnaberg.json.extension.Extended;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Property implements WithPrompt, Nameable {
-    private final String name;
-    private final Optional<Value> value;
-    private final List<Value> array;
-    private final Map<String, Value> object;
-    private final Optional<String> prompt;
-
-    public Property(String name, Optional<String> prompt) {
-        this.name = name;
-        this.prompt = prompt;
-        this.value = Optional.absent();
-        this.array = ImmutableList.of();
-        this.object = ImmutableMap.of();
-    }
-
-    public Property(String name, Optional<String> prompt, Optional<Value> value) {
-        this.name = name;
-        this.value = value;
-        this.array = ImmutableList.of();
-        this.object = ImmutableMap.of();
-        this.prompt = prompt;
-    }
-
-    public Property(String name, Optional<String> prompt, List<Value> array) {
-        this.name = name;
-        this.value = Optional.absent();
-        this.array = ImmutableList.copyOf(array);
-        this.object = ImmutableMap.of();
-        this.prompt = prompt;
-    }
-
-    public Property(String name, Optional<String> prompt, Map<String, Value> object) {
-        this.name = name;
-        this.value = Optional.absent();
-        this.array = ImmutableList.of();
-        this.object = ImmutableMap.copyOf(object);
-        this.prompt = prompt;
-    }
-
-    public static Property value(String name, Optional<Value> value) {
-        return new Property(name, Optional.<String>absent(), value);
-    }
-
-    public static Property array(String name, List<Value> array) {
-        return new Property(name, Optional.<String>absent(), array);
-    }
-
-    public static Property object(String name, Map<String, Value> object) {
-        return new Property(name, Optional.<String>absent(), object);
+public final class Property extends Extended<Property> {
+    public Property(ObjectNode delegate) {
+        super(delegate);
     }
 
     public String getName() {
-        return name;
+        return delegate.get("name").asText();
     }
 
     public Optional<Value> getValue() {
-        return value;
+        return ValueFactory.createValue(delegate.get("value"));
     }
 
     public Optional<String> getPrompt() {
-        return prompt;
+        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>absent();
     }
 
     public List<Value> getArray() {
-        return array;
+        JsonNode array = delegate.get("array");
+        ImmutableList.Builder<Value> builder = ImmutableList.builder();
+        if (array != null && array.isArray()) {
+            for (JsonNode n : array) {
+                Optional<Value> opt = ValueFactory.createValue(n);
+                if (opt.isPresent()) {
+                    builder.add(opt.get());
+                }
+            }
+        }
+        return builder.build();
     }
 
     public Map<String, Value> getObject() {
-        return object;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Property property = (Property) o;
-
-        if (array != null ? !array.equals(property.array) : property.array != null) return false;
-        if (name != null ? !name.equals(property.name) : property.name != null) return false;
-        if (object != null ? !object.equals(property.object) : property.object != null) return false;
-        if (prompt != null ? !prompt.equals(property.prompt) : property.prompt != null) return false;
-        if (value != null ? !value.equals(property.value) : property.value != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (array != null ? array.hashCode() : 0);
-        result = 31 * result + (object != null ? object.hashCode() : 0);
-        result = 31 * result + (prompt != null ? prompt.hashCode() : 0);
-        return result;
+        ImmutableMap.Builder<String, Value> builder = ImmutableMap.builder();
+        JsonNode object = delegate.get("object");
+        if (object != null && object.isObject()) {
+            Iterator<Map.Entry<String,JsonNode>> fields = object.getFields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> next = fields.next();
+                Optional<Value> opt = ValueFactory.createValue(next.getValue());
+                if (opt.isPresent()) {
+                    builder.put(next.getKey(), opt.get());
+                }
+            }
+        }
+        return builder.build();
     }
 
     @Override
     public String toString() {
-        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", name, value.orNull(), array, object, prompt);
+        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orNull(), getArray(), getObject(), getPrompt());
     }
+
+    public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
+        ObjectNode node = makeObject(name, prompt);
+        if (value.isPresent()) {
+            node.put("value", getJsonValue(value.get()));
+        }
+        return new Property(node);
+    }
+
+    public static Property array(String name, Optional<String> prompt, List<Value> list) {
+        ObjectNode node = makeObject(name, prompt);
+        ArrayNode array = JsonNodeFactory.instance.arrayNode();
+        for (Value value : list) {
+            array.add(getJsonValue(value));
+        }
+        node.put("array", array);
+        return new Property(node);
+    }
+
+    public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
+        ObjectNode node = makeObject(name, prompt);
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        for (Map.Entry<String, Value> entry : object.entrySet()) {
+            objectNode.put(entry.getKey(), getJsonValue(entry.getValue()));
+        }
+        node.put("object", objectNode);
+        return new Property(node);
+    }
+
+    @Override
+    protected Property copy(ObjectNode value) {
+        return new Property(value);
+    }
+
+    private static ObjectNode makeObject(String name, Optional<String> prompt) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("name", name);
+        if (prompt.isPresent()) {
+            node.put("prompt", prompt.get());
+        }
+        return node;
+    }
+
+    private static JsonNode getJsonValue(Value value) {
+        if (value.isNumeric()) {
+            return new DoubleNode(value.asNumber().doubleValue());
+        }
+        else if (value.isString()) {
+            return new TextNode(value.asString());
+        }
+        else if (value.isBoolean()) {
+            return BooleanNode.valueOf(value.asBoolean());
+        }
+        return NullNode.getInstance();
+    }
+
 }
