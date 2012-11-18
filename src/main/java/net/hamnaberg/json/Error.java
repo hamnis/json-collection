@@ -16,14 +16,14 @@
 
 package net.hamnaberg.json;
 
-public class ErrorMessage {
-    public static final ErrorMessage EMPTY = new ErrorMessage(null, null, null);
+public class Error {
+    public static final Error EMPTY = new Error(null, null, null);
 
     private final String title;
     private final String code;
     private final String message;
 
-    public ErrorMessage(String title, String code, String message) {
+    public Error(String title, String code, String message) {
         this.title = title;
         this.code = code;
         this.message = message;
@@ -46,7 +46,7 @@ public class ErrorMessage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ErrorMessage error = (ErrorMessage) o;
+        Error error = (Error) o;
 
         if (code != null ? !code.equals(error.code) : error.code != null) return false;
         if (message != null ? !message.equals(error.message) : error.message != null) return false;
@@ -65,7 +65,7 @@ public class ErrorMessage {
 
     @Override
     public String toString() {
-        return "ErrorMessage{" +
+        return "Error{" +
                 "title='" + title + '\'' +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +

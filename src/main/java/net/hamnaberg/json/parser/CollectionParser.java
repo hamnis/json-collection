@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Collection;
+import net.hamnaberg.json.Error;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
@@ -110,7 +111,7 @@ public class CollectionParser {
         URI href = createURI(collectionNode);
         Version version = getVersion(collectionNode);
         Preconditions.checkArgument(version == Version.ONE, "Version was %s, may only be %s", version.getIdentifier(), Version.ONE.getIdentifier());
-        ErrorMessage error = parseError(collectionNode);
+        Error error = parseError(collectionNode);
 
         List<Link> links = parseLinks(collectionNode);
         List<Item> items = parseItems(collectionNode);
@@ -121,16 +122,16 @@ public class CollectionParser {
         return new Collection(href, links, items, queries, template, error);
     }
 
-    private ErrorMessage parseError(JsonNode collectionNode) {
+    private Error parseError(JsonNode collectionNode) {
         JsonNode errorNode = collectionNode.get("error");
         if (errorNode != null) {
             String title = getStringValue(errorNode.get("title"));
             String code = getStringValue(errorNode.get("code"));
             String message = getStringValue(errorNode.get("message"));
             if (isEmpty(title) && isEmpty(code) && isEmpty(message)) {
-                return ErrorMessage.EMPTY;
+                return Error.EMPTY;
             }
-            return new ErrorMessage(title, code, message);
+            return new Error(title, code, message);
         }
         return null;
     }

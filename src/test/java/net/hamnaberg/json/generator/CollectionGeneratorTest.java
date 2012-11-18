@@ -18,6 +18,7 @@ package net.hamnaberg.json.generator;
 
 import com.google.common.base.Optional;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.Error;
 import net.hamnaberg.json.parser.CollectionParser;
 import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.JsonNode;
@@ -57,7 +58,7 @@ public class CollectionGeneratorTest {
 
     @Test
     public void errorCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new Collection.Builder(COLLECTION_URI).withError(new ErrorMessage("Hello", "Warning", "Hello")).build());
+        JsonNode jsonNode = generator.toNode(new Collection.Builder(COLLECTION_URI).withError(new Error("Hello", "Warning", "Hello")).build());
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
         assertNotNull(collection);

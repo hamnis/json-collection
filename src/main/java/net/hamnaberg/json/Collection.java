@@ -38,7 +38,7 @@ public class Collection {
     private final List<Item> items;
     private final List<Query> queries;
     private final Optional<Template> template;
-    private final Optional<ErrorMessage> error;
+    private final Optional<Error> error;
 
     public Collection(URI href) {
         this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null, null);
@@ -48,7 +48,7 @@ public class Collection {
         this(href, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null, null);
     }
 
-    public Collection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, ErrorMessage error) {
+    public Collection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
         this.href = href;
         this.links = links == null ? ImmutableList.<Link>of() : ImmutableList.<Link>builder().addAll(links).build();
         this.items = items == null ? ImmutableList.<Item>of() : ImmutableList.<Item>builder().addAll(items).build();
@@ -126,7 +126,7 @@ public class Collection {
         return template.orNull();
     }
 
-    public ErrorMessage getError() {
+    public Error getError() {
         return error.orNull();
     }
 
@@ -188,7 +188,7 @@ public class Collection {
         private final List<Link> linkBuilder = new ArrayList<Link>();
         private final List<Query> queryBuilder = new ArrayList<Query>();
         private Template template;
-        private ErrorMessage error;
+        private Error error;
 
         public Builder(URI href) {
             this.href = href;
@@ -229,7 +229,7 @@ public class Collection {
             return this;
         }
 
-        public Builder withError(ErrorMessage error) {
+        public Builder withError(Error error) {
             this.error = error;
             return this;
         }

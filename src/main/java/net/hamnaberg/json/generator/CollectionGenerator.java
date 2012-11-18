@@ -18,6 +18,7 @@ package net.hamnaberg.json.generator;
 
 import com.google.common.base.Function;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.Error;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 
@@ -60,7 +61,7 @@ public class CollectionGenerator extends AbstractGenerator<Collection> {
             register(Link.class, new LinkGenerator());
             register(Property.class, new PropertyGenerator());
             register(Item.class, new ItemGenerator());
-            register(ErrorMessage.class, new ErrorMessageGenerator());
+            register(Error.class, new ErrorGenerator());
             register(Template.class, new TemplateGenerator());
         }
     }

@@ -16,17 +16,16 @@
 
 package net.hamnaberg.json.generator;
 
-import net.hamnaberg.json.ErrorMessage;
+import net.hamnaberg.json.Error;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
-public class ErrorMessageGenerator extends AbstractGenerator<ErrorMessage> {
-    public ErrorMessageGenerator() {
+public class ErrorGenerator extends AbstractGenerator<Error> {
+    public ErrorGenerator() {
     }
 
     @Override
-    public JsonNode toNode(ErrorMessage object) {
+    public JsonNode toNode(net.hamnaberg.json.Error object) {
         ObjectNode node = nodeFactory.objectNode();
         node.put("title", object.getTitle());
         node.put("code", object.getCode());
