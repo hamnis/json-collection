@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Erlend Hamnaberg
+ * Copyright 2012 Erlend Hamnaberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package net.hamnaberg.json.generator;
 
 import com.google.common.base.Optional;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.parser.CollectionParser;
 import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -26,6 +27,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,20 +35,20 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class JsonCollectionGeneratorTest {
+public class CollectionGeneratorTest {
     private static final URI COLLECTION_URI = URI.create("http://example.com/collection");
 
-    private JsonCollectionGenerator generator;
+    private CollectionGenerator generator;
     private final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
     @Before
     public void setUp() throws Exception {
-        generator = new JsonCollectionGenerator();
+        generator = new CollectionGenerator();
     }
 
     @Test
     public void minimalCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI));
+        JsonNode jsonNode = generator.toNode(new Collection(COLLECTION_URI));
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
         assertEquals("1.0", collection.get("version").asText());
@@ -55,7 +57,7 @@ public class JsonCollectionGeneratorTest {
 
     @Test
     public void errorCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new ErrorJsonCollection(COLLECTION_URI, new ErrorMessage("Hello", "Warning", "Hello")));
+        JsonNode jsonNode = generator.toNode(new Collection.Builder(COLLECTION_URI).withError(new ErrorMessage("Hello", "Warning", "Hello")).build());
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
         assertNotNull(collection);
@@ -73,9 +75,8 @@ public class JsonCollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-
         items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
-        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(COLLECTION_URI, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null));
+        JsonNode jsonNode = generator.toNode(new Collection(COLLECTION_URI, items));
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
         assertNotNull(collection);
@@ -86,12 +87,10 @@ public class JsonCollectionGeneratorTest {
 
     @Test
     public void templateCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new DefaultJsonCollection(
-                COLLECTION_URI,
-                Collections.<Link>emptyList(),
-                Collections.<Item>emptyList(),
-                Collections.<Query>emptyList(),
-                new Template(ListOps.<Property>of(new Property("one", Optional.of("One")))))
+        JsonNode jsonNode = generator.toNode(new Collection.Builder(
+                COLLECTION_URI).withTemplate(
+                new Template(ListOps.<Property>of(new Property("one", Optional.of("One"))))
+        ).build()
         );
         assertNotNull(jsonNode);
         JsonNode collection = jsonNode.get("collection");
@@ -99,6 +98,26 @@ public class JsonCollectionGeneratorTest {
         assertEquals("1.0", collection.get("version").asText());
         assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
         assertEquals(createTemplate(), collection.get("template"));
+    }
+
+    @Test
+    public void canParseGeneratedTemplate() throws Exception {
+        Template template = new Template(ListOps.<Property>of(new Property("one", Optional.of("One"))));
+        StringWriter writer = new StringWriter();
+        template.writeTo(writer);
+        Template parsed = new CollectionParser().parseTemplate(writer.toString());
+        assertEquals(template, parsed);
+    }
+
+    @Test
+    public void canParseGeneratedCollection() throws Exception {
+        List<Item> items = new ArrayList<Item>();
+        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(new Property("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+
+        Collection collection = new Collection(COLLECTION_URI, items);
+        String generated = collection.toString();
+        Collection parsed = new CollectionParser().parse(generated);
+        assertEquals(collection.toString(), parsed.toString());
     }
 
     private ObjectNode createTemplate() {

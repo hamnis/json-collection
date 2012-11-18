@@ -20,13 +20,15 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.codehaus.jackson.JsonNode;
 
+import java.math.BigDecimal;
+
 public class ValueFactory {
     public static Optional<Value> createValue(JsonNode node) {
         if (node == null) {
             return Optional.absent();
         }
         else if (node.isNumber()) {
-            return Optional.<Value>of(new ValueImpl(node.getDoubleValue()));
+            return Optional.<Value>of(new ValueImpl(node.getDecimalValue()));
         }
         else if (node.isBoolean()) {
             return Optional.<Value>of(new ValueImpl(node.getBooleanValue()));
@@ -43,6 +45,9 @@ public class ValueFactory {
     public static Optional<Value> createValue(Object value) {
         if (value == null) {
             return Optional.absent();
+        }
+        if (value instanceof Number) {
+            value = new BigDecimal(value.toString());
         }
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);
         return Optional.<Value>of(new ValueImpl(value));

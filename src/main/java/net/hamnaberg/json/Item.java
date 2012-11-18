@@ -18,6 +18,7 @@ package net.hamnaberg.json;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.util.ListOps;
 
 import java.net.URI;
@@ -46,6 +47,14 @@ public class Item implements WithHref {
 
     public List<Property> getProperties() {
         return Collections.unmodifiableList(properties);
+    }
+
+    public ImmutableMap<String, Property> getPropertiesAsMap() {
+        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+        for (Property property : properties) {
+            builder.put(property.getName(), property);
+        }
+        return builder.build();
     }
 
     public List<Link> getLinks() {

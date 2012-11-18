@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Erlend Hamnaberg
+ * Copyright 2012 Erlend Hamnaberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,62 +20,67 @@ package net.hamnaberg.json;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import net.hamnaberg.json.generator.CollectionGenerator;
 import net.hamnaberg.json.util.ListOps;
+import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.*;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DefaultJsonCollection extends AbstractJsonCollection {
-    private final List<Link> links = new ArrayList<Link>();
-    private final List<Item> items = new ArrayList<Item>();
-    private final List<Query> queries = new ArrayList<Query>();
+public class Collection {
+    private final URI href;
+    private final List<Link> links;
+    private final List<Item> items;
+    private final List<Query> queries;
     private final Optional<Template> template;
+    private final Optional<ErrorMessage> error;
 
-    public DefaultJsonCollection(URI href) {
-        this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null);
+    public Collection(URI href) {
+        this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null, null);
     }
 
-    public DefaultJsonCollection(URI href, List<Item> items) {
-        this(href, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null);
+    public Collection(URI href, List<Item> items) {
+        this(href, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null, null);
     }
 
-    public DefaultJsonCollection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template) {
-        super(href);
-        if (links != null) {
-            this.links.addAll(links);
-        }
-        if (items != null) {
-            this.items.addAll(items);
-        }
-        if (queries != null) {
-            this.queries.addAll(queries);
-        }
+    public Collection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, ErrorMessage error) {
+        this.href = href;
+        this.links = links == null ? ImmutableList.<Link>of() : ImmutableList.<Link>builder().addAll(links).build();
+        this.items = items == null ? ImmutableList.<Item>of() : ImmutableList.<Item>builder().addAll(items).build();
+        this.queries = queries == null ? ImmutableList.<Query>of() : ImmutableList.<Query>builder().addAll(queries).build();
         this.template = Optional.fromNullable(template);
+        this.error = Optional.fromNullable(error);
     }
 
-    @Override
+    public Version getVersion() {
+        return Version.ONE;
+    }
+
+    public URI getHref() {
+        return href;
+    }
+
     public List<Link> getLinks() {
-        return Collections.unmodifiableList(links);
+        return links;
     }
 
-    @Override
     public List<Item> getItems() {
-        return Collections.unmodifiableList(items);
+        return items;
     }
 
-    @Override
     public boolean hasError() {
-        return false;
+        return error.isPresent();
     }
 
-    @Override
     public List<Query> getQueries() {
-        return Collections.unmodifiableList(queries);
+        return queries;
     }
 
-    @Override
     public boolean hasTemplate() {
         return template.isPresent();
     }
@@ -117,14 +122,60 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         return builder;
     }
 
-    @Override
     public Template getTemplate() {
         return template.orNull();
     }
 
-    @Override
     public ErrorMessage getError() {
-        throw new UnsupportedOperationException("Incorrect Collection type.");
+        return error.orNull();
+    }
+
+    public void writeTo(OutputStream stream) throws IOException {
+        writeTo(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
+    }
+
+    public void writeTo(Writer writer) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(writer, new CollectionGenerator().toNode(this));
+    }
+
+    @Override
+    public String toString() {
+        StringWriter writer = new StringWriter();
+        try {
+            writeTo(writer);
+        } catch (IOException ignore) {
+        }
+        return writer.toString();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Collection that = (Collection) o;
+
+        if (error != null ? !error.equals(that.error) : that.error != null) return false;
+        if (href != null ? !href.equals(that.href) : that.href != null) return false;
+        if (items != null ? !items.equals(that.items) : that.items != null) return false;
+        if (links != null ? !links.equals(that.links) : that.links != null) return false;
+        if (queries != null ? !queries.equals(that.queries) : that.queries != null) return false;
+        if (template != null ? !template.equals(that.template) : that.template != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = href != null ? href.hashCode() : 0;
+        result = 31 * result + (links != null ? links.hashCode() : 0);
+        result = 31 * result + (items != null ? items.hashCode() : 0);
+        result = 31 * result + (queries != null ? queries.hashCode() : 0);
+        result = 31 * result + (template != null ? template.hashCode() : 0);
+        result = 31 * result + (error != null ? error.hashCode() : 0);
+        return result;
     }
 
     public static Builder builder(URI href) {
@@ -137,6 +188,7 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
         private final List<Link> linkBuilder = new ArrayList<Link>();
         private final List<Query> queryBuilder = new ArrayList<Query>();
         private Template template;
+        private ErrorMessage error;
 
         public Builder(URI href) {
             this.href = href;
@@ -177,14 +229,19 @@ public class DefaultJsonCollection extends AbstractJsonCollection {
             return this;
         }
 
+        public Builder withError(ErrorMessage error) {
+            this.error = error;
+            return this;
+        }
+
         private <A> void addToList(Iterable<A> iterable, List<A> list) {
             for (A a : iterable) {
                 list.add(a);
             }
         }
 
-        public JsonCollection build() {
-            return new DefaultJsonCollection(href, linkBuilder, itemBuilder, queryBuilder, template);
+        public Collection build() {
+            return new Collection(href, linkBuilder, itemBuilder, queryBuilder, template, error);
         }
     }
 }

@@ -19,6 +19,7 @@ package net.hamnaberg.json;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -59,6 +60,15 @@ public class Query implements WithHref, WithPrompt {
     public List<Property> getProperties() {
         return Collections.unmodifiableList(properties);
     }
+
+    public ImmutableMap<String, Property> getPropertiesAsMap() {
+        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+        for (Property property : properties) {
+            builder.put(property.getName(), property);
+        }
+        return builder.build();
+    }
+
 
     @Override
     public boolean equals(Object o) {

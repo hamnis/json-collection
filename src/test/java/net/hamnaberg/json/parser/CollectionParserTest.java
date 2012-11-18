@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Erlend Hamnaberg
+ * Copyright 2012 Erlend Hamnaberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,12 @@ package net.hamnaberg.json.parser;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import net.hamnaberg.json.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -34,17 +32,17 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class JsonCollectionParserTest {
-    private JsonCollectionParser parser;
+public class CollectionParserTest {
+    private CollectionParser parser;
 
     @Before
     public void setUp() throws Exception {
-        parser = new JsonCollectionParser();
+        parser = new CollectionParser();
     }
 
     @Test
     public void parseMinimal() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         Assert.assertEquals(Version.ONE, collection.getVersion());
@@ -53,7 +51,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseMinimalWithoutVersion() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal-without-version.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal-without-version.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(Version.ONE, collection.getVersion());
@@ -62,7 +60,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseSingleItemCollection() throws IOException {
-        DefaultJsonCollection collection = (DefaultJsonCollection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
+        Collection collection = (Collection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(3, collection.getLinks().size());
@@ -76,7 +74,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseErrorCollection() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/error.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/error.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertNotNull("Error was null", collection.getError());
@@ -84,7 +82,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseTemplateCollection() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/template.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/template.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertNotNull("Template was null", collection.getTemplate());
@@ -100,7 +98,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseQueriesCollection() throws IOException {
-        JsonCollection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/queries.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/queries.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getQueries().size());
@@ -110,7 +108,7 @@ public class JsonCollectionParserTest {
 
     @Test
     public void parseValuesExtension() throws IOException {
-        DefaultJsonCollection collection = (DefaultJsonCollection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
+        Collection collection = (Collection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getItems().size());

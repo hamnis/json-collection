@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Erlend Hamnaberg
+ * Copyright 2012 Erlend Hamnaberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package net.hamnaberg.json.parser;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.Collection;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
@@ -26,18 +28,16 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
  * Parser for a vnd.collection+json document.
  */
-public class JsonCollectionParser {
-    private Charset UTF_8 = Charset.forName("UTF-8");
+public class CollectionParser {
 
     private final JsonFactory factory = new JsonFactory(new ObjectMapper());
 
-    public JsonCollection parse(Reader reader) throws IOException {
+    public Collection parse(Reader reader) throws IOException {
         try {
             JsonParser jsonParser = factory.createJsonParser(reader);
             return parse(jsonParser.readValueAsTree());
@@ -49,17 +49,28 @@ public class JsonCollectionParser {
     }
 
     /**
-     * Parses a JsonCollection from the given stream.
+     * Parses a Collection from the given stream.
      * The stream is wrapped in a BufferedReader.
      * <p/>
      * The stream is expected to be UTF-8 encoded.
      *
      * @param stream the stream
-     * @return a jsonCollection
+     * @return a Collection
      * @throws IOException
      */
-    public JsonCollection parse(InputStream stream) throws IOException {
-        return parse(new BufferedReader(new InputStreamReader(stream, UTF_8)));
+    public Collection parse(InputStream stream) throws IOException {
+        return parse(new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8)));
+    }
+
+    /**
+     * Parses a Collection from the given String.
+     *
+     * @param input the string to parse
+     * @return a Collection
+     * @throws IOException
+     */
+    public Collection parse(String input) throws IOException {
+        return parse(new StringReader(input));
     }
 
     public Template parseTemplate(Reader reader) throws IOException {
@@ -83,23 +94,23 @@ public class JsonCollectionParser {
      * @throws IOException
      */
     public Template parseTemplate(InputStream stream) throws IOException {
-        return parseTemplate(new BufferedReader(new InputStreamReader(stream, UTF_8)));
+        return parseTemplate(new BufferedReader(new InputStreamReader(stream, Charsets.UTF_8)));
     }
 
-    private JsonCollection parse(JsonNode node) throws IOException {
+    public Template parseTemplate(String input) throws IOException {
+        return parseTemplate(new StringReader(input));
+    }
+
+    private Collection parse(JsonNode node) throws IOException {
         JsonNode collectionNode = node.get("collection");
         return parseCollection(collectionNode);
     }
 
-    private JsonCollection parseCollection(JsonNode collectionNode) {
+    private Collection parseCollection(JsonNode collectionNode) {
         URI href = createURI(collectionNode);
         Version version = getVersion(collectionNode);
         Preconditions.checkArgument(version == Version.ONE, "Version was %s, may only be %s", version.getIdentifier(), Version.ONE.getIdentifier());
         ErrorMessage error = parseError(collectionNode);
-
-        if (error != null) {
-            return new ErrorJsonCollection(href, error);
-        }
 
         List<Link> links = parseLinks(collectionNode);
         List<Item> items = parseItems(collectionNode);
@@ -107,7 +118,7 @@ public class JsonCollectionParser {
         List<Query> queries = parseQueries(collectionNode);
         Template template = parseTemplate(collectionNode);
 
-        return new DefaultJsonCollection(href, links, items, queries, template);
+        return new Collection(href, links, items, queries, template, error);
     }
 
     private ErrorMessage parseError(JsonNode collectionNode) {

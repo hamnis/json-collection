@@ -17,10 +17,7 @@
 package net.hamnaberg.json;
 
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +28,7 @@ import net.hamnaberg.json.generator.TemplateGenerator;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
@@ -76,7 +74,7 @@ public class Template {
         return properties != null ? properties.hashCode() : 0;
     }
 
-        /*
+    /*
      * Writes to the supplied outputstream.
      * Note: Does NOT close the stream.
      */
@@ -89,11 +87,19 @@ public class Template {
      * Note: Does NOT close the writer.
      */
     public void writeTo(Writer writer) throws IOException {
-        JsonFactory factory = new JsonFactory();
-        JsonGenerator generator = factory.createJsonGenerator(writer);
+        ObjectMapper factory = new ObjectMapper();
         ObjectNode template = JsonNodeFactory.instance.objectNode();
         template.put("template", new TemplateGenerator().toNode(this));
-        generator.writeTree(template);
+        factory.writeValue(writer, template);
     }
 
+    @Override
+    public String toString() {
+        StringWriter writer = new StringWriter();
+        try {
+            writeTo(writer);
+        } catch (IOException ignore) {
+        }
+        return writer.toString();
+    }
 }
