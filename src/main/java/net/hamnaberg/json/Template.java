@@ -17,61 +17,51 @@
 package net.hamnaberg.json;
 
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import net.hamnaberg.json.generator.TemplateGenerator;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
+import net.hamnaberg.json.extension.Extended;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
-public class Template {
-    private final List<Property> properties = new ArrayList<Property>();
+import java.io.*;
+import java.util.Collections;
+import java.util.List;
 
-    public Template() {
-        this(Collections.<Property>emptyList());
+public final class Template extends Extended<Template> {
+    Template(ObjectNode delegate) {
+        super(delegate);
     }
 
-    public Template(List<Property> properties) {
-        if (properties != null) {
-            this.properties.addAll(properties);
+    @Override
+    protected Template copy(ObjectNode value) {
+        return new Template(value);
+    }
+
+    public static Template create(List<Property> data) {
+        ObjectNode obj = JsonNodeFactory.instance.objectNode();
+        if (!data.isEmpty()) {
+            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+            for (Property property : data) {
+                arr.add(property.asJson());
+            }
+            obj.put("data", arr);
         }
+        return new Template(obj);
     }
 
-    public List<Property> getProperties() {
-        return Collections.unmodifiableList(properties);
+    public List<Property> getData() {
+        return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
     }
 
-    public ImmutableMap<String, Property> getPropertiesAsMap() {
+    public ImmutableMap<String, Property> getDataAsMap() {
         ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
-        for (Property property : properties) {
+        for (Property property : getData()) {
             builder.put(property.getName(), property);
         }
         return builder.build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Template template = (Template) o;
-
-        if (properties != null ? !properties.equals(template.properties) : template.properties != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return properties != null ? properties.hashCode() : 0;
     }
 
     /*
@@ -89,7 +79,7 @@ public class Template {
     public void writeTo(Writer writer) throws IOException {
         ObjectMapper factory = new ObjectMapper();
         ObjectNode template = JsonNodeFactory.instance.objectNode();
-        template.put("template", new TemplateGenerator().toNode(this));
+        template.put("template", asJson());
         factory.writeValue(writer, template);
     }
 
@@ -101,5 +91,9 @@ public class Template {
         } catch (IOException ignore) {
         }
         return writer.toString();
+    }
+
+    public void validate() {
+
     }
 }

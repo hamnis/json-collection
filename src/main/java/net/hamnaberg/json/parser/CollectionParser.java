@@ -109,142 +109,19 @@ public class CollectionParser {
     }
 
     private Collection parseCollection(JsonNode collectionNode) {
-        URI href = createURI(collectionNode);
-        Version version = getVersion(collectionNode);
-        Preconditions.checkArgument(version == Version.ONE, "Version was %s, may only be %s", version.getIdentifier(), Version.ONE.getIdentifier());
-        Error error = parseError(collectionNode);
-
-        List<Link> links = parseLinks(collectionNode);
-        List<Item> items = parseItems(collectionNode);
-
-        List<Query> queries = parseQueries(collectionNode);
-        Template template = parseTemplate(collectionNode);
-
-        return new Collection(href, links, items, queries, template, error);
-    }
-
-    private Error parseError(JsonNode collectionNode) {
-        JsonNode errorNode = collectionNode.get("error");
-        if (errorNode != null) {
-            String title = getStringValue(errorNode.get("title"));
-            String code = getStringValue(errorNode.get("code"));
-            String message = getStringValue(errorNode.get("message"));
-            if (isEmpty(title) && isEmpty(code) && isEmpty(message)) {
-                return Error.EMPTY;
-            }
-            return new Error(title, code, message);
-        }
-        return null;
-    }
-
-    private boolean isEmpty(String input) {
-        return input == null || input.trim().isEmpty();
-    }
-
-    private String getStringValue(JsonNode node) {
-        return node == null ? null : node.getTextValue();
-    }
-
-    private List<Item> parseItems(JsonNode collectionNode) {
-        List<Item> builder = new ArrayList<Item>();
-        JsonNode items = collectionNode.get("items");
-        if (items != null) {
-            for (JsonNode node : items) {
-                URI uri = createURI(node);
-                builder.add(new Item(uri, parseData(node), parseLinks(node)));
-            }
-        }
-        return builder;
-    }
-
-    private List<Query> parseQueries(JsonNode collectionNode) {
-        List<Query> builder = new ArrayList<Query>();
-        JsonNode queriesNode = collectionNode.get("queries");
-        if (queriesNode != null) {
-            for (JsonNode node : queriesNode) {
-                Link link = toLink(node);
-                List<Property> properties = parseData(node);
-                builder.add(new Query(link, properties));
-            }
-        }
-        return builder;
+        Collection c = objectFactory.createCollection((ObjectNode) collectionNode);
+        c.validate();
+        return c;
     }
 
     private Template parseTemplate(JsonNode collectionNode) {
         JsonNode node = collectionNode.get("template");
         if (node != null) {
-            return new Template(parseData(node));
+            return objectFactory.createTemplate((ObjectNode) node);
         }
         return null;
     }
 
-    private List<Property> parseData(JsonNode node) {
-        JsonNode data = node.get("data");
-        List<Property> builder = new ArrayList<Property>();
-        if (data != null) {
-            for (JsonNode property : data) {
-                builder.add(toProperty(property));
-            }
-        }
-        return builder;
-    }
-
-    private Property toProperty(JsonNode node) {
-        String name = getStringValue(node.get("name"));
-        Optional<String> prompt = Optional.fromNullable(getStringValue(node.get("prompt")));
-
-        Map<String, Value> object = new LinkedHashMap<String, Value>();
-        if (node.has("object")) {
-            Iterator<Map.Entry<String, JsonNode>> fields = node.get("object").getFields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> i = fields.next();
-                Optional<Value> value = ValueFactory.createValue(i.getValue());
-                if (value.isPresent()) {
-                    object.put(i.getKey(), value.get());
-                }
-            }
-        }
-        List<Value> arr = new ArrayList<Value>();
-        if (node.has("array")) {
-            for (JsonNode i : node.get("array")) {
-                Optional<Value> v = ValueFactory.createValue(i);
-                if (v.isPresent()) {
-                    arr.add(v.get());
-                }
-            }
-        }
-        if (!object.isEmpty()) {
-            return Property.object(name, prompt, object);
-        }
-        if (!arr.isEmpty()) {
-            return Property.array(name, prompt, arr);
-        }
-        Optional<Value> value = ValueFactory.createValue(node.get("value"));
-        return Property.value(name, prompt, value);
-    }
-
-    private URI createURI(JsonNode node) {
-        return URI.create(getStringValue(node.get("href")));
-    }
-
-    private Version getVersion(JsonNode collectionNode) {
-        return Version.getVersion(getStringValue(collectionNode.get("version")));
-    }
-
-    private List<Link> parseLinks(JsonNode collectionNode) {
-        JsonNode linkCollection = collectionNode.get("links");
-        List<Link> linkBuilder = new ArrayList<Link>();
-        if (linkCollection != null) {
-            for (JsonNode linkNode : linkCollection) {
-                linkBuilder.add(toLink(linkNode));
-            }
-        }
-        return linkBuilder;
-    }
-
-    private Link toLink(JsonNode linkNode) {
-        Link link = new Link((ObjectNode) linkNode);
-        link.validate();
-        return link;
-    }
+    private static InternalObjectFactory objectFactory = new InternalObjectFactory() {
+    };
 }

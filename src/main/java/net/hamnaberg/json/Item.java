@@ -18,85 +18,93 @@ package net.hamnaberg.json;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Item implements WithHref {
-    private URI href;
-    private final List<Property> properties = new ArrayList<Property>();
-    private final List<Link> links = new ArrayList<Link>();
+public final class Item extends Extended<Item> implements WithHref {
 
-    public Item(URI href, List<Property> properties, List<Link> links) {
-        this.href = href;
-        if (properties != null) {
-            this.properties.addAll(properties);
+    Item(ObjectNode node) {
+        super(node);
+    }
+
+    public static Item create(URI href, List<Property> properties, List<Link> links) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("href", href.toString());
+        if (!properties.isEmpty()) {
+           ArrayNode data = JsonNodeFactory.instance.arrayNode();
+            for (Property property : properties) {
+                data.add(property.asJson());
+            }
+            node.put("data", data);
         }
-        if (links != null) {
-            this.links.addAll(links);
-        }
+        return new Item(node);
     }
 
     public URI getHref() {
-        return href;
+        return URI.create(delegate.get("href").asText());
     }
 
-    public List<Property> getProperties() {
-        return Collections.unmodifiableList(properties);
+    public List<Property> getData() {
+        return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
     }
 
-    public ImmutableMap<String, Property> getPropertiesAsMap() {
+    public ImmutableMap<String, Property> getDataAsMap() {
         ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
-        for (Property property : properties) {
+        for (Property property : getData()) {
             builder.put(property.getName(), property);
         }
         return builder.build();
     }
 
     public List<Link> getLinks() {
-        return Collections.unmodifiableList(links);
+        return delegate.has("links") ? Link.fromArray(delegate.get("links")) : Collections.<Link>emptyList();
+    }
+
+    public Template toTemplate() {
+        return Template.create(getData());
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return ListOps.find(links, predicate);
+        return ListOps.find(getLinks(), predicate);
     }
 
     public List<Link> findLinks(Predicate<Link> predicate) {
-        return ListOps.filter(links, predicate);
+        return ListOps.filter(getLinks(), predicate);
     }
 
     public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return ListOps.find(properties, predicate);
+        return ListOps.find(getData(), predicate);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Item item = (Item) o;
-
-        if (href != null ? !href.equals(item.href) : item.href != null) return false;
-        if (links != null ? !links.equals(item.links) : item.links != null) return false;
-        if (properties != null ? !properties.equals(item.properties) : item.properties != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = href != null ? href.hashCode() : 0;
-        result = 31 * result + (properties != null ? properties.hashCode() : 0);
-        result = 31 * result + (links != null ? links.hashCode() : 0);
-        return result;
+    protected Item copy(ObjectNode value) {
+        return new Item(value);
     }
 
     @Override
     public String toString() {
-        return String.format("Item with href %s, properties %s and links %s", href, properties, links);
+        return String.format("Item with href %s, properties %s and links %s", getHref(), getData(), getLinks());
+    }
+
+    static List<Item> fromArray(JsonNode queries) {
+        ImmutableList.Builder<Item> builder = ImmutableList.builder();
+        for (JsonNode jsonNode : queries) {
+            builder.add(new Item((ObjectNode) jsonNode));
+        }
+        return builder.build();
+    }
+
+    public void validate() {
+
     }
 }

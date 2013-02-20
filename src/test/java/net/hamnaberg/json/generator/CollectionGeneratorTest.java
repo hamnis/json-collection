@@ -39,28 +39,19 @@ import static org.junit.Assert.*;
 public class CollectionGeneratorTest {
     private static final URI COLLECTION_URI = URI.create("http://example.com/collection");
 
-    private CollectionGenerator generator;
     private final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
-
-    @Before
-    public void setUp() throws Exception {
-        generator = new CollectionGenerator();
-    }
 
     @Test
     public void minimalCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new Collection(COLLECTION_URI));
-        assertNotNull(jsonNode);
-        JsonNode collection = jsonNode.get("collection");
+        JsonNode collection = Collection.builder(COLLECTION_URI).build().asJson();
+        assertNotNull(collection);
         assertEquals("1.0", collection.get("version").asText());
         assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
     }
 
     @Test
     public void errorCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new Collection.Builder(COLLECTION_URI).withError(new Error("Hello", "Warning", "Hello")).build());
-        assertNotNull(jsonNode);
-        JsonNode collection = jsonNode.get("collection");
+        JsonNode collection = new Collection.Builder(COLLECTION_URI).withError(Error.create("Hello", "Warning", "Hello")).build().asJson();
         assertNotNull(collection);
 
         assertEquals("1.0", collection.get("version").asText());
@@ -76,10 +67,8 @@ public class CollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
-        JsonNode jsonNode = generator.toNode(new Collection(COLLECTION_URI, items));
-        assertNotNull(jsonNode);
-        JsonNode collection = jsonNode.get("collection");
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        JsonNode collection = Collection.builder(COLLECTION_URI).addItems(items).build().asJson();
         assertNotNull(collection);
         assertEquals("1.0", collection.get("version").asText());
         assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
@@ -88,13 +77,11 @@ public class CollectionGeneratorTest {
 
     @Test
     public void templateCollection() throws Exception {
-        JsonNode jsonNode = generator.toNode(new Collection.Builder(
+        JsonNode collection = new Collection.Builder(
                 COLLECTION_URI).withTemplate(
-                new Template(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())))
-        ).build()
-        );
-        assertNotNull(jsonNode);
-        JsonNode collection = jsonNode.get("collection");
+                Template.create(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())))
+        ).build().asJson();
+
         assertNotNull(collection);
         assertEquals("1.0", collection.get("version").asText());
         assertEquals(COLLECTION_URI.toString(), collection.get("href").asText());
@@ -103,7 +90,7 @@ public class CollectionGeneratorTest {
 
     @Test
     public void canParseGeneratedTemplate() throws Exception {
-        Template template = new Template(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())));
+        Template template = Template.create(ListOps.<Property>of(Property.value("one", Optional.of("One"), Optional.<Value>absent())));
         StringWriter writer = new StringWriter();
         template.writeTo(writer);
         Template parsed = new CollectionParser().parseTemplate(writer.toString());
@@ -113,9 +100,9 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(new Item(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.of("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
 
-        Collection collection = new Collection(COLLECTION_URI, items);
+        Collection collection = Collection.builder(COLLECTION_URI).addItems(items).build();
         String generated = collection.toString();
         Collection parsed = new CollectionParser().parse(generated);
         assertEquals(collection.toString(), parsed.toString());

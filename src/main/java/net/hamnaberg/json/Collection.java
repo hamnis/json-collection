@@ -20,10 +20,12 @@ package net.hamnaberg.json;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
-import net.hamnaberg.json.generator.CollectionGenerator;
+import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
 import java.net.URI;
@@ -32,29 +34,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Collection {
-    private final URI href;
-    private final List<Link> links;
-    private final List<Item> items;
-    private final List<Query> queries;
-    private final Optional<Template> template;
-    private final Optional<Error> error;
-
-    public Collection(URI href) {
-        this(href, Collections.<Link>emptyList(), Collections.<Item>emptyList(), Collections.<Query>emptyList(), null, null);
+public final class Collection extends Extended<Collection> {
+    Collection(ObjectNode value) {
+        super(value);
     }
 
-    public Collection(URI href, List<Item> items) {
-        this(href, Collections.<Link>emptyList(), items, Collections.<Query>emptyList(), null, null);
+    @Override
+    protected Collection copy(ObjectNode value) {
+        return new Collection(value);
     }
 
-    public Collection(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
-        this.href = href;
-        this.links = links == null ? ImmutableList.<Link>of() : ImmutableList.<Link>builder().addAll(links).build();
-        this.items = items == null ? ImmutableList.<Item>of() : ImmutableList.<Item>builder().addAll(items).build();
-        this.queries = queries == null ? ImmutableList.<Query>of() : ImmutableList.<Query>builder().addAll(queries).build();
-        this.template = Optional.fromNullable(template);
-        this.error = Optional.fromNullable(error);
+    public static Collection create(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
+        ObjectNode obj = JsonNodeFactory.instance.objectNode();
+        obj.put("version", Version.ONE.getIdentifier());
+        obj.put("href", href.toString());
+        if (!links.isEmpty()) {
+            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+            for (Link link : links) {
+                arr.add(link.asJson());
+            }
+            obj.put("links", arr);
+        }
+        if (!items.isEmpty()) {
+            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+            for (Item i : items) {
+                arr.add(i.asJson());
+            }
+            obj.put("items", arr);
+        }
+        if (!queries.isEmpty()) {
+            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+            for (Query i : queries) {
+                arr.add(i.asJson());
+            }
+            obj.put("queries", arr);
+        }
+        if (template != null) {
+            obj.put("template", template.asJson());
+        }
+        if (error != null) {
+            obj.put("error", error.asJson());
+        }
+        Collection coll = new Collection(obj);
+        coll.validate();
+        return coll;
     }
 
     public Version getVersion() {
@@ -62,72 +85,73 @@ public class Collection {
     }
 
     public URI getHref() {
-        return href;
+        return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
     }
 
     public List<Link> getLinks() {
-        return links;
+        return delegate.has("links") ? Link.fromArray(delegate.get("links")) : Collections.<Link>emptyList();
     }
 
     public List<Item> getItems() {
-        return items;
-    }
-
-    public boolean hasError() {
-        return error.isPresent();
+        return delegate.has("items") ? Item.fromArray(delegate.get("items")) : Collections.<Item>emptyList();
     }
 
     public List<Query> getQueries() {
-        return queries;
+        return delegate.has("queries") ? Query.fromArray(delegate.get("queries")) : Collections.<Query>emptyList();
     }
 
     public boolean hasTemplate() {
-        return template.isPresent();
+        return delegate.has("template");
+    }
+
+    public Template getTemplate() {
+        return hasTemplate() ? new Template((ObjectNode) delegate.get("template")) : null;
+    }
+
+    public boolean hasError() {
+        return delegate.has("error");
+    }
+
+
+    public Error getError() {
+        return hasError() ? new Error((ObjectNode) delegate.get("error")) : null;
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return ListOps.find(links, predicate);
+        return ListOps.find(getLinks(), predicate);
     }
 
-    public List<Link> findLinks(Predicate<Link> predicate) {
-        return ListOps.filter(links, predicate);
+    public List<Link> filterLinks(Predicate<Link> predicate) {
+        return ListOps.filter(getLinks(), predicate);
     }
 
     public Optional<Item> findItem(Predicate<Item> predicate) {
-        return ListOps.find(items, predicate);
+        return ListOps.find(getItems(), predicate);
     }
 
-    public List<Item> findItems(Predicate<Item> predicate) {
-        return ListOps.filter(items, predicate);
+    public List<Item> filterItems(Predicate<Item> predicate) {
+        return ListOps.filter(getItems(), predicate);
     }
 
     public Optional<Query> findQuery(Predicate<Query> predicate) {
-        return ListOps.find(queries, predicate);
+        return ListOps.find(getQueries(), predicate);
     }
 
-    public List<Query> findQueries(Predicate<Query> predicate) {
-        return ListOps.filter(queries, predicate);
+    public List<Query> filterQueries(Predicate<Query> predicate) {
+        return ListOps.filter(getQueries(), predicate);
     }
 
-    public Optional<Item> getFirst() {
+    public Optional<Item> getFirstItem() {
         return findItem(Predicates.<Item>alwaysTrue());
     }
 
     public Builder toBuilder() {
         Builder builder = builder(getHref());
-        builder.addItems(items);
-        builder.addLinks(links);
-        builder.addQueries(queries);
-        builder.withTemplate(template.orNull());
+        builder.addItems(getItems());
+        builder.addLinks(getLinks());
+        builder.addQueries(getQueries());
+        builder.withTemplate(getTemplate());
         return builder;
-    }
-
-    public Template getTemplate() {
-        return template.orNull();
-    }
-
-    public Error getError() {
-        return error.orNull();
     }
 
     public void writeTo(OutputStream stream) throws IOException {
@@ -136,7 +160,9 @@ public class Collection {
 
     public void writeTo(Writer writer) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(writer, new CollectionGenerator().toNode(this));
+        ObjectNode obj = mapper.createObjectNode();
+        obj.put("collection", asJson());
+        mapper.writeValue(writer, obj);
     }
 
     @Override
@@ -149,33 +175,23 @@ public class Collection {
         return writer.toString();
     }
 
+    public void validate() {
+        for (Link link : getLinks()) {
+            link.validate();
+        }
+        for (Item item : getItems()) {
+            item.validate();
+        }
+        for (Query query : getQueries()) {
+            query.validate();
+        }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Collection that = (Collection) o;
-
-        if (error != null ? !error.equals(that.error) : that.error != null) return false;
-        if (href != null ? !href.equals(that.href) : that.href != null) return false;
-        if (items != null ? !items.equals(that.items) : that.items != null) return false;
-        if (links != null ? !links.equals(that.links) : that.links != null) return false;
-        if (queries != null ? !queries.equals(that.queries) : that.queries != null) return false;
-        if (template != null ? !template.equals(that.template) : that.template != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = href != null ? href.hashCode() : 0;
-        result = 31 * result + (links != null ? links.hashCode() : 0);
-        result = 31 * result + (items != null ? items.hashCode() : 0);
-        result = 31 * result + (queries != null ? queries.hashCode() : 0);
-        result = 31 * result + (template != null ? template.hashCode() : 0);
-        result = 31 * result + (error != null ? error.hashCode() : 0);
-        return result;
+        if (hasTemplate()){
+            getTemplate().validate();
+        }
+        if (hasError()) {
+            getError().validate();
+        }
     }
 
     public static Builder builder(URI href) {
@@ -241,7 +257,7 @@ public class Collection {
         }
 
         public Collection build() {
-            return new Collection(href, linkBuilder, itemBuilder, queryBuilder, template, error);
+            return Collection.create(href, linkBuilder, itemBuilder, queryBuilder, template, error);
         }
     }
 }

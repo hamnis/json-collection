@@ -18,14 +18,17 @@ package net.hamnaberg.json;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.extension.Extended;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
+import java.util.List;
 
 public final class Link extends Extended<Link> {
-    public Link(ObjectNode delegate) {
+    Link(ObjectNode delegate) {
         super(delegate);
     }
 
@@ -72,5 +75,13 @@ public final class Link extends Extended<Link> {
         Preconditions.checkArgument(getRel() != null, "Rel was null");
         Preconditions.checkArgument(getPrompt() != null, "Prompt was null");
         Preconditions.checkArgument(getRender() != null, "Render was null");
+    }
+
+    static List<Link> fromArray(JsonNode node) {
+        ImmutableList.Builder<Link> links = ImmutableList.builder();
+        for (JsonNode jsonNode : node) {
+            links.add(new Link((ObjectNode) jsonNode));
+        }
+        return links.build();
     }
 }

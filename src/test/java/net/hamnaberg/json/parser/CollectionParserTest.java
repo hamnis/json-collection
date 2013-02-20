@@ -60,15 +60,15 @@ public class CollectionParserTest {
 
     @Test
     public void parseSingleItemCollection() throws IOException {
-        Collection collection = (Collection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(3, collection.getLinks().size());
         assertEquals(1, collection.getItems().size());
-        Optional<Item> item = collection.getFirst();
+        Optional<Item> item = collection.getFirstItem();
         assertTrue("Item was null", item.isPresent());
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
-        assertEquals(Property.value("full-name", Optional.of("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getProperties().get(0));
+        assertEquals(Property.value("full-name", Optional.of("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getData().get(0));
         assertEquals(2, item.get().getLinks().size());
     }
 
@@ -92,7 +92,7 @@ public class CollectionParserTest {
     public void parseOnlyTemplate() throws IOException {
         Template template = parser.parseTemplate(new InputStreamReader(getClass().getResourceAsStream("/only-template.json")));
         assertNotNull("Template was null", template);
-        ImmutableMap<String,Property> properties = template.getPropertiesAsMap();
+        ImmutableMap<String,Property> properties = template.getDataAsMap();
         assertThat(properties.keySet(), JUnitMatchers.hasItems("full-name", "email", "blog", "avatar"));
     }
 
@@ -103,16 +103,16 @@ public class CollectionParserTest {
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getQueries().size());
         Query query = collection.getQueries().get(0);
-        assertEquals("search", query.getProperties().get(0).getName());
+        assertEquals("search", query.getData().get(0).getName());
     }
 
     @Test
     public void parseValuesExtension() throws IOException {
-        Collection collection = (Collection) parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
+        Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
         assertNotNull(collection);
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getItems().size());
-        Optional<Item> first = collection.getFirst();
+        Optional<Item> first = collection.getFirstItem();
         assertTrue(first.isPresent());
         Optional<Property> complex = first.get().findProperty(new Predicate<Property>() {
             @Override

@@ -6,7 +6,7 @@ import org.codehaus.jackson.node.ObjectNode;
 public abstract class Extended<T> {
     protected final ObjectNode delegate;
 
-    public Extended(ObjectNode delegate) {
+    protected Extended(ObjectNode delegate) {
         this.delegate = delegate;
     }
 
@@ -32,6 +32,10 @@ public abstract class Extended<T> {
         return copyDelegate();
     }
 
+    protected String getAsString(String name) {
+        return delegate.has(name) ? delegate.get(name).asText() : null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,4 +52,6 @@ public abstract class Extended<T> {
     public int hashCode() {
         return delegate != null ? delegate.hashCode() : 0;
     }
+
+    public abstract void validate();
 }

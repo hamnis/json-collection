@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class Property extends Extended<Property> {
-    public Property(ObjectNode delegate) {
+    Property(ObjectNode delegate) {
         super(delegate);
     }
 
@@ -42,6 +42,14 @@ public final class Property extends Extended<Property> {
 
     public Optional<String> getPrompt() {
         return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>absent();
+    }
+
+    public boolean isArray() {
+        return delegate.has("array");
+    }
+
+    public boolean isObject() {
+        return delegate.has("object");
     }
 
     public List<Value> getArray() {
@@ -112,6 +120,11 @@ public final class Property extends Extended<Property> {
         return new Property(value);
     }
 
+    @Override
+    public void validate() {
+
+    }
+
     private static ObjectNode makeObject(String name, Optional<String> prompt) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("name", name);
@@ -134,4 +147,28 @@ public final class Property extends Extended<Property> {
         return NullNode.getInstance();
     }
 
+    public static List<Property> fromData(JsonNode data) {
+        ImmutableList.Builder<Property> builder = ImmutableList.builder();
+        for (JsonNode jsonNode : data) {
+            builder.add(new Property((ObjectNode) jsonNode));
+        }
+        return builder.build();
+    }
+
+    public static Map<String, Object> toMap(List<Property> props) {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+        for (Property prop : props) {
+            if (prop.isObject()) {
+                builder.put(prop.getName(), prop.getObject());
+            }
+            else if (prop.isArray()) {
+                builder.put(prop.getName(), prop.getArray());
+            }
+            else {
+                builder.put(prop.getName(), prop.getValue());
+            }
+        }
+
+        return builder.build();
+    }
 }
