@@ -41,6 +41,9 @@ public final class Query extends Extended<Query> {
     public static Query create(Target target, String rel, Optional<String> prompt, List<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         obj.put("href", target.toString());
+        if (target.isURITemplate()) {
+            obj.put("encoding", "uri-template");
+        }
         obj.put("rel", rel);
         if (prompt.isPresent()) {
             obj.put("prompt", prompt.get());

@@ -44,6 +44,6 @@ public class URITemplateTarget implements Target {
 
     @Override
     public String toString() {
-        return href.toString();
+        return href.getTemplate();
     }
 }
