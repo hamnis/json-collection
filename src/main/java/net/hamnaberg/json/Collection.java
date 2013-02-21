@@ -17,11 +17,10 @@
 package net.hamnaberg.json;
 
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
+import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Predicate;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -142,7 +141,7 @@ public final class Collection extends Extended<Collection> {
     }
 
     public Optional<Item> getFirstItem() {
-        return findItem(Predicates.<Item>alwaysTrue());
+        return ListOps.headOption(getItems());
     }
 
     public Builder toBuilder() {

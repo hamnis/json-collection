@@ -17,20 +17,18 @@
 package net.hamnaberg.json;
 
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.ListOps;
+import net.hamnaberg.json.util.MapOps;
+import net.hamnaberg.json.util.Optional;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public final class Query extends Extended<Query> {
 
@@ -45,7 +43,7 @@ public final class Query extends Extended<Query> {
             obj.put("encoding", "uri-template");
         }
         obj.put("rel", rel);
-        if (prompt.isPresent()) {
+        if (prompt.isSome()) {
             obj.put("prompt", prompt.get());
         }
         if (!data.isEmpty()) {
@@ -76,27 +74,27 @@ public final class Query extends Extended<Query> {
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.fromNullable(delegate.get("prompt").asText()) : Optional.<String>absent();
+        return delegate.has("prompt") ? Optional.fromNullable(delegate.get("prompt").asText()) : Optional.<String>none();
     }
 
     public List<Property> getData() {
         return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
     }
 
-    public ImmutableMap<String, Property> getDataAsMap() {
-        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+    public Map<String, Property> getDataAsMap() {
+        Map<String, Property> builder = MapOps.newHashMap();
         for (Property property : getData()) {
             builder.put(property.getName(), property);
         }
-        return builder.build();
+        return Collections.unmodifiableMap(builder);
     }
 
     static List<Query> fromArray(JsonNode queries) {
-        ImmutableList.Builder<Query> builder = ImmutableList.builder();
+        List<Query> builder = ListOps.newArrayList();
         for (JsonNode jsonNode : queries) {
             builder.add(new Query((ObjectNode) jsonNode));
         }
-        return builder.build();
+        return Collections.unmodifiableList(builder);
     }
 
     public void validate() {

@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 
 import java.math.BigDecimal;
@@ -25,32 +25,32 @@ import java.math.BigDecimal;
 public class ValueFactory {
     public static Optional<Value> createValue(JsonNode node) {
         if (node == null) {
-            return Optional.absent();
+            return Optional.none();
         }
         else if (node.isNumber()) {
-            return Optional.<Value>of(new ValueImpl(node.getDecimalValue()));
+            return Optional.<Value>some(new ValueImpl(node.getDecimalValue()));
         }
         else if (node.isBoolean()) {
-            return Optional.<Value>of(new ValueImpl(node.getBooleanValue()));
+            return Optional.<Value>some(new ValueImpl(node.getBooleanValue()));
         }
         else if (node.isTextual()) {
-            return Optional.<Value>of(new ValueImpl(node.getTextValue()));
+            return Optional.<Value>some(new ValueImpl(node.getTextValue()));
         }
         else if (node.isNull()) {
-            return Optional.absent();
+            return Optional.none();
         }
         throw new IllegalArgumentException("Illegal value " + node);
     }
 
     public static Optional<Value> createValue(Object value) {
         if (value == null) {
-            return Optional.absent();
+            return Optional.none();
         }
         if (value instanceof Number) {
             value = new BigDecimal(value.toString());
         }
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);
-        return Optional.<Value>of(new ValueImpl(value));
+        return Optional.<Value>some(new ValueImpl(value));
     }
 
     private static boolean checkValue(Object value) {

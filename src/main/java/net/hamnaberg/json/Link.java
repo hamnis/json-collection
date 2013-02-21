@@ -16,15 +16,16 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.ListOps;
+import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 public final class Link extends Extended<Link> {
@@ -38,17 +39,17 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link of(URI href, String rel, Optional<String> prompt) {
-        return of(href, rel, prompt, Optional.<Render>absent());
+        return of(href, rel, prompt, Optional.<Render>none());
     }
 
     public static Link of(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("href", Preconditions.checkNotNull(href, "Href may not be null").toString());
         node.put("rel", Preconditions.checkNotNull(rel, "Relation may not be null"));
-        if (prompt.isPresent()) {
+        if (prompt.isSome()) {
             node.put("prompt", prompt.get());
         }
-        if (render.isPresent()) {
+        if (render.isSome()) {
             node.put("render", render.get().getName());
         }
         return new Link(node);
@@ -63,7 +64,7 @@ public final class Link extends Extended<Link> {
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>absent();
+        return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
     }
 
     public Render getRender() {
@@ -78,10 +79,10 @@ public final class Link extends Extended<Link> {
     }
 
     static List<Link> fromArray(JsonNode node) {
-        ImmutableList.Builder<Link> links = ImmutableList.builder();
+        List<Link> links = ListOps.newArrayList();
         for (JsonNode jsonNode : node) {
             links.add(new Link((ObjectNode) jsonNode));
         }
-        return links.build();
+        return Collections.unmodifiableList(links);
     }
 }

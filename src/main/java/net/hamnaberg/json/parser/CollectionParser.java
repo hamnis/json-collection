@@ -16,12 +16,9 @@
 
 package net.hamnaberg.json.parser;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Collection;
-import net.hamnaberg.json.Error;
+import net.hamnaberg.json.util.Charsets;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
@@ -29,8 +26,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
-import java.net.URI;
-import java.util.*;
 
 /**
  * Parser for a vnd.collection+json document.

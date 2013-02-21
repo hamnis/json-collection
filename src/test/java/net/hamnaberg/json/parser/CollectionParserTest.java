@@ -16,10 +16,10 @@
 
 package net.hamnaberg.json.parser;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.*;
+import net.hamnaberg.json.util.Function;
+import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Predicate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,9 +66,9 @@ public class CollectionParserTest {
         assertEquals(3, collection.getLinks().size());
         assertEquals(1, collection.getItems().size());
         Optional<Item> item = collection.getFirstItem();
-        assertTrue("Item was null", item.isPresent());
+        assertTrue("Item was null", item.isSome());
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
-        assertEquals(Property.value("full-name", Optional.of("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getData().get(0));
+        assertEquals(Property.value("full-name", Optional.some("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getData().get(0));
         assertEquals(2, item.get().getLinks().size());
     }
 
@@ -92,7 +92,7 @@ public class CollectionParserTest {
     public void parseOnlyTemplate() throws IOException {
         Template template = parser.parseTemplate(new InputStreamReader(getClass().getResourceAsStream("/only-template.json")));
         assertNotNull("Template was null", template);
-        ImmutableMap<String,Property> properties = template.getDataAsMap();
+        Map<String,Property> properties = template.getDataAsMap();
         assertThat(properties.keySet(), JUnitMatchers.hasItems("full-name", "email", "blog", "avatar"));
     }
 
@@ -113,15 +113,20 @@ public class CollectionParserTest {
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getItems().size());
         Optional<Item> first = collection.getFirstItem();
-        assertTrue(first.isPresent());
-        Optional<Property> complex = first.get().findProperty(new Predicate<Property>() {
+        assertTrue(first.isSome());
+        Optional<Property> complex = first.flatMap(new Function<Item, Optional<Property>>() {
             @Override
-            public boolean apply(Property input) {
-                return "complex".equals(input.getName());
+            public Optional<Property> apply(Item input) {
+                return input.findProperty(new Predicate<Property>() {
+                    @Override
+                    public boolean apply(Property input) {
+                        return "complex".equals(input.getName());
+                    }
+                });
             }
         });
-        assertTrue(complex.isPresent());
-        assertFalse(complex.get().getValue().isPresent());
+        assertTrue(complex.isSome());
+        assertFalse(complex.get().getValue().isSome());
         Map<String,Value> object = complex.get().getObject();
         assertTrue(object.containsKey("foo"));
         assertEquals(ValueFactory.createValue("bar").get(), object.get("foo"));

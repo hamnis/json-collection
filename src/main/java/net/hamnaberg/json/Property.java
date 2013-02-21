@@ -16,13 +16,14 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.ListOps;
+import net.hamnaberg.json.util.MapOps;
+import net.hamnaberg.json.util.Optional;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.*;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public final class Property extends Extended<Property> {
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>absent();
+        return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
     }
 
     public boolean isArray() {
@@ -54,32 +55,32 @@ public final class Property extends Extended<Property> {
 
     public List<Value> getArray() {
         JsonNode array = delegate.get("array");
-        ImmutableList.Builder<Value> builder = ImmutableList.builder();
+        List<Value> builder = ListOps.newArrayList();
         if (array != null && array.isArray()) {
             for (JsonNode n : array) {
                 Optional<Value> opt = ValueFactory.createValue(n);
-                if (opt.isPresent()) {
+                if (opt.isSome()) {
                     builder.add(opt.get());
                 }
             }
         }
-        return builder.build();
+        return Collections.unmodifiableList(builder);
     }
 
     public Map<String, Value> getObject() {
-        ImmutableMap.Builder<String, Value> builder = ImmutableMap.builder();
+        Map<String, Value> builder = MapOps.newHashMap();
         JsonNode object = delegate.get("object");
         if (object != null && object.isObject()) {
             Iterator<Map.Entry<String,JsonNode>> fields = object.getFields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> next = fields.next();
                 Optional<Value> opt = ValueFactory.createValue(next.getValue());
-                if (opt.isPresent()) {
+                if (opt.isSome()) {
                     builder.put(next.getKey(), opt.get());
                 }
             }
         }
-        return builder.build();
+        return Collections.unmodifiableMap(builder);
     }
 
     @Override
@@ -89,7 +90,7 @@ public final class Property extends Extended<Property> {
 
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
         ObjectNode node = makeObject(name, prompt);
-        if (value.isPresent()) {
+        if (value.isSome()) {
             node.put("value", getJsonValue(value.get()));
         }
         return new Property(node);
@@ -128,7 +129,7 @@ public final class Property extends Extended<Property> {
     private static ObjectNode makeObject(String name, Optional<String> prompt) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("name", name);
-        if (prompt.isPresent()) {
+        if (prompt.isSome()) {
             node.put("prompt", prompt.get());
         }
         return node;
@@ -148,15 +149,15 @@ public final class Property extends Extended<Property> {
     }
 
     public static List<Property> fromData(JsonNode data) {
-        ImmutableList.Builder<Property> builder = ImmutableList.builder();
+        List<Property> builder = ListOps.newArrayList();
         for (JsonNode jsonNode : data) {
             builder.add(new Property((ObjectNode) jsonNode));
         }
-        return builder.build();
+        return Collections.unmodifiableList(builder);
     }
 
     public static Map<String, Object> toMap(List<Property> props) {
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+        Map<String, Object> builder = MapOps.newHashMap();
         for (Property prop : props) {
             if (prop.isObject()) {
                 builder.put(prop.getName(), prop.getObject());
@@ -169,6 +170,6 @@ public final class Property extends Extended<Property> {
             }
         }
 
-        return builder.build();
+        return Collections.unmodifiableMap(builder);
     }
 }

@@ -16,12 +16,11 @@
 
 package net.hamnaberg.json;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
+import net.hamnaberg.json.util.MapOps;
+import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Predicate;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -30,6 +29,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public final class Item extends Extended<Item> implements WithHref {
 
@@ -58,12 +58,12 @@ public final class Item extends Extended<Item> implements WithHref {
         return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
     }
 
-    public ImmutableMap<String, Property> getDataAsMap() {
-        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+    public Map<String, Property> getDataAsMap() {
+        Map<String, Property> builder = MapOps.newHashMap();
         for (Property property : getData()) {
             builder.put(property.getName(), property);
         }
-        return builder.build();
+        return Collections.unmodifiableMap(builder);
     }
 
     public List<Link> getLinks() {
@@ -97,11 +97,11 @@ public final class Item extends Extended<Item> implements WithHref {
     }
 
     static List<Item> fromArray(JsonNode queries) {
-        ImmutableList.Builder<Item> builder = ImmutableList.builder();
+        List<Item> builder = ListOps.newArrayList();
         for (JsonNode jsonNode : queries) {
             builder.add(new Item((ObjectNode) jsonNode));
         }
-        return builder.build();
+        return Collections.unmodifiableList(builder);
     }
 
     public void validate() {

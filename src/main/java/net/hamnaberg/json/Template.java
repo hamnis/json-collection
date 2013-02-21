@@ -17,10 +17,9 @@
 package net.hamnaberg.json;
 
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import net.hamnaberg.json.extension.Extended;
-import org.codehaus.jackson.JsonNode;
+import net.hamnaberg.json.util.Charsets;
+import net.hamnaberg.json.util.MapOps;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -29,6 +28,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public final class Template extends Extended<Template> {
     Template(ObjectNode delegate) {
@@ -56,12 +56,12 @@ public final class Template extends Extended<Template> {
         return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
     }
 
-    public ImmutableMap<String, Property> getDataAsMap() {
-        ImmutableMap.Builder<String, Property> builder = ImmutableMap.builder();
+    public Map<String, Property> getDataAsMap() {
+        Map<String, Property> builder = MapOps.newHashMap();
         for (Property property : getData()) {
             builder.put(property.getName(), property);
         }
-        return builder.build();
+        return Collections.unmodifiableMap(builder);
     }
 
     /*

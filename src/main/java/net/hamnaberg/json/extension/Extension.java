@@ -1,6 +1,6 @@
 package net.hamnaberg.json.extension;
 
-import com.google.common.collect.ImmutableMap;
+import net.hamnaberg.json.util.MapOps;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 
@@ -32,10 +32,10 @@ public abstract class Extension<A> {
 
         @Override
         public Map<String, JsonNode> apply(Tuple2<A, B> value) {
-            ImmutableMap.Builder<String, JsonNode> builder = ImmutableMap.builder();
+            Map<String, JsonNode> builder = MapOps.newHashMap();
             builder.putAll(delegate._1.apply(value._1));
             builder.putAll(delegate._2.apply(value._2));
-            return builder.build();
+            return Collections.unmodifiableMap(builder);
         }
     }
 
@@ -53,11 +53,11 @@ public abstract class Extension<A> {
 
         @Override
         public Map<String, JsonNode> apply(Tuple3<A, B, C> value) {
-            ImmutableMap.Builder<String, JsonNode> builder = ImmutableMap.builder();
+            Map<String, JsonNode> builder = MapOps.newHashMap();
             builder.putAll(delegate._1.apply(value._1));
             builder.putAll(delegate._2.apply(value._2));
             builder.putAll(delegate._3.apply(value._3));
-            return builder.build();
+            return Collections.unmodifiableMap(builder);
         }
     }
 }
