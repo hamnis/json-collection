@@ -10,6 +10,12 @@ public abstract class Optional<A> {
 
     public abstract boolean isSome();
 
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract boolean equals(Object obj);
+
     public final boolean isNone() {
         return !isSome();
     }
@@ -103,6 +109,16 @@ final class None<A> extends Optional<A> {
     @Override
     public A get() {
         throw new UnsupportedOperationException("Cannot get from None");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof None;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 
     @Override
