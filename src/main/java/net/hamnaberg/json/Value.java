@@ -16,6 +16,8 @@
 
 package net.hamnaberg.json;
 
+import net.hamnaberg.json.util.Optional;
+
 public interface Value {
     boolean isBoolean();
     boolean isString();
@@ -27,4 +29,6 @@ public interface Value {
     boolean asBoolean();
 
     Number asNumber();
+
+    Optional<Value> NONE = Optional.none();
 }

@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static net.hamnaberg.json.util.StringUtils.*;
+
 public final class Property extends Extended<Property> {
     Property(ObjectNode delegate) {
         super(delegate);
@@ -88,12 +90,36 @@ public final class Property extends Extended<Property> {
         return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orNull(), getArray(), getObject(), getPrompt());
     }
 
+    public static Property template(String name) {
+        return value(name, Optional.some(capitalize(name)), Value.NONE);
+    }
+
+    public static Property template(String name, Optional<String> prompt) {
+        return value(name, prompt, Value.NONE);
+    }
+
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
         ObjectNode node = makeObject(name, prompt);
         if (value.isSome()) {
             node.put("value", getJsonValue(value.get()));
         }
         return new Property(node);
+    }
+
+    public static Property value(String name, Value value) {
+        return value(name,
+                Optional.fromNullable(value)
+        );
+    }
+    public static Property value(String name, Optional<Value> value) {
+        return value(name,
+                Optional.some(capitalize(name)),
+                value
+        );
+    }
+
+    public static Property array(String name, List<Value> list) {
+        return array(name, Optional.some(capitalize(name)), list);
     }
 
     public static Property array(String name, Optional<String> prompt, List<Value> list) {
@@ -104,6 +130,10 @@ public final class Property extends Extended<Property> {
         }
         node.put("array", array);
         return new Property(node);
+    }
+
+    public static Property object(String name, Map<String, Value> object) {
+        return object(name, Optional.some(capitalize(name)), object);
     }
 
     public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
