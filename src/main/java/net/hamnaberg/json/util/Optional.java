@@ -1,6 +1,8 @@
 package net.hamnaberg.json.util;
 
-public abstract class Optional<A> {
+import java.util.Iterator;
+
+public abstract class Optional<A> implements Iterable<A> {
     public static None<Object> NONE = new None<Object>();
 
     Optional() {
@@ -38,6 +40,12 @@ public abstract class Optional<A> {
         }
     }
 
+    public final void foreach(Function<A, Void> f) {
+        if(isSome()) {
+            f.apply(get());
+        }
+    }
+
     public final Optional<A> filter(Predicate<A> input) {
         if (isSome() && input.apply(get())) {
             return this;
@@ -66,6 +74,34 @@ public abstract class Optional<A> {
 
     public A getOrElse(A orElse) {
         return isSome() ? get() : orElse;
+    }
+
+    public A getOrElse(Supplier<A> orElse) {
+        return isSome() ? get() : orElse.get();
+    }
+
+    public Optional<A> or(Optional<A> orElse) {
+        return isSome() ? this : orElse;
+    }
+
+    @Override
+    public final Iterator<A> iterator() {
+        return new Iterator<A>() {
+            @Override
+            public boolean hasNext() {
+                return isSome();
+            }
+
+            @Override
+            public A next() {
+                return get();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported");
+            }
+        };
     }
 }
 
