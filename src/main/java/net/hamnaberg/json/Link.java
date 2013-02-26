@@ -38,11 +38,15 @@ public final class Link extends Extended<Link> {
         return new Link(value);
     }
 
-    public static Link of(URI href, String rel, Optional<String> prompt) {
-        return of(href, rel, prompt, Optional.<Render>none());
+    public static Link create(URI href, String rel) {
+        return create(href, rel, Optional.<String>none(), Optional.<Render>none());
     }
 
-    public static Link of(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
+    public static Link create(URI href, String rel, Optional<String> prompt) {
+        return create(href, rel, prompt, Optional.<Render>none());
+    }
+
+    public static Link create(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("href", Preconditions.checkNotNull(href, "Href may not be null").toString());
         node.put("rel", Preconditions.checkNotNull(rel, "Relation may not be null"));
