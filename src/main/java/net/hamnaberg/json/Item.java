@@ -27,9 +27,7 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Item extends Extended<Item> implements WithHref {
 
@@ -41,11 +39,18 @@ public final class Item extends Extended<Item> implements WithHref {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("href", href.toString());
         if (!properties.isEmpty()) {
-           ArrayNode data = JsonNodeFactory.instance.arrayNode();
+           ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : properties) {
-                data.add(property.asJson());
+                arr.add(property.asJson());
             }
-            node.put("data", data);
+            node.put("data", arr);
+        }
+        if (!links.isEmpty()) {
+            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+            for (Link link : links) {
+                arr.add(link.asJson());
+            }
+            node.put("links", arr);
         }
         return new Item(node);
     }
@@ -72,6 +77,29 @@ public final class Item extends Extended<Item> implements WithHref {
 
     public Template toTemplate() {
         return Template.create(getData());
+    }
+
+    public Template toTemplate(Template input) {
+        Map<String, Property> dataFromTemplate = input.getDataAsMap();
+        Map<String, Property> ourData = getDataAsMap();
+        Set<String> propsNotInOur = new HashSet<String>();
+        List<Property> templateProps = new ArrayList<Property>();
+        for (String key : dataFromTemplate.keySet()) {
+            Property property = ourData.get(key);
+            if (property != null) {
+                templateProps.add(property);
+            }
+            else {
+                propsNotInOur.add(key);
+            }
+        }
+        if (propsNotInOur.isEmpty()) {
+            return Template.create(templateProps);
+        }
+        else {
+            throw new IllegalArgumentException("There are some properties that cannot be found in the template:\n" + propsNotInOur);
+        }
+
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
