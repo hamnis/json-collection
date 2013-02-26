@@ -23,6 +23,7 @@ import net.hamnaberg.json.util.Optional;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.*;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -167,6 +168,10 @@ public final class Property extends Extended<Property> {
 
     private static JsonNode getJsonValue(Value value) {
         if (value.isNumeric()) {
+            Number number = value.asNumber();
+            if (number instanceof BigDecimal) {
+                return new DecimalNode((BigDecimal) number);
+            }
             return new DoubleNode(value.asNumber().doubleValue());
         }
         else if (value.isString()) {
