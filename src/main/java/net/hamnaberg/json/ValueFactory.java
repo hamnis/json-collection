@@ -46,7 +46,7 @@ public class ValueFactory {
         if (value == null) {
             return Optional.none();
         }
-        if (value instanceof Number) {
+        if (value instanceof Number && !(value instanceof BigDecimal)) {
             value = new BigDecimal(value.toString());
         }
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);

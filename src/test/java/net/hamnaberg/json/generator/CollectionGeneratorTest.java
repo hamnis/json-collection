@@ -28,6 +28,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.junit.Test;
 
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,8 +127,8 @@ public class CollectionGeneratorTest {
         ArrayNode properties = nodeFactory.arrayNode();
         ObjectNode property = nodeFactory.objectNode();
         property.put("name", "one");
-        property.put("value", 1.0);
         property.put("prompt", "One");
+        property.put("value", new BigDecimal(1));
         properties.add(property);
         objectNode.put("data", properties);
         array.add(objectNode);
