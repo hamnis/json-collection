@@ -114,6 +114,15 @@ public final class Item extends Extended<Item> implements WithHref {
         return ListOps.find(getData(), predicate);
     }
 
+    public Optional<Property> propertyByName(final String name) {
+        return findProperty(new Predicate<Property>() {
+            @Override
+            public boolean apply(Property input) {
+                return name.equals(input.getName());
+            }
+        });
+    }
+
     @Override
     protected Item copy(ObjectNode value) {
         return new Item(value);

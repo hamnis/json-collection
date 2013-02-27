@@ -18,8 +18,7 @@ package net.hamnaberg.json;
 
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.Charsets;
-import net.hamnaberg.json.util.MapOps;
+import net.hamnaberg.json.util.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -62,6 +61,19 @@ public final class Template extends Extended<Template> {
             builder.put(property.getName(), property);
         }
         return Collections.unmodifiableMap(builder);
+    }
+
+    public Optional<Property> findProperty(Predicate<Property> predicate) {
+        return ListOps.find(getData(), predicate);
+    }
+
+    public Optional<Property> propertyByName(final String name) {
+        return findProperty(new Predicate<Property>() {
+            @Override
+            public boolean apply(Property input) {
+                return name.equals(input.getName());
+            }
+        });
     }
 
     /*
