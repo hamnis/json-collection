@@ -23,34 +23,54 @@ import org.codehaus.jackson.JsonNode;
 import java.math.BigDecimal;
 
 public class ValueFactory {
-    public static Optional<Value> createValue(JsonNode node) {
+    static Value createValue(JsonNode node) {
         if (node == null) {
-            return Optional.none();
+            throw new IllegalArgumentException("Node may not be null");
         }
         else if (node.isNumber()) {
-            return Optional.<Value>some(new ValueImpl(node.getDecimalValue()));
+            return new ValueImpl(node.getDecimalValue());
         }
         else if (node.isBoolean()) {
-            return Optional.<Value>some(new ValueImpl(node.getBooleanValue()));
+            return new ValueImpl(node.getBooleanValue());
         }
         else if (node.isTextual()) {
-            return Optional.<Value>some(new ValueImpl(node.getTextValue()));
+            return new ValueImpl(node.getTextValue());
         }
         else if (node.isNull()) {
-            return Optional.none();
+            return ValueImpl.NULL;
         }
         throw new IllegalArgumentException("Illegal value " + node);
     }
 
-    public static Optional<Value> createValue(Object value) {
+    public static Value createValue(Object value) {
         if (value == null) {
-            return Optional.none();
+            return ValueImpl.NULL;
         }
         if (value instanceof Number && !(value instanceof BigDecimal)) {
             value = new BigDecimal(value.toString());
         }
         Preconditions.checkArgument(checkValue(value), "Illegal value %s", value);
-        return Optional.<Value>some(new ValueImpl(value));
+        return new ValueImpl(value);
+    }
+
+
+    public static Optional<Value> createOptionalValue(Object value) {
+        Value v = createValue(value);
+        if (v.isNull()) {
+            return Optional.none();
+        }
+        return Optional.some(v);
+    }
+
+    static Optional<Value> createOptionalValue(JsonNode value) {
+        if (value == null) {
+            return Optional.none();
+        }
+        Value v = createValue(value);
+        if (v.isNull()) {
+            return Optional.none();
+        }
+        return Optional.some(v);
     }
 
     private static boolean checkValue(Object value) {

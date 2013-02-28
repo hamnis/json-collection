@@ -41,7 +41,7 @@ public final class Property extends Extended<Property> {
     }
 
     public Optional<Value> getValue() {
-        return ValueFactory.createValue(delegate.get("value"));
+        return ValueFactory.createOptionalValue(delegate.get("value"));
     }
 
     public Optional<String> getPrompt() {
@@ -61,10 +61,7 @@ public final class Property extends Extended<Property> {
         List<Value> builder = ListOps.newArrayList();
         if (array != null && array.isArray()) {
             for (JsonNode n : array) {
-                Optional<Value> opt = ValueFactory.createValue(n);
-                if (opt.isSome()) {
-                    builder.add(opt.get());
-                }
+                builder.add(ValueFactory.createValue(n));
             }
         }
         return Collections.unmodifiableList(builder);
@@ -77,10 +74,8 @@ public final class Property extends Extended<Property> {
             Iterator<Map.Entry<String,JsonNode>> fields = object.getFields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> next = fields.next();
-                Optional<Value> opt = ValueFactory.createValue(next.getValue());
-                if (opt.isSome()) {
-                    builder.put(next.getKey(), opt.get());
-                }
+                Value opt = ValueFactory.createValue(next.getValue());
+                builder.put(next.getKey(), opt);
             }
         }
         return Collections.unmodifiableMap(builder);

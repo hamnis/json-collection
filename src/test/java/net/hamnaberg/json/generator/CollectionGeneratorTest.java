@@ -68,7 +68,7 @@ public class CollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
         JsonNode collection = Collection.builder(COLLECTION_URI).addItems(items).build().asJson();
         assertNotNull(collection);
         assertEquals("1.0", collection.get("version").asText());
@@ -101,7 +101,7 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createValue(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
 
         Collection collection = Collection.builder(COLLECTION_URI).addItems(items).build();
         String generated = collection.toString();

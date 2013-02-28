@@ -19,6 +19,7 @@ package net.hamnaberg.json;
 public class ValueImpl implements Value {
     private final Object value;
     private final Class type;
+    public static final Value NULL = new ValueImpl(null);
 
     ValueImpl(Object value) {
         this.value = value;

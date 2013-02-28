@@ -68,7 +68,7 @@ public class CollectionParserTest {
         Optional<Item> item = collection.getFirstItem();
         assertTrue("Item was null", item.isSome());
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
-        assertEquals(Property.value("full-name", Optional.some("Full Name"), ValueFactory.createValue("J. Doe")), item.get().getData().get(0));
+        assertEquals(Property.value("full-name", Optional.some("Full Name"), ValueFactory.createOptionalValue("J. Doe")), item.get().getData().get(0));
         assertEquals(2, item.get().getLinks().size());
     }
 
@@ -129,6 +129,6 @@ public class CollectionParserTest {
         assertFalse(complex.get().getValue().isSome());
         Map<String,Value> object = complex.get().getObject();
         assertTrue(object.containsKey("foo"));
-        assertEquals(ValueFactory.createValue("bar").get(), object.get("foo"));
+        assertEquals(ValueFactory.createOptionalValue("bar").get(), object.get("foo"));
     }
 }
