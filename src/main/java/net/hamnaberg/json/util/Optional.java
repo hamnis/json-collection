@@ -87,14 +87,17 @@ public abstract class Optional<A> implements Iterable<A> {
     @Override
     public final Iterator<A> iterator() {
         return new Iterator<A>() {
+            private volatile boolean used = false;
             @Override
             public boolean hasNext() {
-                return isSome();
+                return !used && isSome();
             }
 
             @Override
             public A next() {
-                return get();
+                A value = get();
+                used = true;
+                return value;
             }
 
             @Override
