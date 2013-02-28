@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class Collection extends Extended<Collection> {
+public final class Collection extends Extended<Collection> implements Writable {
     Collection(ObjectNode value) {
         super(value);
     }

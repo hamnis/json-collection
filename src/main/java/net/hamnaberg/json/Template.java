@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class Template extends Extended<Template> {
+public final class Template extends Extended<Template> implements Writable {
     Template(ObjectNode delegate) {
         super(delegate);
     }
