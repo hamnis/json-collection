@@ -52,12 +52,10 @@ public class ListOps {
         }
     }
 
-    public static <A, B> List<B> flatMap(final Iterable<Iterable<A>> list, final Function<A, Iterable<B>> f) {
+    public static <A, B> List<B> flatMap(final Iterable<A> list, final Function<A, Iterable<B>> f) {
         ArrayList<B> toList = newArrayList();
-        for (Iterable<A> it : list) {
-            for (A a : it) {
-                addAll(toList, f.apply(a));
-            }
+        for (A a : list) {
+            addAll(toList, f.apply(a));
         }
         return Collections.unmodifiableList(toList);
     }

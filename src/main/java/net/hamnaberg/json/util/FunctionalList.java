@@ -24,11 +24,11 @@ public final class FunctionalList<A> implements List<A> {
         if (isEmpty()) {
             return this;
         }
-        return new FunctionalList<A>(delegate.subList(1, size()));
+        return create(delegate.subList(1, size()));
     }
 
     public <B> FunctionalList<B> map(Function<A, B> f) {
-        return new FunctionalList<B>(ListOps.map(this, f));
+        return create(ListOps.map(this, f));
     }
 
     public <B> FunctionalList<B> flatMap(Function<A, Iterable<B>> f) {
@@ -36,13 +36,7 @@ public final class FunctionalList<A> implements List<A> {
             return empty();
         }
         else {
-            Optional<A> head = headOption();
-            if (head.isSome() && Iterable.class.isAssignableFrom(head.get().getClass())) {
-                @SuppressWarnings("unchecked")
-                Iterable<Iterable<A>> other = (Iterable<Iterable<A>>) this;
-                return new FunctionalList<B>(ListOps.flatMap(other, f));
-            }
-            throw new IllegalStateException("Not a List of Iterables");
+            return create(ListOps.flatMap(this, f));
         }
     }
 
@@ -50,27 +44,33 @@ public final class FunctionalList<A> implements List<A> {
         return new FunctionalList<A>(ListOps.filter(this, pred));
     }
 
-    public static <B> FunctionalList<B> empty() {
-        return new FunctionalList<B>(Collections.<B>emptyList());
-    }
-
-    public static <A> FunctionalList<A> create(List<A> list) {
-        return new FunctionalList<A>(list);
-    }
-
-    public FunctionalList<A> flatten() {
+    @SuppressWarnings("unchecked")
+    public <B> FunctionalList<B> flatten() {
         if (isEmpty()) {
-            return empty();
+            return (FunctionalList<B>) this;
         }
         else {
             Optional<A> head = headOption();
             if (head.isSome() && Iterable.class.isAssignableFrom(head.get().getClass())) {
-                @SuppressWarnings("unchecked")
-                Iterable<Iterable<A>> other = (Iterable<Iterable<A>>) this;
-                return new FunctionalList<A>(ListOps.flatten(other));
+                List<Iterable<B>> actual = (List<Iterable<B>>) this;
+                return create(ListOps.flatten(actual));
             }
-            throw new IllegalStateException("Not a List of Iterables");
+            return (FunctionalList<B>) this;
         }
+    }
+
+    /** factories **/
+
+    public static <B> FunctionalList<B> empty() {
+        return new FunctionalList<B>(Collections.<B>emptyList());
+    }
+
+    public static <A> FunctionalList<A> of(A... args) {
+        return new FunctionalList<A>(Arrays.asList(args));
+    }
+
+    public static <A> FunctionalList<A> create(List<A> list) {
+        return new FunctionalList<A>(list);
     }
 
 
@@ -194,5 +194,10 @@ public final class FunctionalList<A> implements List<A> {
     @Override
     public List<A> subList(int fromIndex, int toIndex) {
         return Collections.unmodifiableList(delegate).subList(fromIndex, toIndex);
+    }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
     }
 }
