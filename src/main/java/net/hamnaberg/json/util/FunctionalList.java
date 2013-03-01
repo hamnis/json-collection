@@ -44,21 +44,6 @@ public final class FunctionalList<A> implements List<A> {
         return new FunctionalList<A>(ListOps.filter(this, pred));
     }
 
-    @SuppressWarnings("unchecked")
-    public <B> FunctionalList<B> flatten() {
-        if (isEmpty()) {
-            return (FunctionalList<B>) this;
-        }
-        else {
-            Optional<A> head = headOption();
-            if (head.isSome() && Iterable.class.isAssignableFrom(head.get().getClass())) {
-                List<Iterable<B>> actual = (List<Iterable<B>>) this;
-                return create(ListOps.flatten(actual));
-            }
-            return (FunctionalList<B>) this;
-        }
-    }
-
     /** factories **/
 
     public static <B> FunctionalList<B> empty() {

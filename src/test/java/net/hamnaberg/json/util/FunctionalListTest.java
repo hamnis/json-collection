@@ -51,14 +51,4 @@ public class FunctionalListTest {
         }));
 
     }
-
-    @Test
-    public void flattenIterables() {
-        FunctionalList<Optional<String>> list = FunctionalList.of(some("1"), some("2"), Optional.<String>none(), some("3"));
-        FunctionalList<String> flattened = FunctionalList.of("1","2", "3");
-        assertEquals(flattened, list.<String>flatten());
-        assertEquals(flattened, flattened.flatten());
-
-    }
-
 }
