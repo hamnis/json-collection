@@ -46,11 +46,15 @@ public final class FunctionalList<A> implements List<A> {
         }
     }
 
+    public FunctionalList<A> filter(Predicate<A> pred) {
+        return new FunctionalList<A>(ListOps.filter(this, pred));
+    }
+
     public static <B> FunctionalList<B> empty() {
         return new FunctionalList<B>(Collections.<B>emptyList());
     }
 
-    public static <A> FunctionalList<A> makeFunctional(List<A> list) {
+    public static <A> FunctionalList<A> create(List<A> list) {
         return new FunctionalList<A>(list);
     }
 

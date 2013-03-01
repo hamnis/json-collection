@@ -1,6 +1,9 @@
 package net.hamnaberg.json.util;
 
-public class Functions {
+public final class Functions {
+    private Functions() {
+    }
+
     public static <A> Function<A, A> identity() {
         return new Function<A, A>() {
             @Override
