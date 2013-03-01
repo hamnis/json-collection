@@ -29,10 +29,45 @@ public class ListOps {
         return new ArrayList<A>();
     }
 
+    public static <A> Iterable<A> iterable(final Iterator<A> it) {
+        return new Iterable<A>() {
+            @Override
+            public Iterator<A> iterator() {
+                return it;
+            }
+        };
+    }
+
     public static <A, B> List<B> map(final List<A> list, final Function<A, B> f) {
         List<B> toList = newArrayList();
         for (A a : list) {
             toList.add(f.apply(a));
+        }
+        return Collections.unmodifiableList(toList);
+    }
+
+    public static <A> void addAll(ArrayList<A> list, Iterable<A> iterable) {
+        for (A a : iterable) {
+            list.add(a);
+        }
+    }
+
+    public static <A, B> List<B> flatMap(final Iterable<Iterable<A>> list, final Function<A, Iterable<B>> f) {
+        ArrayList<B> toList = newArrayList();
+        for (Iterable<A> it : list) {
+            for (A a : it) {
+                addAll(toList, f.apply(a));
+            }
+        }
+        return Collections.unmodifiableList(toList);
+    }
+
+    public static <A> List<A> flatten(final Iterable<Iterable<A>> list) {
+        List<A> toList = newArrayList();
+        for (Iterable<A> it : list) {
+            for (A a : it) {
+                toList.add(a);
+            }
         }
         return Collections.unmodifiableList(toList);
     }
