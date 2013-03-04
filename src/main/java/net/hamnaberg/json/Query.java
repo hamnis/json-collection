@@ -21,6 +21,7 @@ import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
 import net.hamnaberg.json.util.MapOps;
 import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.Preconditions;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -73,8 +74,12 @@ public final class Query extends Extended<Query> {
         return new URITarget(href);
     }
 
+    public String getRel() {
+        return getAsString("rel");
+    }
+
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.fromNullable(delegate.get("prompt").asText()) : Optional.<String>none();
+        return Optional.fromNullable(getAsString("prompt"));
     }
 
     public List<Property> getData() {
@@ -98,6 +103,7 @@ public final class Query extends Extended<Query> {
     }
 
     public void validate() {
-
+        Preconditions.checkArgument(getHref() != null, "Href may not be null");
+        Preconditions.checkArgument(getRel() != null, "Rel may not be null");
     }
 }

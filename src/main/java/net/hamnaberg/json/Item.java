@@ -102,6 +102,15 @@ public final class Item extends Extended<Item> implements WithHref {
 
     }
 
+    public Optional<Link> linkByRel(final String rel) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return rel.equals(input.getRel());
+            }
+        });
+    }
+
     public Optional<Link> findLink(Predicate<Link> predicate) {
         return ListOps.find(getLinks(), predicate);
     }

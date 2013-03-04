@@ -116,6 +116,24 @@ public final class Collection extends Extended<Collection> implements Writable {
         return hasError() ? new Error((ObjectNode) delegate.get("error")) : null;
     }
 
+    public Optional<Link> linkByRel(final String rel) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return rel.equals(input.getRel());
+            }
+        });
+    }
+
+    public Optional<Query> queryByRel(final String rel) {
+        return findQuery(new Predicate<Query>() {
+            @Override
+            public boolean apply(Query input) {
+                return rel.equals(input.getRel());
+            }
+        });
+    }
+
     public Optional<Link> findLink(Predicate<Link> predicate) {
         return ListOps.find(getLinks(), predicate);
     }
