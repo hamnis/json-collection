@@ -6,9 +6,6 @@ public final class FunctionalList<A> implements List<A> {
     private final List<A> delegate;
 
     private FunctionalList(List<A> delegate) {
-        if (delegate instanceof FunctionalList) {
-            throw new UnsupportedOperationException("Wrapping ourselves does not make sense");
-        }
         this.delegate = delegate;
     }
 
@@ -55,6 +52,9 @@ public final class FunctionalList<A> implements List<A> {
     }
 
     public static <A> FunctionalList<A> create(List<A> list) {
+        if (list instanceof FunctionalList) {
+            return (FunctionalList<A>) list;
+        }
         return new FunctionalList<A>(list);
     }
 

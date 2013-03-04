@@ -16,9 +16,11 @@ public class FunctionalListTest {
         assertNotNull(objects);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void wrappingOfSelfFails() {
-        FunctionalList.create(FunctionalList.empty());
+    @Test
+    public void wrappingOfSelfReturnsSame() {
+        FunctionalList<Object> empty = FunctionalList.empty();
+        FunctionalList<Object> list = FunctionalList.create(empty);
+        assertSame(empty, list);
     }
 
     @Test
