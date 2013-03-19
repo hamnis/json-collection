@@ -22,7 +22,7 @@ public final class Functions {
         };
     }
 
-    public static <A> Function<A, String> toString() {
+    public static <A> Function<A, String> asString() {
         return new Function<A, String>() {
             @Override
             public String apply(A input) {
