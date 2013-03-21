@@ -23,7 +23,6 @@ import net.hamnaberg.json.util.Optional;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.*;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -97,7 +96,7 @@ public final class Property extends Extended<Property> {
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
         ObjectNode node = makeObject(name, prompt);
         if (value.isSome()) {
-            node.put("value", getJsonValue(value.get()));
+            node.put("value", value.get().asJson());
         }
         return new Property(node);
     }
@@ -122,7 +121,7 @@ public final class Property extends Extended<Property> {
         ObjectNode node = makeObject(name, prompt);
         ArrayNode array = JsonNodeFactory.instance.arrayNode();
         for (Value value : list) {
-            array.add(getJsonValue(value));
+            array.add(value.asJson());
         }
         node.put("array", array);
         return new Property(node);
@@ -136,7 +135,7 @@ public final class Property extends Extended<Property> {
         ObjectNode node = makeObject(name, prompt);
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         for (Map.Entry<String, Value> entry : object.entrySet()) {
-            objectNode.put(entry.getKey(), getJsonValue(entry.getValue()));
+            objectNode.put(entry.getKey(), entry.getValue().asJson());
         }
         node.put("object", objectNode);
         return new Property(node);
@@ -159,23 +158,6 @@ public final class Property extends Extended<Property> {
             node.put("prompt", prompt.get());
         }
         return node;
-    }
-
-    private static JsonNode getJsonValue(Value value) {
-        if (value.isNumeric()) {
-            Number number = value.asNumber();
-            if (number instanceof BigDecimal) {
-                return new DecimalNode((BigDecimal) number);
-            }
-            return new DoubleNode(value.asNumber().doubleValue());
-        }
-        else if (value.isString()) {
-            return new TextNode(value.asString());
-        }
-        else if (value.isBoolean()) {
-            return BooleanNode.valueOf(value.asBoolean());
-        }
-        return NullNode.getInstance();
     }
 
     public static List<Property> fromData(JsonNode data) {

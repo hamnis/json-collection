@@ -43,6 +43,10 @@ public final class FunctionalMap<K, V> implements Map<K, V> {
         return v != null ? v : defaultValue;
     }
 
+    public Optional<V> getOptional(K key) {
+        return Optional.fromNullable(get(key));
+    }
+
     public static <K,V> FunctionalMap<K, V> empty() {
         return create(Collections.<K, V>emptyMap());
     }
@@ -79,6 +83,7 @@ public final class FunctionalMap<K, V> implements Map<K, V> {
         return delegate.isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public V get(Object key) {
         return getOrElse((K) key, defaultValue);

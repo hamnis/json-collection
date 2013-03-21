@@ -16,6 +16,11 @@
 
 package net.hamnaberg.json;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.*;
+
+import java.math.BigDecimal;
+
 public class ValueImpl implements Value {
     private final Object value;
     private final Class type;
@@ -70,6 +75,11 @@ public class ValueImpl implements Value {
         return (Number) value;
     }
 
+    @Override
+    public JsonNode asJson() {
+        return getJsonValue(this);
+    }
+
 
     private String getTypeName() {
         return (type == null ? "Null" : type.getSimpleName());
@@ -98,5 +108,22 @@ public class ValueImpl implements Value {
     @Override
     public String toString() {
         return String.format("Value is %s of type %s", value, getTypeName());
+    }
+
+    private static JsonNode getJsonValue(Value value) {
+        if (value.isNumeric()) {
+            Number number = value.asNumber();
+            if (number instanceof BigDecimal) {
+                return new DecimalNode((BigDecimal) number);
+            }
+            return new DoubleNode(value.asNumber().doubleValue());
+        }
+        else if (value.isString()) {
+            return new TextNode(value.asString());
+        }
+        else if (value.isBoolean()) {
+            return BooleanNode.valueOf(value.asBoolean());
+        }
+        return NullNode.getInstance();
     }
 }

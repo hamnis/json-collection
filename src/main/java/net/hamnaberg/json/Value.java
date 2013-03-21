@@ -17,6 +17,7 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.util.Optional;
+import org.codehaus.jackson.JsonNode;
 
 public interface Value {
     boolean isBoolean();
@@ -29,6 +30,8 @@ public interface Value {
     boolean asBoolean();
 
     Number asNumber();
+
+    JsonNode asJson();
 
     Optional<Value> NONE = Optional.none();
 }
