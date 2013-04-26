@@ -112,7 +112,7 @@ final class Some<A> extends Optional<A> {
 
     private final A value;
 
-    public Some(A value) {
+    Some(A value) {
         this.value = value;
     }
 
@@ -142,6 +142,11 @@ final class Some<A> extends Optional<A> {
     public int hashCode() {
         return value != null ? value.hashCode() : 0;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Some{%s}", value);
+    }
 }
 
 final class None<A> extends Optional<A> {
@@ -163,5 +168,10 @@ final class None<A> extends Optional<A> {
     @Override
     public boolean isSome() {
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "None";
     }
 }
