@@ -22,7 +22,7 @@ public abstract class Extended<T> {
         return copy(copied);
     }
 
-    private ObjectNode copyDelegate() {
+    protected ObjectNode copyDelegate() {
         ObjectNode copied = JsonNodeFactory.instance.objectNode();
         copied.putAll(delegate);
         return copied;
