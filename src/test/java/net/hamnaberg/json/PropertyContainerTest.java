@@ -14,6 +14,5 @@ public class PropertyContainerTest {
         Template replaced = template.replace(replacedFooProperty);
         assertNotSame(template, replaced);
         assertEquals(replacedFooProperty, replaced.getDataAsMap().get("foo"));
-        assertEquals(replacedFooProperty, template.getDataAsMap().get("foo"));
     }
 }
