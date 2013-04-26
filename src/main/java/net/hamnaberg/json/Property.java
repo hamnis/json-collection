@@ -35,6 +35,14 @@ public final class Property extends Extended<Property> {
         super(delegate);
     }
 
+    static ArrayNode toArrayNode(List<Property> data) {
+        ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+        for (Property property : data) {
+            arr.add(property.asJson());
+        }
+        return arr;
+    }
+
     public String getName() {
         return delegate.get("name").asText();
     }

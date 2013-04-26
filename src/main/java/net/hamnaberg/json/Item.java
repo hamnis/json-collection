@@ -16,9 +16,7 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.MapOps;
 import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.Predicate;
 import org.codehaus.jackson.JsonNode;
@@ -29,7 +27,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.net.URI;
 import java.util.*;
 
-public final class Item extends Extended<Item> implements WithHref {
+public final class Item extends PropertyContainer<Item> implements WithHref {
 
     Item(ObjectNode node) {
         super(node);
@@ -57,18 +55,6 @@ public final class Item extends Extended<Item> implements WithHref {
 
     public URI getHref() {
         return URI.create(delegate.get("href").asText());
-    }
-
-    public List<Property> getData() {
-        return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
-    }
-
-    public Map<String, Property> getDataAsMap() {
-        Map<String, Property> builder = MapOps.newHashMap();
-        for (Property property : getData()) {
-            builder.put(property.getName(), property);
-        }
-        return Collections.unmodifiableMap(builder);
     }
 
     public List<Link> getLinks() {
@@ -117,19 +103,6 @@ public final class Item extends Extended<Item> implements WithHref {
 
     public List<Link> findLinks(Predicate<Link> predicate) {
         return ListOps.filter(getLinks(), predicate);
-    }
-
-    public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return ListOps.find(getData(), predicate);
-    }
-
-    public Optional<Property> propertyByName(final String name) {
-        return findProperty(new Predicate<Property>() {
-            @Override
-            public boolean apply(Property input) {
-                return name.equals(input.getName());
-            }
-        });
     }
 
     @Override

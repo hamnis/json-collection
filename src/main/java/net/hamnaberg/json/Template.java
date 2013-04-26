@@ -17,19 +17,15 @@
 package net.hamnaberg.json;
 
 
-import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.*;
+import net.hamnaberg.json.util.Charsets;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-public final class Template extends Extended<Template> implements Writable {
+public final class Template extends PropertyContainer<Template> implements Writable {
     Template(ObjectNode delegate) {
         super(delegate);
     }
@@ -42,38 +38,9 @@ public final class Template extends Extended<Template> implements Writable {
     public static Template create(List<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         if (!data.isEmpty()) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Property property : data) {
-                arr.add(property.asJson());
-            }
-            obj.put("data", arr);
+            obj.put("data", Property.toArrayNode(data));
         }
         return new Template(obj);
-    }
-
-    public List<Property> getData() {
-        return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
-    }
-
-    public Map<String, Property> getDataAsMap() {
-        Map<String, Property> builder = MapOps.newHashMap();
-        for (Property property : getData()) {
-            builder.put(property.getName(), property);
-        }
-        return Collections.unmodifiableMap(builder);
-    }
-
-    public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return ListOps.find(getData(), predicate);
-    }
-
-    public Optional<Property> propertyByName(final String name) {
-        return findProperty(new Predicate<Property>() {
-            @Override
-            public boolean apply(Property input) {
-                return name.equals(input.getName());
-            }
-        });
     }
 
     /*
