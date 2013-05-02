@@ -7,10 +7,7 @@ import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.Predicate;
 import org.codehaus.jackson.node.ObjectNode;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class PropertyContainer<A> extends Extended<A> {
     protected PropertyContainer(ObjectNode delegate) {
@@ -71,8 +68,29 @@ public abstract class PropertyContainer<A> extends Extended<A> {
      * @return a new copy of the template.
      */
     public A add(Property property) {
+        return addAll(Arrays.asList(property));
+    }
+
+    /**
+     * Adds properties to the data.
+     * @param toAdd the properties to add
+     * @return a new copy of the template.
+     */
+    public A addAll(List<Property> toAdd) {
         List<Property> props = new ArrayList<Property>(getData());
-        props.add(property);
+        props.addAll(toAdd);
+        ObjectNode copied = copyDelegate();
+        copied.put("data", Property.toArrayNode(props));
+        return copy(copied);
+    }
+
+    /**
+     * Replaces all properties.
+     *
+     * @param props the property to add
+     * @return a new copy of the template.
+     */
+    public A set(List<Property> props) {
         ObjectNode copied = copyDelegate();
         copied.put("data", Property.toArrayNode(props));
         return copy(copied);
