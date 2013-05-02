@@ -25,6 +25,7 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,6 +66,10 @@ public final class Link extends Extended<Link> {
 
     public String getRel() {
         return delegate.get("rel").asText();
+    }
+
+    public List<String> getParsedRel() {
+        return Arrays.asList(getRel().split("\\s"));
     }
 
     public Optional<String> getPrompt() {

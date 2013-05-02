@@ -26,6 +26,7 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -86,6 +87,10 @@ public final class Query extends PropertyContainer<Query> {
 
     public String getRel() {
         return getAsString("rel");
+    }
+
+    public List<String> getParsedRel() {
+        return Arrays.asList(getRel().split("\\s"));
     }
 
     public Optional<String> getPrompt() {
