@@ -127,6 +127,11 @@ public final class Item extends PropertyContainer<Item> implements WithHref {
         return Collection.builder(getHref()).addItem(this).build();
     }
 
+    public Builder toBuilder() {
+        Builder builder = new Builder(getHref());
+        return builder.addProperties(getData()).addLinks(getLinks());
+    }
+
     static List<Item> fromArray(JsonNode queries) {
         List<Item> builder = ListOps.newArrayList();
         for (JsonNode jsonNode : queries) {
@@ -137,5 +142,42 @@ public final class Item extends PropertyContainer<Item> implements WithHref {
 
     public void validate() {
 
+    }
+
+    /**
+     * Mutable not thread-safe builder.
+     */
+    public static class Builder {
+        private final URI href;
+        private List<Property> props = new ArrayList<Property>();
+        private List<Link> links = new ArrayList<Link>();
+
+        public Builder(URI href) {
+            this.href = href;
+        }
+
+        public Builder addProperty(Property prop) {
+            props.add(prop);
+            return this;
+        }
+
+        public Builder addProperties(Iterable<Property> properties) {
+            ListOps.addAll(this.props, properties);
+            return this;
+        }
+
+        public Builder addLink(Link link) {
+            links.add(link);
+            return this;
+        }
+
+        public Builder addLinks(Iterable<Link> links) {
+            ListOps.addAll(this.links, links);
+            return this;
+        }
+
+        public Item build() {
+            return Item.create(href, props, links);
+        }
     }
 }

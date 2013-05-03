@@ -24,6 +24,7 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 public final class Template extends PropertyContainer<Template> implements Writable {
@@ -34,6 +35,10 @@ public final class Template extends PropertyContainer<Template> implements Writa
     @Override
     protected Template copy(ObjectNode value) {
         return new Template(value);
+    }
+
+    public static Template create() {
+        return create(Collections.<Property>emptyList());
     }
 
     public static Template create(List<Property> data) {

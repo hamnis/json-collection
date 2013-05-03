@@ -46,7 +46,7 @@ public class ListOps {
         return Collections.unmodifiableList(toList);
     }
 
-    public static <A> void addAll(ArrayList<A> list, Iterable<A> iterable) {
+    public static <A> void addAll(List<A> list, Iterable<A> iterable) {
         for (A a : iterable) {
             list.add(a);
         }
