@@ -23,6 +23,7 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
+import java.net.URI;
 import java.util.List;
 
 public final class Template extends PropertyContainer<Template> implements Writable {
@@ -41,6 +42,11 @@ public final class Template extends PropertyContainer<Template> implements Writa
             obj.put("data", Property.toArrayNode(data));
         }
         return new Template(obj);
+    }
+
+
+    public Collection toCollection(URI href) {
+        return Collection.builder(href).withTemplate(this).build();
     }
 
     /*

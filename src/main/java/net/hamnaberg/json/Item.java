@@ -115,6 +115,10 @@ public final class Item extends PropertyContainer<Item> implements WithHref {
         return String.format("Item with href %s, properties %s and links %s", getHref(), getData(), getLinks());
     }
 
+    public Collection toCollection() {
+        return Collection.builder(getHref()).addItem(this).build();
+    }
+
     static List<Item> fromArray(JsonNode queries) {
         List<Item> builder = ListOps.newArrayList();
         for (JsonNode jsonNode : queries) {

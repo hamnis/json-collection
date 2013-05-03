@@ -20,6 +20,8 @@ import net.hamnaberg.json.extension.Extended;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
+import java.net.URI;
+
 public class Error extends Extended<Error> {
     public static final Error EMPTY = Error.create(null, null, null);
 
@@ -46,6 +48,10 @@ public class Error extends Extended<Error> {
 
     @Override
     public void validate() {
+    }
+
+    public Collection toCollection(URI href) {
+        return Collection.builder(href).withError(this).build();
     }
 
     public static Error create(String title, String code, String message) {
