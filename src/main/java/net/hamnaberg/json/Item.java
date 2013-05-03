@@ -53,6 +53,14 @@ public final class Item extends PropertyContainer<Item> implements WithHref {
         return new Item(node);
     }
 
+    public static Item create(URI href, List<Property> properties) {
+        return create(href, properties, Collections.<Link>emptyList());
+    }
+
+    public static Item create(URI href) {
+        return create(href, Collections.<Property>emptyList(), Collections.<Link>emptyList());
+    }
+
     public URI getHref() {
         return URI.create(delegate.get("href").asText());
     }
