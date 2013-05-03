@@ -17,9 +17,7 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.MapOps;
-import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.json.util.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.*;
 
@@ -109,11 +107,26 @@ public final class Property extends Extended<Property> {
         return new Property(node);
     }
 
+    public static Property value(String name, Optional<String> prompt, Value value) {
+        return value(name, prompt, Optional.some(value));
+    }
+
+    public static Property value(String name, Optional<String> prompt, Object value) {
+        return value(name, prompt, ValueFactory.createOptionalValue(value));
+    }
+
     public static Property value(String name, Value value) {
         return value(name,
                 Optional.fromNullable(value)
         );
     }
+
+    public static Property value(String name, Object value) {
+        return value(name,
+                ValueFactory.createOptionalValue(value)
+        );
+    }
+
     public static Property value(String name, Optional<Value> value) {
         return value(name,
                 Optional.some(capitalize(name)),
@@ -135,6 +148,19 @@ public final class Property extends Extended<Property> {
         return new Property(node);
     }
 
+    public static Property arrayObject(String name, List<Object> list) {
+        return arrayObject(name, Optional.some(capitalize(name)), list);
+    }
+
+    public static Property arrayObject(String name, Optional<String> prompt, List<Object> list) {
+        return array(name, prompt, ListOps.flatMap(list, new Function<Object, Iterable<Value>>() {
+            @Override
+            public Iterable<Value> apply(Object input) {
+                return ValueFactory.createOptionalValue(input);
+            }
+        }));
+    }
+
     public static Property object(String name, Map<String, Value> object) {
         return object(name, Optional.some(capitalize(name)), object);
     }
@@ -147,6 +173,19 @@ public final class Property extends Extended<Property> {
         }
         node.put("object", objectNode);
         return new Property(node);
+    }
+
+    public static Property objectMap(String name, Map<String, Object> object) {
+        return objectMap(name, Optional.some(capitalize(name)), object);
+    }
+
+    public static Property objectMap(String name, Optional<String> prompt, Map<String, Object> object) {
+        return object(name, prompt, MapOps.mapValues(object, new Function<Object, Value>() {
+            @Override
+            public Value apply(Object input) {
+                return ValueFactory.createValue(input);
+            }
+        }));
     }
 
     @Override
