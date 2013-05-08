@@ -84,23 +84,21 @@ public final class Property extends Extended<Property> {
     }
 
     public Property withValue(Value value) {
-        ObjectNode dlg = copyDelegate();
-        dlg.remove(Arrays.asList("array", "object"));
-        dlg.put("value", value.asJson());
-        return copy(dlg);
+        return withDataValue("value", value.asJson(), "array", "object");
     }
 
     public Property withArray(List<Value> values) {
-        ObjectNode dlg = copyDelegate();
-        dlg.remove(Arrays.asList("value", "object"));
-        dlg.put("array", toArray(values));
-        return copy(dlg);
+        return withDataValue("array", toArray(values), "value", "object");
     }
 
     public Property withObject(Map<String, Value> values) {
+        return withDataValue("object", toObject(values), "value", "array");
+    }
+
+    private Property withDataValue(String name, JsonNode node, String... toRemove) {
         ObjectNode dlg = copyDelegate();
-        dlg.remove(Arrays.asList("value", "array"));
-        dlg.put("object", toObject(values));
+        dlg.put(name, node);
+        dlg.remove(Arrays.asList(toRemove));
         return copy(dlg);
     }
 
