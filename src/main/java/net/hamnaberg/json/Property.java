@@ -21,10 +21,7 @@ import net.hamnaberg.json.util.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.*;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.hamnaberg.json.util.StringUtils.*;
 
@@ -86,6 +83,27 @@ public final class Property extends Extended<Property> {
         return Collections.unmodifiableMap(builder);
     }
 
+    public Property withValue(Value value) {
+        ObjectNode dlg = copyDelegate();
+        dlg.remove(Arrays.asList("array", "object"));
+        dlg.put("value", value.asJson());
+        return copy(dlg);
+    }
+
+    public Property withArray(List<Value> values) {
+        ObjectNode dlg = copyDelegate();
+        dlg.remove(Arrays.asList("value", "object"));
+        dlg.put("array", toArray(values));
+        return copy(dlg);
+    }
+
+    public Property withObject(Map<String, Value> values) {
+        ObjectNode dlg = copyDelegate();
+        dlg.remove(Arrays.asList("value", "array"));
+        dlg.put("object", toObject(values));
+        return copy(dlg);
+    }
+
     @Override
     public String toString() {
         return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orNull(), getArray(), getObject(), getPrompt());
@@ -140,12 +158,16 @@ public final class Property extends Extended<Property> {
 
     public static Property array(String name, Optional<String> prompt, List<Value> list) {
         ObjectNode node = makeObject(name, prompt);
+        node.put("array", toArray(list));
+        return new Property(node);
+    }
+
+    private static ArrayNode toArray(List<Value> list) {
         ArrayNode array = JsonNodeFactory.instance.arrayNode();
         for (Value value : list) {
             array.add(value.asJson());
         }
-        node.put("array", array);
-        return new Property(node);
+        return array;
     }
 
     public static Property arrayObject(String name, List<Object> list) {
@@ -167,12 +189,16 @@ public final class Property extends Extended<Property> {
 
     public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
         ObjectNode node = makeObject(name, prompt);
+        node.put("object", toObject(object));
+        return new Property(node);
+    }
+
+    private static ObjectNode toObject(Map<String, Value> object) {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         for (Map.Entry<String, Value> entry : object.entrySet()) {
             objectNode.put(entry.getKey(), entry.getValue().asJson());
         }
-        node.put("object", objectNode);
-        return new Property(node);
+        return objectNode;
     }
 
     public static Property objectMap(String name, Map<String, Object> object) {
