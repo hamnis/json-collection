@@ -80,6 +80,15 @@ public class ListOps {
         return Collections.unmodifiableList(copy);
     }
 
+    public static <A> boolean forall(final Iterable<A> iterable, Predicate<A> pred) {
+        for (A a : iterable) {
+            if (!pred.apply(a)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static <A> Optional<A> find(final Collection<A> coll, final Predicate<A> f) {
         for (A a : coll) {
             if (f.apply(a)) {
