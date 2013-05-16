@@ -41,6 +41,10 @@ public final class FunctionalList<A> implements List<A> {
         return new FunctionalList<A>(ListOps.filter(this, pred));
     }
 
+    public Optional<A> find(Predicate<A> pred) {
+        return ListOps.find(this, pred);
+    }
+
     /** factories **/
 
     public static <B> FunctionalList<B> empty() {
