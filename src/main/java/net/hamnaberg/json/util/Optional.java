@@ -59,6 +59,10 @@ public abstract class Optional<A> implements Iterable<A> {
         return ListOps.forall(this, input);
     }
 
+    public boolean exists(Predicate<A> input) {
+        return ListOps.exists(this, input);
+    }
+
     public static <A> Optional<A> fromNullable(A value) {
         return value != null ? some(value) : Optional.<A>none();
     }

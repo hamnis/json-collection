@@ -89,6 +89,15 @@ public class ListOps {
         return true;
     }
 
+    public static <A> boolean exists(final Iterable<A> iterable, Predicate<A> pred) {
+        for (A a : iterable) {
+            if (pred.apply(a)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static <A> Optional<A> find(final Collection<A> coll, final Predicate<A> f) {
         for (A a : coll) {
             if (f.apply(a)) {

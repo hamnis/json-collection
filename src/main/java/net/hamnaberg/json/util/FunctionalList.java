@@ -45,6 +45,10 @@ public final class FunctionalList<A> implements List<A> {
         return ListOps.forall(this, pred);
     }
 
+    public boolean exists(Predicate<A> input) {
+        return ListOps.exists(this, input);
+    }
+
     public Optional<A> find(Predicate<A> pred) {
         return ListOps.find(this, pred);
     }
