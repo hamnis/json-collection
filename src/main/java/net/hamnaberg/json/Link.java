@@ -48,6 +48,10 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
+        return create(href, rel, prompt, Optional.<String>none(), render);
+    }
+
+    public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name, Optional<Render> render) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("href", Preconditions.checkNotNull(href, "Href may not be null").toString());
         node.put("rel", Preconditions.checkNotNull(rel, "Relation may not be null"));
@@ -56,6 +60,9 @@ public final class Link extends Extended<Link> {
         }
         if (render.isSome()) {
             node.put("render", render.get().getName());
+        }
+        if (name.isSome()) {
+            node.put("name", name.get());
         }
         return new Link(node);
     }
@@ -76,6 +83,10 @@ public final class Link extends Extended<Link> {
         return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
     }
 
+    public Optional<String> getName() {
+        return delegate.has("name") ? Optional.some(delegate.get("name").asText()) : Optional.<String>none();
+    }
+
     public Render getRender() {
         return delegate.has("render") ? Render.valueOf(delegate.get("render").asText()) : Render.Link;
     }
@@ -83,8 +94,6 @@ public final class Link extends Extended<Link> {
     public void validate() {
         Preconditions.checkArgument(getHref() != null, "Href was null");
         Preconditions.checkArgument(getRel() != null, "Rel was null");
-        Preconditions.checkArgument(getPrompt() != null, "Prompt was null");
-        Preconditions.checkArgument(getRender() != null, "Render was null");
     }
 
     static List<Link> fromArray(JsonNode node) {
