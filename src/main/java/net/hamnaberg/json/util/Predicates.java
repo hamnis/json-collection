@@ -38,11 +38,22 @@ public final class Predicates {
         return (Predicate<A>) TRUE;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <A> Predicate<A> alwaysFalse() {
+        return (Predicate<A>) FALSE;
+    }
+
 
     public static Predicate<Object> TRUE = new Predicate<Object>() {
         @Override
         public boolean apply(Object input) {
             return true;
+        }
+    };
+    public static Predicate<Object> FALSE = new Predicate<Object>() {
+        @Override
+        public boolean apply(Object input) {
+            return false;
         }
     };
 
