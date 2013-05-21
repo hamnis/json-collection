@@ -62,4 +62,23 @@ public final class MapOps {
         }
         return Collections.unmodifiableMap(map);
     }
+
+    public static <K,V> Map<K, V> filterKeys(Map<K, V> input, final Predicate<K> predicate) {
+        return filter(input, new Predicate<Map.Entry<K, V>>() {
+            @Override
+            public boolean apply(Map.Entry<K, V> input) {
+                return predicate.apply(input.getKey());
+            }
+        });
+    }
+
+    public static <K,V> Map<K, V> filter(Map<K, V> input, Predicate<Map.Entry<K, V>> predicate) {
+        Map<K, V> map = MapOps.newHashMap();
+        for (Map.Entry<K, V> entry : input.entrySet()) {
+            if (predicate.apply(entry)) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return Collections.unmodifiableMap(map);
+    }
 }

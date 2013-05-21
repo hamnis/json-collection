@@ -56,6 +56,14 @@ public final class FunctionalMap<K, V> implements Map<K, V> {
         return create(MapOps.mapValues(delegate, f));
     }
 
+    public FunctionalMap<K, V> filterKeys(Predicate<K> p) {
+        return create(MapOps.filterKeys(delegate, p));
+    }
+
+    public FunctionalMap<K, V> filter(Predicate<Map.Entry<K, V>> p) {
+        return create(MapOps.filter(delegate, p));
+    }
+
     private static <K, V> boolean isDefaultOverride(V defaultValue, FunctionalMap<K, V> fMap) {
         return (fMap.defaultValue == null && defaultValue != null) || (fMap.defaultValue != null && defaultValue == null);
     }
