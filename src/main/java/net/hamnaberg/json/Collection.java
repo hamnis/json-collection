@@ -83,6 +83,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return Version.ONE;
     }
 
+    //TODO: Use Optional<URI> since this is a SHOULD?
     public URI getHref() {
         return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
     }
@@ -103,17 +104,16 @@ public final class Collection extends Extended<Collection> implements Writable {
         return delegate.has("template");
     }
 
-    public Template getTemplate() {
-        return hasTemplate() ? new Template((ObjectNode) delegate.get("template")) : null;
+    public Optional<Template> getTemplate() {
+        return hasTemplate() ? Optional.some(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>none();
     }
 
     public boolean hasError() {
         return delegate.has("error");
     }
 
-
-    public Error getError() {
-        return hasError() ? new Error((ObjectNode) delegate.get("error")) : null;
+    public Optional<Error> getError() {
+        return hasError() ? Optional.some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
     }
 
     public Optional<Link> linkByRel(final String rel) {
@@ -167,7 +167,12 @@ public final class Collection extends Extended<Collection> implements Writable {
         builder.addItems(getItems());
         builder.addLinks(getLinks());
         builder.addQueries(getQueries());
-        builder.withTemplate(getTemplate());
+        for (Template t : getTemplate()) {
+            builder.withTemplate(t);
+        }
+        for (Error e : getError()) {
+            builder.withError(e);
+        }
         return builder;
     }
 
@@ -202,12 +207,11 @@ public final class Collection extends Extended<Collection> implements Writable {
         for (Query query : getQueries()) {
             query.validate();
         }
-
-        if (hasTemplate()){
-            getTemplate().validate();
+        for (Template t : getTemplate()) {
+            t.validate();
         }
-        if (hasError()) {
-            getError().validate();
+        for (Error e : getError()) {
+            e.validate();
         }
     }
 

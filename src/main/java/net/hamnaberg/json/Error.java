@@ -17,13 +17,17 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.Optional;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 import java.net.URI;
 
+import static net.hamnaberg.json.util.Optional.fromNullable;
+import static net.hamnaberg.json.util.Optional.some;
+
 public class Error extends Extended<Error> {
-    public static final Error EMPTY = Error.create(null, null, null);
+    public static final Error EMPTY = Error.create(Optional.<String>none(), Optional.<String>none(), Optional.<String>none());
 
     Error(ObjectNode delegate) {
         super(delegate);
@@ -55,10 +59,20 @@ public class Error extends Extended<Error> {
     }
 
     public static Error create(String title, String code, String message) {
+        return create(fromNullable(title), fromNullable(code), fromNullable(message));
+    }
+
+    public static Error create(Optional<String> title, Optional<String> code, Optional<String> message) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        obj.put("title", title);
-        obj.put("code", code);
-        obj.put("message", message);
+        for (String t : title) {
+            obj.put("title", t);
+        }
+        for (String t : code) {
+            obj.put("code", t);
+        }
+        for (String t : message) {
+            obj.put("message", t);
+        }
         return new Error(obj);
     }
 

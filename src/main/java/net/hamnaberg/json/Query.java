@@ -37,10 +37,14 @@ public final class Query extends PropertyContainer<Query> {
     }
 
     public static Query create(URI target, String rel, Optional<String> prompt, List<Property> data) {
-        return create(new URITarget(target), rel, prompt, data);
+        return create(new URITarget(target), rel, prompt, Optional.<String>none(), data);
     }
 
     public static Query create(Target target, String rel, Optional<String> prompt, List<Property> data) {
+        return create(target, rel, prompt, Optional.<String>none(), data);
+    }
+
+    public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, List<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         obj.put("href", target.toString());
         if (target.isURITemplate()) {
@@ -49,6 +53,9 @@ public final class Query extends PropertyContainer<Query> {
         obj.put("rel", rel);
         if (prompt.isSome()) {
             obj.put("prompt", prompt.get());
+        }
+        if (name.isSome()) {
+            obj.put("name", name.get());
         }
         if (!data.isEmpty()) {
             ArrayNode arr = JsonNodeFactory.instance.arrayNode();
@@ -61,7 +68,7 @@ public final class Query extends PropertyContainer<Query> {
     }
 
     public static Query create(Link link) {
-        return create(new URITarget(link.getHref()), link.getRel(), link.getPrompt(), Collections.<Property>emptyList());
+        return create(new URITarget(link.getHref()), link.getRel(), link.getPrompt(), link.getName(), Collections.<Property>emptyList());
     }
 
     @Override
