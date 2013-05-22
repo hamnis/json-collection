@@ -238,21 +238,4 @@ public final class Property extends Extended<Property> {
         }
         return Collections.unmodifiableList(builder);
     }
-
-    public static Map<String, Object> toMap(List<Property> props) {
-        Map<String, Object> builder = MapOps.newHashMap();
-        for (Property prop : props) {
-            if (prop.isObject()) {
-                builder.put(prop.getName(), prop.getObject());
-            }
-            else if (prop.isArray()) {
-                builder.put(prop.getName(), prop.getArray());
-            }
-            else {
-                builder.put(prop.getName(), prop.getValue());
-            }
-        }
-
-        return Collections.unmodifiableMap(builder);
-    }
 }
