@@ -23,6 +23,7 @@ import net.hamnaberg.funclite.Preconditions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.navigation.Navigator;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -119,6 +120,10 @@ public final class Link extends Extended<Link> {
         ObjectNode node = copyDelegate();
         node.put("render", render.getName());
         return copy(node);
+    }
+
+    public Optional<Collection> follow(Navigator navigator) {
+        return navigator.follow(getHref());
     }
 
     @Override

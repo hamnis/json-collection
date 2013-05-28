@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.navigation.Navigator;
 
 import java.io.*;
 import java.net.URI;
@@ -122,6 +123,14 @@ public final class Collection extends Extended<Collection> implements Writable {
 
     public Optional<Error> getError() {
         return hasError() ? some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
+    }
+
+    public Optional<Collection> addItem(Navigator navigator, Template template) {
+        Optional<URI> href = getHref();
+        if (href.isSome()) {
+            throw new UnsupportedOperationException("Collection has no href, unable to POST to remote.");
+        }
+        return navigator.create(href.get(), template);
     }
 
     public Optional<Link> linkByName(final String name) {
