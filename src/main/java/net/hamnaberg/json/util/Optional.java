@@ -36,7 +36,7 @@ public abstract class Optional<A> implements Iterable<A> {
             return none();
         }
         else {
-            return f.apply(get());
+            return Preconditions.checkNotNull(f.apply(get()));
         }
     }
 
