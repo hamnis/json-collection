@@ -80,11 +80,11 @@ public final class Link extends Extended<Link> {
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
+        return Optional.fromNullable(getAsString("prompt"));
     }
 
     public Optional<String> getName() {
-        return delegate.has("name") ? Optional.some(delegate.get("name").asText()) : Optional.<String>none();
+        return Optional.fromNullable(getAsString("name"));
     }
 
     public Render getRender() {
