@@ -105,6 +105,24 @@ public final class Item extends PropertyContainer<Item> implements WithHref {
         });
     }
 
+    public Optional<Link> linkByName(final String name) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return Optional.some(name).equals(input.getName());
+            }
+        });
+    }
+
+    public Optional<Link> linkByRelAndName(final String rel, final String name) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
+            }
+        });
+    }
+
     public Optional<Link> findLink(Predicate<Link> predicate) {
         return ListOps.find(getLinks(), predicate);
     }

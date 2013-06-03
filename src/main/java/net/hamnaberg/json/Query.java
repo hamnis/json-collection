@@ -96,6 +96,10 @@ public final class Query extends PropertyContainer<Query> {
         return getAsString("rel");
     }
 
+    public Optional<String> getName() {
+        return Optional.fromNullable(getAsString("name"));
+    }
+
     public List<String> getParsedRel() {
         return Arrays.asList(getRel().split("\\s"));
     }

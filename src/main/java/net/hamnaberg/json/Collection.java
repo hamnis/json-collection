@@ -116,6 +116,24 @@ public final class Collection extends Extended<Collection> implements Writable {
         return hasError() ? Optional.some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
     }
 
+    public Optional<Link> linkByName(final String name) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return Optional.some(name).equals(input.getName());
+            }
+        });
+    }
+
+    public Optional<Link> linkByRelAndName(final String rel, final String name) {
+        return findLink(new Predicate<Link>() {
+            @Override
+            public boolean apply(Link input) {
+                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
+            }
+        });
+    }
+
     public Optional<Link> linkByRel(final String rel) {
         return findLink(new Predicate<Link>() {
             @Override
@@ -130,6 +148,24 @@ public final class Collection extends Extended<Collection> implements Writable {
             @Override
             public boolean apply(Query input) {
                 return rel.equals(input.getRel());
+            }
+        });
+    }
+
+    public Optional<Query> queryByName(final String name) {
+        return findQuery(new Predicate<Query>() {
+            @Override
+            public boolean apply(Query input) {
+                return Optional.some(name).equals(input.getName());
+            }
+        });
+    }
+
+    public Optional<Query> queryByRelAndName(final String rel, final String name) {
+        return findQuery(new Predicate<Query>() {
+            @Override
+            public boolean apply(Query input) {
+                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
             }
         });
     }
