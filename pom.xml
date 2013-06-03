@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.hamnaberg.rest</groupId>
   <artifactId>json-collection</artifactId>
-  <version>2.2.1</version>
+  <version>2.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>JSON Collection</name>
   <url>https://github.com/hamnis/json-collection</url>
