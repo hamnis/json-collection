@@ -120,7 +120,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return Optional.some(name).equals(input.getName());
+                return Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -129,7 +129,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
+                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -156,7 +156,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findQuery(new Predicate<Query>() {
             @Override
             public boolean apply(Query input) {
-                return Optional.some(name).equals(input.getName());
+                return Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -165,7 +165,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findQuery(new Predicate<Query>() {
             @Override
             public boolean apply(Query input) {
-                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
+                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
