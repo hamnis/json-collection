@@ -40,15 +40,15 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link create(URI href, String rel) {
-        return create(href, rel, Optional.<String>none(), Optional.<Render>none());
+        return create(href, rel, Optional.<String>none(), Optional.<String>none(), Optional.<Render>none());
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt) {
-        return create(href, rel, prompt, Optional.<Render>none());
+        return create(href, rel, prompt, Optional.<String>none(), Optional.<Render>none());
     }
 
-    public static Link create(URI href, String rel, Optional<String> prompt, Optional<Render> render) {
-        return create(href, rel, prompt, Optional.<String>none(), render);
+    public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name) {
+        return create(href, rel, prompt, name, Optional.<Render>none());
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name, Optional<Render> render) {
@@ -71,8 +71,20 @@ public final class Link extends Extended<Link> {
         return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
     }
 
+    public Link withHref(URI href) {
+        ObjectNode node = copyDelegate();
+        node.put("href", href.toString());
+        return copy(node);
+    }
+
     public String getRel() {
         return delegate.get("rel").asText();
+    }
+
+    public Link withRel(String rel) {
+        ObjectNode node = copyDelegate();
+        node.put("rel", rel);
+        return copy(node);
     }
 
     public List<String> getParsedRel() {
@@ -83,12 +95,30 @@ public final class Link extends Extended<Link> {
         return Optional.fromNullable(getAsString("prompt"));
     }
 
+    public Link withPrompt(String prompt) {
+        ObjectNode node = copyDelegate();
+        node.put("prompt", prompt);
+        return copy(node);
+    }
+
     public Optional<String> getName() {
         return Optional.fromNullable(getAsString("name"));
     }
 
+    public Link withName(String name) {
+        ObjectNode node = copyDelegate();
+        node.put("name", name);
+        return copy(node);
+    }
+
     public Render getRender() {
         return delegate.has("render") ? Render.valueOf(delegate.get("render").asText()) : Render.Link;
+    }
+
+    public Link withRender(Render render) {
+        ObjectNode node = copyDelegate();
+        node.put("render", render.getName());
+        return copy(node);
     }
 
     public void validate() {
