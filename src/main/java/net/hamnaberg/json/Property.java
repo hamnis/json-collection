@@ -30,7 +30,7 @@ public final class Property extends Extended<Property> {
         super(delegate);
     }
 
-    static ArrayNode toArrayNode(List<Property> data) {
+    static ArrayNode toArrayNode(Iterable<Property> data) {
         ArrayNode arr = JsonNodeFactory.instance.arrayNode();
         for (Property property : data) {
             arr.add(property.asJson());

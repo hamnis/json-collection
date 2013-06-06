@@ -17,6 +17,8 @@
 package net.hamnaberg.json.util;
 
 
+import net.hamnaberg.json.Property;
+
 import java.util.*;
 
 public class ListOps {
@@ -27,6 +29,12 @@ public class ListOps {
 
     public static <A> ArrayList<A> newArrayList() {
         return new ArrayList<A>();
+    }
+
+    public static <A> ArrayList<A> newArrayList(Iterable<A> iterable) {
+        ArrayList<A> list = newArrayList();
+        addAll(list, iterable);
+        return list;
     }
 
     public static <A> Iterable<A> iterable(final Iterator<A> it) {
@@ -109,5 +117,9 @@ public class ListOps {
 
     public static <A> Optional<A> headOption(final Collection<A> coll) {
         return coll.isEmpty() ? Optional.<A>none() : Optional.fromNullable(coll.iterator().next());
+    }
+
+    public static <A>  boolean isEmpty(Iterable<A> iterable) {
+        return !iterable.iterator().hasNext();
     }
 }

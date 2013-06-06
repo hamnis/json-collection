@@ -68,7 +68,7 @@ public class CollectionParserTest {
         Optional<Item> item = collection.getFirstItem();
         assertTrue("Item was null", item.isSome());
         assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref());
-        assertEquals(Property.value("full-name", Optional.some("Full Name"), ValueFactory.createOptionalValue("J. Doe")), item.get().getData().get(0));
+        assertEquals(Property.value("full-name", Optional.some("Full Name"), ValueFactory.createOptionalValue("J. Doe")), item.get().getData().get(0).get());
         assertEquals(2, item.get().getLinks().size());
     }
 
@@ -103,7 +103,7 @@ public class CollectionParserTest {
         assertEquals(URI.create("http://example.org/friends/"), collection.getHref());
         assertEquals(1, collection.getQueries().size());
         Query query = collection.getQueries().get(0);
-        assertEquals("search", query.getData().get(0).getName());
+        assertEquals("search", query.getData().get(0).get().getName());
     }
 
     @Test

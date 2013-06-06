@@ -30,7 +30,7 @@ public class URITarget implements Target {
         return href;
     }
 
-    public URI expand(List<Property> properties) {
+    public URI expand(Iterable<Property> properties) {
         final String query = href.getQuery();
         StringBuilder fromProperties = buildQuery(properties);
         if (StringUtils.isNotBlank(query)) {
@@ -55,7 +55,7 @@ public class URITarget implements Target {
         }
     }
 
-    private StringBuilder buildQuery(List<Property> properties) {
+    private StringBuilder buildQuery(Iterable<Property> properties) {
         StringBuilder sb = new StringBuilder();
         for (Property property : properties) {
             if (property.isObject()) {

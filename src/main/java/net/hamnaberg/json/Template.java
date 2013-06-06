@@ -18,6 +18,7 @@ package net.hamnaberg.json;
 
 
 import net.hamnaberg.json.util.Charsets;
+import net.hamnaberg.json.util.ListOps;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -27,7 +28,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-public final class Template extends PropertyContainer<Template> implements Writable {
+public final class Template extends DataContainer<Template> implements Writable {
     Template(ObjectNode delegate) {
         super(delegate);
     }
@@ -41,9 +42,9 @@ public final class Template extends PropertyContainer<Template> implements Writa
         return create(Collections.<Property>emptyList());
     }
 
-    public static Template create(List<Property> data) {
+    public static Template create(Iterable<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        if (!data.isEmpty()) {
+        if (!ListOps.isEmpty(data)) {
             obj.put("data", Property.toArrayNode(data));
         }
         return new Template(obj);

@@ -22,7 +22,7 @@ public class URITemplateTarget implements Target {
         return URI.create(href.expand());
     }
 
-    public URI expand(List<Property> properties) {
+    public URI expand(Iterable<Property> properties) {
         Map<String, Object> map = MapOps.newHashMap();
         for (Property property : properties) {
             if (property.isArray()) {

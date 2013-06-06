@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public final class Query extends PropertyContainer<Query> {
+public final class Query extends DataContainer<Query> {
 
     Query(ObjectNode delegate) {
         super(delegate);
@@ -84,7 +84,7 @@ public final class Query extends PropertyContainer<Query> {
         return new URITarget(href);
     }
 
-    public URI expand(List<Property> properties) {
+    public URI expand(Iterable<Property> properties) {
         return getHref().expand(properties);
     }
 

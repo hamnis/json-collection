@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
-public class PropertyContainerTest {
+public class DataContainerTest {
     @Test
     public void replaceFooPropertiesInTemplate() throws Exception {
         Template template = Template.create(Arrays.asList(Property.template("foo"), Property.template("bar")));

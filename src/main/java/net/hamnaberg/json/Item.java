@@ -27,7 +27,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.net.URI;
 import java.util.*;
 
-public final class Item extends PropertyContainer<Item> implements WithHref {
+public final class Item extends DataContainer<Item> implements WithHref {
 
     Item(ObjectNode node) {
         super(node);

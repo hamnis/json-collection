@@ -9,34 +9,25 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import java.util.*;
 
-public abstract class PropertyContainer<A> extends Extended<A> {
-    protected PropertyContainer(ObjectNode delegate) {
+public abstract class DataContainer<A extends DataContainer> extends Extended<A> {
+    protected DataContainer(ObjectNode delegate) {
         super(delegate);
     }
 
-    public List<Property> getData() {
-        return delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList();
+    public Data getData() {
+        return new Data(delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList());
     }
 
     public Map<String, Property> getDataAsMap() {
-        Map<String, Property> builder = MapOps.newHashMap();
-        for (Property property : getData()) {
-            builder.put(property.getName(), property);
-        }
-        return Collections.unmodifiableMap(builder);
+       return getData().getDataAsMap();
     }
 
     public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return ListOps.find(getData(), predicate);
+        return getData().findProperty(predicate);
     }
 
     public Optional<Property> propertyByName(final String name) {
-        return findProperty(new Predicate<Property>() {
-            @Override
-            public boolean apply(Property input) {
-                return name.equals(input.getName());
-            }
-        });
+        return getData().propertyByName(name);
     }
 
     /**
@@ -46,17 +37,11 @@ public abstract class PropertyContainer<A> extends Extended<A> {
      */
     @SuppressWarnings("unchecked")
     public A replace(Property property) {
-        List<Property> data = getData();
-        List<Property> props = new ArrayList<Property>(data);
-        for (int i = 0; i < data.size(); i++) {
-            if (data.get(i).getName().equals(property.getName())) {
-                props.set(i, property);
-                break;
-            }
-        }
-        if (!props.isEmpty()) {
+        Data data = getData();
+        Data replaced = data.replace(property);
+        if (!replaced.isEmpty()) {
             ObjectNode copied = copyDelegate();
-            copied.put("data", Property.toArrayNode(props));
+            copied.put("data", Property.toArrayNode(replaced));
             return copy(copied);
         }
         return (A)this;
@@ -76,11 +61,16 @@ public abstract class PropertyContainer<A> extends Extended<A> {
      * @param toAdd the properties to add
      * @return a new copy of the template.
      */
-    public A addAll(List<Property> toAdd) {
-        List<Property> props = new ArrayList<Property>(getData());
-        props.addAll(toAdd);
+    @SuppressWarnings("unchecked")
+    public A addAll(Iterable<Property> toAdd) {
+        Data data = getData();
+        Data modified = data.addAll(toAdd);
+        if (data == modified) {
+            return (A)this;
+        }
+
         ObjectNode copied = copyDelegate();
-        copied.put("data", Property.toArrayNode(props));
+        copied.put("data", Property.toArrayNode(data));
         return copy(copied);
     }
 
@@ -90,7 +80,11 @@ public abstract class PropertyContainer<A> extends Extended<A> {
      * @param props the property to add
      * @return a new copy of the template.
      */
-    public A set(List<Property> props) {
+    @SuppressWarnings("unchecked")
+    public A set(Iterable<Property> props) {
+        if (ListOps.isEmpty(props)) {
+            return (A) this;
+        }
         ObjectNode copied = copyDelegate();
         copied.put("data", Property.toArrayNode(props));
         return copy(copied);
