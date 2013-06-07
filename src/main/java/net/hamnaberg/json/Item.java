@@ -109,7 +109,7 @@ public final class Item extends DataContainer<Item> implements WithHref {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return Optional.some(name).equals(input.getName());
+                return Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -118,7 +118,7 @@ public final class Item extends DataContainer<Item> implements WithHref {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return rel.equals(input.getRel()) && Optional.some(name).equals(input.getName());
+                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
             }
         });
     }
