@@ -98,9 +98,12 @@ public class CollectionParser {
         return parseTemplate(new StringReader(input));
     }
 
-    private Collection parse(JsonNode node) throws IOException {
+    private Collection parse(JsonNode node) throws ParseException {
         JsonNode collectionNode = node.get("collection");
-        return parseCollection(collectionNode);
+        if (collectionNode != null) {
+            return parseCollection(collectionNode);
+        }
+        throw new ParseException("Missing \"collection\" property");
     }
 
     private Collection parseCollection(JsonNode collectionNode) {
@@ -109,12 +112,12 @@ public class CollectionParser {
         return c;
     }
 
-    private Template parseTemplate(JsonNode collectionNode) {
+    private Template parseTemplate(JsonNode collectionNode) throws ParseException {
         JsonNode node = collectionNode.get("template");
         if (node != null) {
             return objectFactory.createTemplate((ObjectNode) node);
         }
-        return null;
+        throw new ParseException("Missing \"template\" property");
     }
 
     private static InternalObjectFactory objectFactory = new InternalObjectFactory() {
