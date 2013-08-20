@@ -36,6 +36,7 @@ public class JsonObjectToData implements ToData<ObjectNode> {
                     Map.Entry<String, JsonNode> entry = objFields.next();
                     map.put(entry.getKey(), ValueFactory.createValue(entry.getValue()));
                 }
+                properties.add(Property.object(key, map));
             }
             else {
                 Value v = ValueFactory.createValue(value);
