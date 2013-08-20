@@ -23,7 +23,7 @@ import org.codehaus.jackson.JsonNode;
 import java.math.BigDecimal;
 
 public class ValueFactory {
-    static Value createValue(JsonNode node) {
+    public static Value createValue(JsonNode node) {
         if (node == null) {
             throw new IllegalArgumentException("Node may not be null");
         }
@@ -67,7 +67,7 @@ public class ValueFactory {
         return Optional.some(v);
     }
 
-    static Optional<Value> createOptionalValue(JsonNode value) {
+    public static Optional<Value> createOptionalValue(JsonNode value) {
         if (value == null) {
             return Optional.none();
         }
