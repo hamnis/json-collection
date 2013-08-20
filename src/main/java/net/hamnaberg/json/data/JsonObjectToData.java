@@ -42,6 +42,6 @@ public class JsonObjectToData implements ToData<ObjectNode> {
                 properties.add(Property.value(key, v));
             }
         }
-        return null;
+        return new Data(properties);
     }
 }
