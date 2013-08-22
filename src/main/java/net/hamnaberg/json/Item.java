@@ -36,6 +36,10 @@ public final class Item extends DataContainer<Item> {
         super(node);
     }
 
+    public static Item create(URI href, Iterable<Property> properties) {
+        return create(fromNullable(href), properties, Collections.<Link>emptyList());
+    }
+
     public static Item create(URI href, Iterable<Property> properties, List<Link> links) {
         return create(fromNullable(href), properties, links);
     }
@@ -151,7 +155,7 @@ public final class Item extends DataContainer<Item> {
 
     @Override
     public String toString() {
-        return String.format("Item with href %s, properties %s and links %s", getHref(), getData(), getLinks());
+        return String.format("Item with href %s, properties %s and links %s", getHref().orNull(), getData(), getLinks());
     }
 
     public Collection toCollection() {

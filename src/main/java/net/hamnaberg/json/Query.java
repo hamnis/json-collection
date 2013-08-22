@@ -100,6 +100,11 @@ public final class Query extends DataContainer<Query> {
         return Optional.fromNullable(getAsString("name"));
     }
 
+    @Override
+    public String toString() {
+        return String.format("Query with href %s, properties %s", getHref(), getData());
+    }
+
     public List<String> getParsedRel() {
         return Arrays.asList(getRel().split("\\s"));
     }

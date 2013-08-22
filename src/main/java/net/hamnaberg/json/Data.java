@@ -112,6 +112,11 @@ public class Data implements Iterable<Property> {
     }
 
     @Override
+    public String toString() {
+        return properties.toString();
+    }
+
+    @Override
     public Iterator<Property> iterator() {
         return properties.iterator();
     }
