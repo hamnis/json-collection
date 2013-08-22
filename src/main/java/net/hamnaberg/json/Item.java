@@ -27,15 +27,24 @@ import org.codehaus.jackson.node.ObjectNode;
 import java.net.URI;
 import java.util.*;
 
-public final class Item extends DataContainer<Item> implements WithHref {
+import static net.hamnaberg.json.util.Optional.fromNullable;
+import static net.hamnaberg.json.util.Optional.some;
+
+public final class Item extends DataContainer<Item> {
 
     Item(ObjectNode node) {
         super(node);
     }
 
     public static Item create(URI href, Iterable<Property> properties, List<Link> links) {
+        return create(fromNullable(href), properties, links);
+    }
+
+    public static Item create(Optional<URI> href, Iterable<Property> properties, List<Link> links) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("href", href.toString());
+        for (URI uri : href) {
+            node.put("href", uri.toString());
+        }
         if (!ListOps.isEmpty(properties)) {
            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : properties) {
@@ -53,16 +62,20 @@ public final class Item extends DataContainer<Item> implements WithHref {
         return new Item(node);
     }
 
-    public static Item create(URI href, Iterable<Property> properties) {
+    public static Item create(Optional<URI> href, Iterable<Property> properties) {
         return create(href, properties, Collections.<Link>emptyList());
     }
 
-    public static Item create(URI href) {
+    public static Item create(Optional<URI> href) {
         return create(href, Collections.<Property>emptyList(), Collections.<Link>emptyList());
     }
 
-    public URI getHref() {
-        return URI.create(delegate.get("href").asText());
+    public static Item create() {
+        return create(Optional.<URI>none());
+    }
+
+    public Optional<URI> getHref() {
+        return delegate.has("href") ? some(URI.create(delegate.get("href").asText())) : Optional.<URI>none();
     }
 
     public List<Link> getLinks() {
@@ -142,7 +155,7 @@ public final class Item extends DataContainer<Item> implements WithHref {
     }
 
     public Collection toCollection() {
-        return Collection.builder(getHref()).addItem(this).build();
+        return new Collection.Builder(getHref()).addItem(this).build();
     }
 
     public Builder toBuilder() {
@@ -166,11 +179,15 @@ public final class Item extends DataContainer<Item> implements WithHref {
      * Mutable not thread-safe builder.
      */
     public static class Builder {
-        private final URI href;
+        private Optional<URI> href;
         private List<Property> props = new ArrayList<Property>();
         private List<Link> links = new ArrayList<Link>();
 
         public Builder(URI href) {
+            this(fromNullable(href));
+        }
+
+        public Builder(Optional<URI> href) {
             this.href = href;
         }
 

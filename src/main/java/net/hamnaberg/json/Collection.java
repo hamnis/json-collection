@@ -47,7 +47,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Collection create(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
-        return create(some(href), links, items, queries, some(template), some(error));
+        return create(some(href), links, items, queries, fromNullable(template), fromNullable(error));
     }
 
     public static Collection create(Optional<URI> href, List<Link> links, List<Item> items, List<Query> queries, Optional<Template> template, Optional<Error> error) {
@@ -272,8 +272,12 @@ public final class Collection extends Extended<Collection> implements Writable {
         private final List<Item> itemBuilder = new ArrayList<Item>();
         private final List<Link> linkBuilder = new ArrayList<Link>();
         private final List<Query> queryBuilder = new ArrayList<Query>();
-        private Optional<Template> template;
-        private Optional<Error> error;
+        private Optional<Template> template = Optional.none();
+        private Optional<Error> error = Optional.none();
+
+        public Builder(URI href) {
+            this(fromNullable(href));
+        }
 
         public Builder(Optional<URI> href) {
             this.href = href;
