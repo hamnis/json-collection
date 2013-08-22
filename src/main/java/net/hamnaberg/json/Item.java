@@ -33,10 +33,10 @@ public final class Item extends DataContainer<Item> implements WithHref {
         super(node);
     }
 
-    public static Item create(URI href, List<Property> properties, List<Link> links) {
+    public static Item create(URI href, Iterable<Property> properties, List<Link> links) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("href", href.toString());
-        if (!properties.isEmpty()) {
+        if (!ListOps.isEmpty(properties)) {
            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : properties) {
                 arr.add(property.asJson());
@@ -53,7 +53,7 @@ public final class Item extends DataContainer<Item> implements WithHref {
         return new Item(node);
     }
 
-    public static Item create(URI href, List<Property> properties) {
+    public static Item create(URI href, Iterable<Property> properties) {
         return create(href, properties, Collections.<Link>emptyList());
     }
 

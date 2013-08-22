@@ -36,15 +36,15 @@ public final class Query extends DataContainer<Query> {
         super(delegate);
     }
 
-    public static Query create(URI target, String rel, Optional<String> prompt, List<Property> data) {
+    public static Query create(URI target, String rel, Optional<String> prompt, Iterable<Property> data) {
         return create(new URITarget(target), rel, prompt, Optional.<String>none(), data);
     }
 
-    public static Query create(Target target, String rel, Optional<String> prompt, List<Property> data) {
+    public static Query create(Target target, String rel, Optional<String> prompt, Iterable<Property> data) {
         return create(target, rel, prompt, Optional.<String>none(), data);
     }
 
-    public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, List<Property> data) {
+    public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, Iterable<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         obj.put("href", target.toString());
         if (target.isURITemplate()) {
@@ -57,7 +57,7 @@ public final class Query extends DataContainer<Query> {
         if (name.isSome()) {
             obj.put("name", name.get());
         }
-        if (!data.isEmpty()) {
+        if (!ListOps.isEmpty(data)) {
             ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : data) {
                 arr.add(property.asJson());

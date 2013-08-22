@@ -102,8 +102,15 @@ public final class Property extends Extended<Property> {
         return copy(dlg);
     }
 
+    public boolean isEmpty() {
+        return getValue().isNone() && getArray().isEmpty() && getObject().isEmpty();
+    }
+
     @Override
     public String toString() {
+        if (isEmpty()) {
+            return "Property template with name " + getName();
+        }
         return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orNull(), getArray(), getObject(), getPrompt());
     }
 
