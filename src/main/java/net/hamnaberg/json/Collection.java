@@ -264,7 +264,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Builder builder() {
-        return new Builder(Optional.<URI>none());
+        return new Builder();
     }
 
     public static class Builder {

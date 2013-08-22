@@ -175,6 +175,14 @@ public final class Item extends DataContainer<Item> {
 
     }
 
+    public static Builder builder(URI href) {
+        return new Builder(fromNullable(href));
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Mutable not thread-safe builder.
      */
