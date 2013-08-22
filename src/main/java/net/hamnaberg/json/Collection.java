@@ -275,6 +275,10 @@ public final class Collection extends Extended<Collection> implements Writable {
         private Optional<Template> template = Optional.none();
         private Optional<Error> error = Optional.none();
 
+        public Builder() {
+            this(Optional.<URI>none());
+        }
+
         public Builder(URI href) {
             this(fromNullable(href));
         }

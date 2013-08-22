@@ -183,12 +183,21 @@ public final class Item extends DataContainer<Item> {
         private List<Property> props = new ArrayList<Property>();
         private List<Link> links = new ArrayList<Link>();
 
+        public Builder() {
+            this(Optional.<URI>none());
+        }
+
         public Builder(URI href) {
             this(fromNullable(href));
         }
 
         public Builder(Optional<URI> href) {
             this.href = href;
+        }
+
+        public Builder withHref(URI href) {
+            this.href = fromNullable(href);
+            return this;
         }
 
         public Builder addProperty(Property prop) {
