@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static net.hamnaberg.json.util.Optional.fromNullable;
+import static net.hamnaberg.json.util.Optional.some;
+
 public final class Collection extends Extended<Collection> implements Writable {
     Collection(ObjectNode value) {
         super(value);
@@ -44,9 +47,15 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Collection create(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
+        return create(some(href), links, items, queries, some(template), some(error));
+    }
+
+    public static Collection create(Optional<URI> href, List<Link> links, List<Item> items, List<Query> queries, Optional<Template> template, Optional<Error> error) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         obj.put("version", Version.ONE.getIdentifier());
-        obj.put("href", href.toString());
+        if (href.isSome()) {
+            obj.put("href", href.get().toString());
+        }
         if (!links.isEmpty()) {
             ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Link link : links) {
@@ -68,11 +77,11 @@ public final class Collection extends Extended<Collection> implements Writable {
             }
             obj.put("queries", arr);
         }
-        if (template != null) {
-            obj.put("template", template.asJson());
+        if (template.isSome()) {
+            obj.put("template", template.get().asJson());
         }
-        if (error != null) {
-            obj.put("error", error.asJson());
+        if (error.isSome()) {
+            obj.put("error", error.get().asJson());
         }
         Collection coll = new Collection(obj);
         coll.validate();
@@ -83,9 +92,8 @@ public final class Collection extends Extended<Collection> implements Writable {
         return Version.ONE;
     }
 
-    //TODO: Use Optional<URI> since this is a SHOULD?
-    public URI getHref() {
-        return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
+    public Optional<URI> getHref() {
+        return delegate.has("href") ? some(URI.create(delegate.get("href").asText())) : Optional.<URI>none();
     }
 
     public List<Link> getLinks() {
@@ -105,7 +113,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<Template> getTemplate() {
-        return hasTemplate() ? Optional.some(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>none();
+        return hasTemplate() ? some(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>none();
     }
 
     public boolean hasError() {
@@ -113,14 +121,14 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<Error> getError() {
-        return hasError() ? Optional.some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
+        return hasError() ? some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
     }
 
     public Optional<Link> linkByName(final String name) {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return Optional.fromNullable(name).equals(input.getName());
+                return fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -129,7 +137,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findLink(new Predicate<Link>() {
             @Override
             public boolean apply(Link input) {
-                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
+                return rel.equals(input.getRel()) && fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -156,7 +164,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findQuery(new Predicate<Query>() {
             @Override
             public boolean apply(Query input) {
-                return Optional.fromNullable(name).equals(input.getName());
+                return fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -165,7 +173,7 @@ public final class Collection extends Extended<Collection> implements Writable {
         return findQuery(new Predicate<Query>() {
             @Override
             public boolean apply(Query input) {
-                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
+                return rel.equals(input.getRel()) && fromNullable(name).equals(input.getName());
             }
         });
     }
@@ -199,7 +207,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Builder toBuilder() {
-        Builder builder = builder(getHref());
+        Builder builder = new Builder(getHref());
         builder.addItems(getItems());
         builder.addLinks(getLinks());
         builder.addQueries(getQueries());
@@ -252,26 +260,30 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Builder builder(URI href) {
-        return new Builder(href);
+        return new Builder(fromNullable(href));
+    }
+
+    public static Builder builder() {
+        return new Builder(Optional.<URI>none());
     }
 
     public static class Builder {
-        private final URI href;
+        private Optional<URI> href;
         private final List<Item> itemBuilder = new ArrayList<Item>();
         private final List<Link> linkBuilder = new ArrayList<Link>();
         private final List<Query> queryBuilder = new ArrayList<Query>();
-        private Template template;
-        private Error error;
+        private Optional<Template> template;
+        private Optional<Error> error;
 
-        public Builder(URI href) {
+        public Builder(Optional<URI> href) {
             this.href = href;
         }
-        
-        public Builder withTemplate(Template template) {
-            this.template = template;
+
+        public Builder withHref(URI href) {
+            this.href = fromNullable(href);
             return this;
         }
-
+        
         public Builder addItem(Item item) {
             itemBuilder.add(item);
             return this;
@@ -303,7 +315,12 @@ public final class Collection extends Extended<Collection> implements Writable {
         }
 
         public Builder withError(Error error) {
-            this.error = error;
+            this.error = fromNullable(error);
+            return this;
+        }
+
+        public Builder withTemplate(Template template) {
+            this.template = fromNullable(template);
             return this;
         }
 
