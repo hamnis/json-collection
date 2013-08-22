@@ -17,8 +17,6 @@
 package net.hamnaberg.json.util;
 
 
-import net.hamnaberg.json.Property;
-
 import java.util.*;
 
 public class ListOps {
