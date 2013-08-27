@@ -121,6 +121,11 @@ public final class Link extends Extended<Link> {
         return copy(node);
     }
 
+    @Override
+    public String toString() {
+        return String.format("Link{href=%s,rel=%s,prompt=%s,name=%s,render=%s}", getHref(), getRel(), getPrompt(), getName(), getRender());
+    }
+
     public void validate() {
         Preconditions.checkArgument(getHref() != null, "Href was null");
         Preconditions.checkArgument(getRel() != null, "Rel was null");
