@@ -47,7 +47,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Collection create(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
-        return create(some(href), links, items, queries, fromNullable(template), fromNullable(error));
+        return create(fromNullable(href), links, items, queries, fromNullable(template), fromNullable(error));
     }
 
     public static Collection create(Optional<URI> href, List<Link> links, List<Item> items, List<Query> queries, Optional<Template> template, Optional<Error> error) {
