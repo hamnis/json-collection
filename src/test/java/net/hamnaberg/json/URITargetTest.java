@@ -3,12 +3,37 @@ package net.hamnaberg.json;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class URITargetTest {
+
+    @Test
+    public void expandShouldKeepEncodingFromBaseURI() {
+        URI href = URI.create("https://api.test.com/myapi/customer;issue_id=1337;location=LUND%2FB;enterprise=false");
+        URITarget target = new URITarget(href);
+
+        URI expanded = target.expand(new ArrayList<Property>());
+
+        assertEquals("https://api.test.com/myapi/customer;issue_id=1337;location=LUND%2FB;enterprise=false", expanded.toString());
+    }
+
+    @Test
+    public void expandShouldNotDoubleEncodeProperties() {
+        URI href = URI.create("https://api.test.com/myapi");
+        URITarget target = new URITarget(href);
+
+        List<Property> properties = Arrays.asList(
+                Property.value("first_name", ValueFactory.createValue("Humle/Dumle"))
+        );
+
+        URI expanded = target.expand(properties);
+
+        assertEquals("https://api.test.com/myapi?first_name=Humle%2FDumle", expanded.toString());
+    }
 
     @Test
     public void construction() {

@@ -1,5 +1,6 @@
 package net.hamnaberg.json;
 
+import net.hamnaberg.json.util.ListOps;
 import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.StringUtils;
 
@@ -31,6 +32,9 @@ public class URITarget implements Target {
     }
 
     public URI expand(Iterable<Property> properties) {
+        if (ListOps.isEmpty(properties)) {
+            return href;
+        }
         final String query = href.getQuery();
         StringBuilder fromProperties = buildQuery(properties);
         if (StringUtils.isNotBlank(query)) {
@@ -40,19 +44,13 @@ public class URITarget implements Target {
             }
             fromProperties.insert(0, actual);
         }
-        try {
-            return new URI(
-                    href.getScheme(),
-                    href.getUserInfo(),
-                    href.getHost(),
-                    href.getPort(),
-                    href.getPath(),
-                    fromProperties.length() == 0 ? null : fromProperties.toString(),
-                    href.getFragment()
-            );
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
+        String str = href.toString();
+        int queryPart = str.indexOf('?');
+        if (queryPart > 0) {
+            str = str.substring(0, queryPart);
         }
+        String createdQuery = fromProperties.length() == 0 ? "" : ( "?" + fromProperties.toString());
+        return URI.create(str + createdQuery);
     }
 
     private StringBuilder buildQuery(Iterable<Property> properties) {
