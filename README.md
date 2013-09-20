@@ -11,7 +11,7 @@ Releases are pushed to oss.sonatype.org which again syncs with maven central.
     <dependency>
         <groupId>net.hamnaberg.rest</groupId>
         <artifactId>json-collection</artifactId>
-        <version>2.2</version>
+        <version>2.5</version>
     </dependency>
 
 # Example using Apache HTTPClient
