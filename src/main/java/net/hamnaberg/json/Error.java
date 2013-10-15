@@ -18,8 +18,8 @@ package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Optional;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
 

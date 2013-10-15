@@ -21,10 +21,10 @@ import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.ListOps;
 import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.Predicate;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 import java.net.URI;

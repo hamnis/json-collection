@@ -4,7 +4,6 @@ import com.damnhandy.uri.template.UriTemplate;
 import net.hamnaberg.json.util.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 public class URITemplateTarget implements Target {
@@ -25,10 +24,10 @@ public class URITemplateTarget implements Target {
     public URI expand(Iterable<Property> properties) {
         Map<String, Object> map = MapOps.newHashMap();
         for (Property property : properties) {
-            if (property.isArray()) {
+            if (property.hasArray()) {
                 map.put(property.getName(), FunctionalList.create(property.getArray()).filter(NOT_NULL_PRED).map(AS_STRING));
             }
-            else if (property.isObject()) {
+            else if (property.hasObject()) {
                 map.put(property.getName(), FunctionalMap.create(property.getObject()).filter(VALUE_NOT_NULL_PRED).mapValues(AS_STRING));
             }
             else {

@@ -7,10 +7,10 @@ import net.hamnaberg.json.util.Function;
 import net.hamnaberg.json.util.FunctionalList;
 import net.hamnaberg.json.util.FunctionalMap;
 import net.hamnaberg.json.util.Optional;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 
@@ -21,13 +21,13 @@ public final class JsonObjectFromData implements FromData<ObjectNode> {
         JsonNodeFactory factory = JsonNodeFactory.instance;
         ObjectNode node = factory.objectNode();
         for (Property property : data) {
-            if (property.isArray()) {
+            if (property.hasArray()) {
                 List<Value> arrValue = property.getArray();
                 ArrayNode arr = factory.arrayNode();
                 arr.addAll(FunctionalList.create(arrValue).map(toJSON));
                 node.put(property.getName(), arr);
             }
-            else if (property.isObject()) {
+            else if (property.hasObject()) {
                 ObjectNode object = factory.objectNode();
                 object.putAll(FunctionalMap.create(property.getObject()).mapValues(toJSON));
                 node.put(property.getName(), object);

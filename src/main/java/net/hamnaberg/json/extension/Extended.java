@@ -1,7 +1,7 @@
 package net.hamnaberg.json.extension;
 
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class Extended<T> {
     protected final ObjectNode delegate;

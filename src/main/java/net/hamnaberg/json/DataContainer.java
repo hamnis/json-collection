@@ -5,7 +5,7 @@ import net.hamnaberg.json.util.ListOps;
 import net.hamnaberg.json.util.MapOps;
 import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.Predicate;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.*;
 

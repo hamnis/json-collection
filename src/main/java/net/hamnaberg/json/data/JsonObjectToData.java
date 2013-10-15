@@ -4,8 +4,8 @@ import net.hamnaberg.json.Data;
 import net.hamnaberg.json.Property;
 import net.hamnaberg.json.Value;
 import net.hamnaberg.json.ValueFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,7 +17,7 @@ public class JsonObjectToData implements ToData<ObjectNode> {
     @Override
     public Data apply(ObjectNode from) {
         List<Property> properties = new ArrayList<Property>();
-        Iterator<Map.Entry<String,JsonNode>> fields = from.getFields();
+        Iterator<Map.Entry<String,JsonNode>> fields = from.fields();
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> next = fields.next();
             String key = next.getKey();
@@ -30,7 +30,7 @@ public class JsonObjectToData implements ToData<ObjectNode> {
                 properties.add(Property.array(key, values));
             }
             else if (value.isObject()) {
-                Iterator<Map.Entry<String,JsonNode>> objFields = value.getFields();
+                Iterator<Map.Entry<String,JsonNode>> objFields = value.fields();
                 Map<String, Value> map = new LinkedHashMap<String, Value>();
                 while (objFields.hasNext()) {
                     Map.Entry<String, JsonNode> entry = objFields.next();

@@ -18,8 +18,8 @@ package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.*;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.*;
 
 import java.util.*;
 
@@ -50,11 +50,15 @@ public final class Property extends Extended<Property> {
         return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
     }
 
-    public boolean isArray() {
+    public boolean hasValue() {
+        return delegate.has("value");
+    }
+
+    public boolean hasArray() {
         return delegate.has("array");
     }
 
-    public boolean isObject() {
+    public boolean hasObject() {
         return delegate.has("object");
     }
 
@@ -73,7 +77,7 @@ public final class Property extends Extended<Property> {
         Map<String, Value> builder = MapOps.newHashMap();
         JsonNode object = delegate.get("object");
         if (object != null && object.isObject()) {
-            Iterator<Map.Entry<String,JsonNode>> fields = object.getFields();
+            Iterator<Map.Entry<String,JsonNode>> fields = object.fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> next = fields.next();
                 Value opt = ValueFactory.createValue(next.getValue());

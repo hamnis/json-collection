@@ -16,8 +16,8 @@
 
 package net.hamnaberg.json;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.*;
 
 import java.math.BigDecimal;
 

@@ -1,6 +1,6 @@
 package net.hamnaberg.json;
 
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class InternalObjectFactory {
     public Collection createCollection(ObjectNode node) {

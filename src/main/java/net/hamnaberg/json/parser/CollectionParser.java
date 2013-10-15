@@ -19,11 +19,9 @@ package net.hamnaberg.json.parser;
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Collection;
 import net.hamnaberg.json.util.Charsets;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 
@@ -32,12 +30,11 @@ import java.io.*;
  */
 public class CollectionParser {
 
-    private final JsonFactory factory = new JsonFactory(new ObjectMapper());
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public Collection parse(Reader reader) throws IOException {
         try {
-            JsonParser jsonParser = factory.createJsonParser(reader);
-            return parse(jsonParser.readValueAsTree());
+            return parse(mapper.readTree(reader));
         } finally {
             if (reader != null) {
                 reader.close();
@@ -72,7 +69,7 @@ public class CollectionParser {
 
     public Template parseTemplate(Reader reader) throws IOException {
         try {
-            return parseTemplate(factory.createJsonParser(reader).readValueAsTree());
+            return parseTemplate(mapper.readTree(reader));
         } finally {
             if (reader != null) {
                 reader.close();

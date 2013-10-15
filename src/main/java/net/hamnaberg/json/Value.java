@@ -17,7 +17,7 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.util.Optional;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public interface Value {
     boolean isBoolean();

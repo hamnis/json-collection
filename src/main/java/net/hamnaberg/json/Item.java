@@ -19,10 +19,10 @@ package net.hamnaberg.json;
 import net.hamnaberg.json.util.ListOps;
 import net.hamnaberg.json.util.Optional;
 import net.hamnaberg.json.util.Predicate;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
 import java.util.*;

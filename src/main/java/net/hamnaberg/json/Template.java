@@ -19,14 +19,13 @@ package net.hamnaberg.json;
 
 import net.hamnaberg.json.util.Charsets;
 import net.hamnaberg.json.util.ListOps;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
 
 public final class Template extends DataContainer<Template> implements Writable {
     Template(ObjectNode delegate) {

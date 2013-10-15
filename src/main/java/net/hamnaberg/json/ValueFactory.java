@@ -17,8 +17,7 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Preconditions;
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
 
@@ -28,13 +27,13 @@ public class ValueFactory {
             throw new IllegalArgumentException("Node may not be null");
         }
         else if (node.isNumber()) {
-            return new ValueImpl(node.getDecimalValue());
+            return new ValueImpl(node.decimalValue());
         }
         else if (node.isBoolean()) {
-            return new ValueImpl(node.getBooleanValue());
+            return new ValueImpl(node.booleanValue());
         }
         else if (node.isTextual()) {
-            return new ValueImpl(node.getTextValue());
+            return new ValueImpl(node.textValue());
         }
         else if (node.isNull()) {
             return ValueImpl.NULL;

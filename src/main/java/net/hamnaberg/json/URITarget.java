@@ -6,7 +6,6 @@ import net.hamnaberg.json.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
@@ -56,11 +55,11 @@ public class URITarget implements Target {
     private StringBuilder buildQuery(Iterable<Property> properties) {
         StringBuilder sb = new StringBuilder();
         for (Property property : properties) {
-            if (property.isObject()) {
+            if (property.hasObject()) {
                 throw new IllegalArgumentException("Expanding Cj Property object is undefined in the spec.");
             }
             else {
-                if (property.isArray()) {
+                if (property.hasArray()) {
                     List<Value> prop = property.getArray();
                     for (Value value : prop) {
                         if (sb.length() > 0) {
