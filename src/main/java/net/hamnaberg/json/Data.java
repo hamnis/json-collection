@@ -58,21 +58,37 @@ public class Data implements Iterable<Property> {
 
     /**
      * Replaces all properties with the same name as the supplied property
+     * @param replacement property to replace with
+     * @return a new copy of the template
+     */
+    public Data replace(Iterable<Property> replacement) {
+        if (ListOps.isEmpty(replacement)) {
+            return this;
+        }
+
+        Map<String, Property> map = new Data(replacement).getDataAsMap();
+        List<Property> props = new ArrayList<Property>(this.properties.size());
+        for (int i = 0; i < this.properties.size(); i++) {
+            Property current = this.properties.get(i);
+            Property property = map.get(current.getName());
+            if (property != null) {
+                props.set(i, property);
+            }
+            else {
+                props.set(i, current);
+            }
+        }
+        return new Data(props);
+    }
+
+
+    /**
+     * Replaces all properties with the same name as the supplied property
      * @param property property to replace with
      * @return a new copy of the template, or this if nothing was modified.
      */
     public Data replace(Property property) {
-        List<Property> props = new ArrayList<Property>(properties);
-        for (int i = 0; i < properties.size(); i++) {
-            if (properties.get(i).getName().equals(property.getName())) {
-                props.set(i, property);
-                break;
-            }
-        }
-        if (!props.isEmpty()) {
-            return new Data(props);
-        }
-        return this;
+        return replace(Arrays.asList(property));
     }
 
     /**
