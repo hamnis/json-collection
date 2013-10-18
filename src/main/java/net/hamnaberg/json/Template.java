@@ -17,8 +17,8 @@
 package net.hamnaberg.json;
 
 
+import net.hamnaberg.funclite.CollectionOps;
 import net.hamnaberg.json.util.Charsets;
-import net.hamnaberg.json.util.ListOps;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -43,7 +43,7 @@ public final class Template extends DataContainer<Template> implements Writable 
 
     public static Template create(Iterable<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        if (!ListOps.isEmpty(data)) {
+        if (!CollectionOps.isEmpty(data)) {
             obj.put("data", Property.toArrayNode(data));
         }
         return new Template(obj);

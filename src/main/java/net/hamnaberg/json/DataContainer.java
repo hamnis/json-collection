@@ -1,10 +1,7 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.MapOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Predicate;
+import net.hamnaberg.funclite.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.*;
@@ -82,7 +79,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
      */
     @SuppressWarnings("unchecked")
     public A set(Iterable<Property> props) {
-        if (ListOps.isEmpty(props)) {
+        if (CollectionOps.isEmpty(props)) {
             return (A) this;
         }
         ObjectNode copied = copyDelegate();

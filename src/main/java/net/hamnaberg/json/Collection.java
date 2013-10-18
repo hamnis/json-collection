@@ -18,9 +18,9 @@ package net.hamnaberg.json;
 
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Predicate;
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.funclite.Predicate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static net.hamnaberg.json.util.Optional.fromNullable;
-import static net.hamnaberg.json.util.Optional.some;
+import static net.hamnaberg.funclite.Optional.fromNullable;
+import static net.hamnaberg.funclite.Optional.some;
 
 public final class Collection extends Extended<Collection> implements Writable {
     Collection(ObjectNode value) {
@@ -179,31 +179,31 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return ListOps.find(getLinks(), predicate);
+        return CollectionOps.find(getLinks(), predicate);
     }
 
     public List<Link> filterLinks(Predicate<Link> predicate) {
-        return ListOps.filter(getLinks(), predicate);
+        return CollectionOps.filter(getLinks(), predicate);
     }
 
     public Optional<Item> findItem(Predicate<Item> predicate) {
-        return ListOps.find(getItems(), predicate);
+        return CollectionOps.find(getItems(), predicate);
     }
 
     public List<Item> filterItems(Predicate<Item> predicate) {
-        return ListOps.filter(getItems(), predicate);
+        return CollectionOps.filter(getItems(), predicate);
     }
 
     public Optional<Query> findQuery(Predicate<Query> predicate) {
-        return ListOps.find(getQueries(), predicate);
+        return CollectionOps.find(getQueries(), predicate);
     }
 
     public List<Query> filterQueries(Predicate<Query> predicate) {
-        return ListOps.filter(getQueries(), predicate);
+        return CollectionOps.filter(getQueries(), predicate);
     }
 
     public Optional<Item> getFirstItem() {
-        return ListOps.headOption(getItems());
+        return CollectionOps.headOption(getItems());
     }
 
     public Builder toBuilder() {

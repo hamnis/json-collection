@@ -16,8 +16,11 @@
 
 package net.hamnaberg.json;
 
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Function;
+import net.hamnaberg.funclite.MapOps;
+import net.hamnaberg.funclite.Optional;
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 
@@ -64,7 +67,7 @@ public final class Property extends Extended<Property> {
 
     public List<Value> getArray() {
         JsonNode array = delegate.get("array");
-        List<Value> builder = ListOps.newArrayList();
+        List<Value> builder = CollectionOps.newArrayList();
         if (array != null && array.isArray()) {
             for (JsonNode n : array) {
                 builder.add(ValueFactory.createValue(n));
@@ -184,7 +187,7 @@ public final class Property extends Extended<Property> {
     }
 
     public static Property arrayObject(String name, Optional<String> prompt, List<Object> list) {
-        return array(name, prompt, ListOps.flatMap(list, new Function<Object, Iterable<Value>>() {
+        return array(name, prompt, CollectionOps.flatMap(list, new Function<Object, Iterable<Value>>() {
             @Override
             public Iterable<Value> apply(Object input) {
                 return ValueFactory.createOptionalValue(input);
@@ -243,7 +246,7 @@ public final class Property extends Extended<Property> {
     }
 
     public static List<Property> fromData(JsonNode data) {
-        List<Property> builder = ListOps.newArrayList();
+        List<Property> builder = CollectionOps.newArrayList();
         for (JsonNode jsonNode : data) {
             builder.add(new Property((ObjectNode) jsonNode));
         }

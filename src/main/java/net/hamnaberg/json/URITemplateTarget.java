@@ -1,7 +1,7 @@
 package net.hamnaberg.json;
 
 import com.damnhandy.uri.template.UriTemplate;
-import net.hamnaberg.json.util.*;
+import net.hamnaberg.funclite.*;
 
 import java.net.URI;
 import java.util.Map;

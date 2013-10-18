@@ -17,9 +17,9 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Preconditions;
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.funclite.Preconditions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -132,7 +132,7 @@ public final class Link extends Extended<Link> {
     }
 
     static List<Link> fromArray(JsonNode node) {
-        List<Link> links = ListOps.newArrayList();
+        List<Link> links = CollectionOps.newArrayList();
         for (JsonNode jsonNode : node) {
             links.add(new Link((ObjectNode) jsonNode));
         }

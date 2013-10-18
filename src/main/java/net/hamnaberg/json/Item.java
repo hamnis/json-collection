@@ -16,9 +16,9 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Predicate;
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.funclite.Predicate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -27,8 +27,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.util.*;
 
-import static net.hamnaberg.json.util.Optional.fromNullable;
-import static net.hamnaberg.json.util.Optional.some;
+import static net.hamnaberg.funclite.Optional.fromNullable;
+import static net.hamnaberg.funclite.Optional.some;
 
 public final class Item extends DataContainer<Item> {
 
@@ -49,7 +49,7 @@ public final class Item extends DataContainer<Item> {
         for (URI uri : href) {
             node.put("href", uri.toString());
         }
-        if (!ListOps.isEmpty(properties)) {
+        if (!CollectionOps.isEmpty(properties)) {
            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : properties) {
                 arr.add(property.asJson());
@@ -141,11 +141,11 @@ public final class Item extends DataContainer<Item> {
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return ListOps.find(getLinks(), predicate);
+        return CollectionOps.find(getLinks(), predicate);
     }
 
     public List<Link> findLinks(Predicate<Link> predicate) {
-        return ListOps.filter(getLinks(), predicate);
+        return CollectionOps.filter(getLinks(), predicate);
     }
 
     @Override
@@ -168,7 +168,7 @@ public final class Item extends DataContainer<Item> {
     }
 
     static List<Item> fromArray(JsonNode queries) {
-        List<Item> builder = ListOps.newArrayList();
+        List<Item> builder = CollectionOps.newArrayList();
         for (JsonNode jsonNode : queries) {
             builder.add(new Item((ObjectNode) jsonNode));
         }
@@ -218,7 +218,7 @@ public final class Item extends DataContainer<Item> {
         }
 
         public Builder addProperties(Iterable<Property> properties) {
-            ListOps.addAll(this.props, properties);
+            CollectionOps.addAll(this.props, properties);
             return this;
         }
 
@@ -228,7 +228,7 @@ public final class Item extends DataContainer<Item> {
         }
 
         public Builder addLinks(Iterable<Link> links) {
-            ListOps.addAll(this.links, links);
+            CollectionOps.addAll(this.links, links);
             return this;
         }
 

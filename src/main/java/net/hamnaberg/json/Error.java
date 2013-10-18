@@ -17,14 +17,13 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.funclite.Optional;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
 
-import static net.hamnaberg.json.util.Optional.fromNullable;
-import static net.hamnaberg.json.util.Optional.some;
+import static net.hamnaberg.funclite.Optional.fromNullable;
 
 public class Error extends Extended<Error> {
     public static final Error EMPTY = Error.create(Optional.<String>none(), Optional.<String>none(), Optional.<String>none());

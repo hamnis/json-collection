@@ -17,9 +17,9 @@
 package net.hamnaberg.json.parser;
 
 import net.hamnaberg.json.*;
-import net.hamnaberg.json.util.Function;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Predicate;
+import net.hamnaberg.funclite.Function;
+import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.funclite.Predicate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

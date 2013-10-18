@@ -19,8 +19,7 @@ package net.hamnaberg.json.generator;
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Error;
 import net.hamnaberg.json.parser.CollectionParser;
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.Optional;
+import net.hamnaberg.funclite.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -68,7 +67,7 @@ public class CollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), CollectionOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
         JsonNode collection = Collection.builder(COLLECTION_URI).addItems(items).build().asJson();
         assertNotNull(collection);
         assertEquals("1.0", collection.get("version").asText());
@@ -80,7 +79,7 @@ public class CollectionGeneratorTest {
     public void templateCollection() throws Exception {
         JsonNode collection = new Collection.Builder(
                 COLLECTION_URI).withTemplate(
-                Template.create(ListOps.<Property>of(Property.value("one", Optional.some("One"), Optional.<Value>none())))
+                Template.create(CollectionOps.<Property>of(Property.value("one", Optional.some("One"), Optional.<Value>none())))
         ).build().asJson();
 
         assertNotNull(collection);
@@ -91,7 +90,7 @@ public class CollectionGeneratorTest {
 
     @Test
     public void canParseGeneratedTemplate() throws Exception {
-        Template template = Template.create(ListOps.<Property>of(Property.value("one", Optional.some("One"), Optional.<Value>none())));
+        Template template = Template.create(CollectionOps.<Property>of(Property.value("one", Optional.some("One"), Optional.<Value>none())));
         StringWriter writer = new StringWriter();
         template.writeTo(writer);
         Template parsed = new CollectionParser().parseTemplate(writer.toString());
@@ -101,7 +100,7 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), ListOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), CollectionOps.<Property>of(Property.value("one", Optional.some("One"), ValueFactory.createOptionalValue(1))), Collections.<Link>emptyList()));
 
         Collection collection = Collection.builder(COLLECTION_URI).addItems(items).build();
         String generated = collection.toString();

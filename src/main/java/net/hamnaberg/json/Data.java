@@ -1,10 +1,6 @@
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.MapOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Preconditions;
-import net.hamnaberg.json.util.Predicate;
+import net.hamnaberg.funclite.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +13,7 @@ public class Data implements Iterable<Property> {
     private List<Property> properties;
 
     public Data(Iterable<Property> props) {
-        properties = Collections.unmodifiableList(ListOps.newArrayList(Preconditions.checkNotNull(props, "Properties in Data may not be null")));
+        properties = Collections.unmodifiableList(CollectionOps.newArrayList(Preconditions.checkNotNull(props, "Properties in Data may not be null")));
     }
 
     public boolean isEmpty() {
@@ -33,7 +29,7 @@ public class Data implements Iterable<Property> {
     }
 
     public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return ListOps.find(properties, predicate);
+        return CollectionOps.find(properties, predicate);
     }
 
     public Optional<Property> propertyByName(final String name) {
@@ -62,7 +58,7 @@ public class Data implements Iterable<Property> {
      * @return a new copy of the template
      */
     public Data replace(Iterable<Property> replacement) {
-        if (ListOps.isEmpty(replacement)) {
+        if (CollectionOps.isEmpty(replacement)) {
             return this;
         }
 
@@ -104,11 +100,11 @@ public class Data implements Iterable<Property> {
      * @return a new copy of the template.
      */
     public Data addAll(Iterable<Property> toAdd) {
-        if (ListOps.isEmpty(toAdd)) {
+        if (CollectionOps.isEmpty(toAdd)) {
             return this;
         }
         List<Property> props = new ArrayList<Property>(properties);
-        ListOps.addAll(props, toAdd);
+        CollectionOps.addAll(props, toAdd);
         return new Data(props);
     }
 
@@ -119,7 +115,7 @@ public class Data implements Iterable<Property> {
      * @return a new copy of the template.
      */
     public Data set(Iterable<Property> props) {
-        if (ListOps.isEmpty(props)) {
+        if (CollectionOps.isEmpty(props)) {
             return this;
         }
         return new Data(props);

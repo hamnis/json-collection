@@ -17,9 +17,9 @@
 package net.hamnaberg.json;
 
 
-import net.hamnaberg.json.util.ListOps;
-import net.hamnaberg.json.util.Optional;
-import net.hamnaberg.json.util.Preconditions;
+import net.hamnaberg.funclite.CollectionOps;
+import net.hamnaberg.funclite.Optional;
+import net.hamnaberg.funclite.Preconditions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -57,7 +57,7 @@ public final class Query extends DataContainer<Query> {
         if (name.isSome()) {
             obj.put("name", name.get());
         }
-        if (!ListOps.isEmpty(data)) {
+        if (!CollectionOps.isEmpty(data)) {
             ArrayNode arr = JsonNodeFactory.instance.arrayNode();
             for (Property property : data) {
                 arr.add(property.asJson());
@@ -114,7 +114,7 @@ public final class Query extends DataContainer<Query> {
     }
 
     static List<Query> fromArray(JsonNode queries) {
-        List<Query> builder = ListOps.newArrayList();
+        List<Query> builder = CollectionOps.newArrayList();
         for (JsonNode jsonNode : queries) {
             builder.add(new Query((ObjectNode) jsonNode));
         }

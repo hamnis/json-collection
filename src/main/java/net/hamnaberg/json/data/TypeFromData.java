@@ -1,7 +1,7 @@
 package net.hamnaberg.json.data;
 
+import net.hamnaberg.funclite.Optional;
 import net.hamnaberg.json.Data;
-import net.hamnaberg.json.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
