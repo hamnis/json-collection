@@ -57,7 +57,7 @@ public class Data implements Iterable<Property> {
     }
 
     /**
-     * Replaces all properties with the same name as the supplied property
+     * Replaces all properties with the same name as the supplied properties.
      * @param replacement property to replace with
      * @return a new copy of the template
      */
