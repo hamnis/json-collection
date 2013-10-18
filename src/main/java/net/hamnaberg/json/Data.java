@@ -68,14 +68,12 @@ public class Data implements Iterable<Property> {
 
         Map<String, Property> map = new Data(replacement).getDataAsMap();
         List<Property> props = new ArrayList<Property>(this.properties.size());
-        for (int i = 0; i < this.properties.size(); i++) {
-            Property current = this.properties.get(i);
+        for (Property current : this.properties) {
             Property property = map.get(current.getName());
             if (property != null) {
-                props.set(i, property);
-            }
-            else {
-                props.set(i, current);
+                props.add(property);
+            } else {
+                props.add(current);
             }
         }
         return new Data(props);
