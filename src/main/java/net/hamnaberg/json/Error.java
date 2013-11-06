@@ -25,7 +25,7 @@ import java.net.URI;
 
 import static net.hamnaberg.funclite.Optional.fromNullable;
 
-public class Error extends Extended<Error> {
+public final class Error extends Extended<Error> {
     public static final Error EMPTY = Error.create(Optional.<String>none(), Optional.<String>none(), Optional.<String>none());
 
     Error(ObjectNode delegate) {

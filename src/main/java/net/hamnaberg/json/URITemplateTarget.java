@@ -8,7 +8,7 @@ import net.hamnaberg.funclite.*;
 import java.net.URI;
 import java.util.Map;
 
-public class URITemplateTarget implements Target {
+public final class URITemplateTarget implements Target {
 
     public URITemplateTarget(String href) {
         try {

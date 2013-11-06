@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.node.*;
 
 import java.math.BigDecimal;
 
-public class ValueImpl implements Value {
+public final class ValueImpl implements Value {
     private final Object value;
     private final Class type;
     public static final Value NULL = new ValueImpl(null);

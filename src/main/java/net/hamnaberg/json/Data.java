@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Data implements Iterable<Property> {
+public final class Data implements Iterable<Property> {
     private List<Property> properties;
 
     public Data(Iterable<Property> props) {

@@ -10,7 +10,7 @@ import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 
-public class URITarget implements Target {
+public final class URITarget implements Target {
     private URI href;
 
     public URITarget(String href) {
