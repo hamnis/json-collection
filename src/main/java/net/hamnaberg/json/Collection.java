@@ -194,16 +194,30 @@ public final class Collection extends Extended<Collection> implements Writable {
         return CollectionOps.filter(getItems(), predicate);
     }
 
+    public List<Item> filterItemsByProfile(final URI profile) {
+        return filterItems(new Predicate<Item>() {
+            @Override
+            public boolean apply(Item item) {
+                return item.linkByRel("profile").forall(new Predicate<Link>() {
+                    @Override
+                    public boolean apply(Link link) {
+                        return link.getHref().equals(profile);
+                    }
+                });
+            }
+        });
+    }
+
+    public Optional<Item> getFirstItem() {
+        return CollectionOps.headOption(getItems());
+    }
+
     public Optional<Query> findQuery(Predicate<Query> predicate) {
         return CollectionOps.find(getQueries(), predicate);
     }
 
     public List<Query> filterQueries(Predicate<Query> predicate) {
         return CollectionOps.filter(getQueries(), predicate);
-    }
-
-    public Optional<Item> getFirstItem() {
-        return CollectionOps.headOption(getItems());
     }
 
     public Builder toBuilder() {
