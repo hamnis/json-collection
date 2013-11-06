@@ -1,6 +1,8 @@
 package net.hamnaberg.json;
 
+import com.damnhandy.uri.template.MalformedUriTemplateException;
 import com.damnhandy.uri.template.UriTemplate;
+import com.damnhandy.uri.template.VariableExpansionException;
 import net.hamnaberg.funclite.*;
 
 import java.net.URI;
@@ -9,7 +11,11 @@ import java.util.Map;
 public class URITemplateTarget implements Target {
 
     public URITemplateTarget(String href) {
-        this.href = UriTemplate.fromTemplate(href);
+        try {
+            this.href = UriTemplate.fromTemplate(href);
+        } catch (MalformedUriTemplateException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
@@ -18,7 +24,11 @@ public class URITemplateTarget implements Target {
     }
 
     public URI toURI() {
-        return URI.create(href.expand());
+        try {
+            return URI.create(href.expand());
+        } catch (VariableExpansionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public URI expand(Iterable<Property> properties) {
@@ -38,7 +48,11 @@ public class URITemplateTarget implements Target {
             }
         }
 
-        return URI.create(href.expand(map));
+        try {
+            return URI.create(href.expand(map));
+        } catch (VariableExpansionException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Override
