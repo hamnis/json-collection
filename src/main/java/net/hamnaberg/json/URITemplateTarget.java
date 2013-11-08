@@ -9,10 +9,12 @@ import java.net.URI;
 import java.util.Map;
 
 public final class URITemplateTarget implements Target {
+    private String href;
 
     public URITemplateTarget(String href) {
         try {
-            this.href = UriTemplate.fromTemplate(href);
+            UriTemplate.fromTemplate(href);
+            this.href = href;
         } catch (MalformedUriTemplateException e) {
             throw new IllegalStateException(e);
         }
@@ -25,8 +27,8 @@ public final class URITemplateTarget implements Target {
 
     public URI toURI() {
         try {
-            return URI.create(href.expand());
-        } catch (VariableExpansionException e) {
+            return URI.create(UriTemplate.fromTemplate(href).expand());
+        } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
@@ -49,8 +51,8 @@ public final class URITemplateTarget implements Target {
         }
 
         try {
-            return URI.create(href.expand(map));
-        } catch (VariableExpansionException e) {
+            return URI.create(UriTemplate.fromTemplate(href).expand(map));
+        } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -74,7 +76,7 @@ public final class URITemplateTarget implements Target {
 
     @Override
     public String toString() {
-        return href.getTemplate();
+        return href;
     }
 
     private final Predicate<Map.Entry<String,Value>> VALUE_NOT_NULL_PRED = new Predicate<Map.Entry<String, Value>>() {
@@ -83,7 +85,7 @@ public final class URITemplateTarget implements Target {
             return !input.getValue().isNull();
         }
     };
-    private UriTemplate href;
+    
     private Predicate<Value> NOT_NULL_PRED = new Predicate<Value>() {
         @Override
         public boolean apply(Value input) {
