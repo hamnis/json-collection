@@ -1,5 +1,8 @@
 package net.hamnaberg.json.extension;
 
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -17,8 +20,12 @@ public abstract class Extended<T> {
     }
 
     public <A> T apply(A value, Extension<A> extension) {
+        Map<String, JsonNode> map = extension.apply(value);
+        if (map == null || map.isEmpty()) {
+            return (T)this;
+        }
         ObjectNode copied = copyDelegate();
-        copied.putAll(extension.apply(value));
+        copied.putAll(map);
         return copy(copied);
     }
 
