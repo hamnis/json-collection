@@ -16,19 +16,21 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Predicate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.Iterables;
 
 import java.net.URI;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import static net.hamnaberg.funclite.Optional.fromNullable;
-import static net.hamnaberg.funclite.Optional.some;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 public final class Item extends DataContainer<Item> {
 
@@ -37,31 +39,25 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Item create(URI href, Iterable<Property> properties) {
-        return create(fromNullable(href), properties, Collections.<Link>emptyList());
+        return create(ofNullable(href), properties, Collections.<Link>emptyList());
     }
 
     public static Item create(URI href, Iterable<Property> properties, List<Link> links) {
-        return create(fromNullable(href), properties, links);
+        return create(ofNullable(href), properties, links);
     }
 
     public static Item create(Optional<URI> href, Iterable<Property> properties, List<Link> links) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
-        for (URI uri : href) {
-            node.put("href", uri.toString());
+        href.ifPresent(uri -> node.put("href", uri.toString()));
+        if (!Iterables.isEmpty(properties)) {
+            node.put("data", StreamSupport.stream(properties.spliterator(), false)
+                                          .map(Extended::asJson)
+                                          .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
-        if (!CollectionOps.isEmpty(properties)) {
-           ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Property property : properties) {
-                arr.add(property.asJson());
-            }
-            node.put("data", arr);
-        }
-        if (!links.isEmpty()) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Link link : links) {
-                arr.add(link.asJson());
-            }
-            node.put("links", arr);
+        if (!Iterables.isEmpty(links)) {
+            node.put("links", StreamSupport.stream(links.spliterator(), false)
+                                           .map(Extended::asJson)
+                                           .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         return new Item(node);
     }
@@ -75,11 +71,11 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Item create() {
-        return create(Optional.<URI>none());
+        return create(Optional.<URI>empty());
     }
 
     public Optional<URI> getHref() {
-        return delegate.has("href") ? some(URI.create(delegate.get("href").asText())) : Optional.<URI>none();
+        return delegate.has("href") ? of(URI.create(delegate.get("href").asText())) : Optional.<URI>empty();
     }
 
     public List<Link> getLinks() {
@@ -114,38 +110,23 @@ public final class Item extends DataContainer<Item> {
     }
 
     public Optional<Link> linkByRel(final String rel) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return rel.equals(input.getRel());
-            }
-        });
+        return findLink(input -> rel.equals(input.getRel()));
     }
 
     public Optional<Link> linkByName(final String name) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return Optional.fromNullable(name).equals(input.getName());
-            }
-        });
+        return findLink(input -> ofNullable(name).equals(input.getName()));
     }
 
     public Optional<Link> linkByRelAndName(final String rel, final String name) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return rel.equals(input.getRel()) && Optional.fromNullable(name).equals(input.getName());
-            }
-        });
+        return findLink(input -> rel.equals(input.getRel()) && ofNullable(name).equals(input.getName()));
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return CollectionOps.find(getLinks(), predicate);
+        return getLinks().stream().filter(predicate).findFirst();
     }
 
     public List<Link> findLinks(Predicate<Link> predicate) {
-        return CollectionOps.filter(getLinks(), predicate);
+        return getLinks().stream().filter(predicate).collect(Collectors.<Link>toList());
     }
 
     @Override
@@ -155,7 +136,7 @@ public final class Item extends DataContainer<Item> {
 
     @Override
     public String toString() {
-        return String.format("Item with href %s, properties %s and links %s", getHref().orNull(), getData(), getLinks());
+        return String.format("Item with href %s, properties %s and links %s", getHref().orElse(null), getData(), getLinks());
     }
 
     public Collection toCollection() {
@@ -168,11 +149,9 @@ public final class Item extends DataContainer<Item> {
     }
 
     static List<Item> fromArray(JsonNode queries) {
-        List<Item> builder = CollectionOps.newArrayList();
-        for (JsonNode jsonNode : queries) {
-            builder.add(new Item((ObjectNode) jsonNode));
-        }
-        return Collections.unmodifiableList(builder);
+        return Collections.unmodifiableList(StreamSupport.stream(queries.spliterator(), false)
+                                                         .map(query -> new Item((ObjectNode) query))
+                                                         .collect(Collectors.toList()));
     }
 
     public void validate() {
@@ -180,7 +159,7 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Builder builder(URI href) {
-        return new Builder(fromNullable(href));
+        return new Builder(ofNullable(href));
     }
 
     public static Builder builder() {
@@ -196,11 +175,11 @@ public final class Item extends DataContainer<Item> {
         private List<Link> links = new ArrayList<Link>();
 
         public Builder() {
-            this(Optional.<URI>none());
+            this(Optional.<URI>empty());
         }
 
         public Builder(URI href) {
-            this(fromNullable(href));
+            this(ofNullable(href));
         }
 
         public Builder(Optional<URI> href) {
@@ -208,7 +187,7 @@ public final class Item extends DataContainer<Item> {
         }
 
         public Builder withHref(URI href) {
-            this.href = fromNullable(href);
+            this.href = ofNullable(href);
             return this;
         }
 
@@ -218,7 +197,7 @@ public final class Item extends DataContainer<Item> {
         }
 
         public Builder addProperties(Iterable<Property> properties) {
-            CollectionOps.addAll(this.props, properties);
+            properties.forEach(props::add);
             return this;
         }
 
@@ -228,7 +207,7 @@ public final class Item extends DataContainer<Item> {
         }
 
         public Builder addLinks(Iterable<Link> links) {
-            CollectionOps.addAll(this.links, links);
+            links.forEach(this.links::add);
             return this;
         }
 

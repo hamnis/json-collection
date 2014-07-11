@@ -16,19 +16,20 @@
 
 package net.hamnaberg.json;
 
-
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Preconditions;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.util.Iterables;
 
 public final class Query extends DataContainer<Query> {
 
@@ -37,11 +38,11 @@ public final class Query extends DataContainer<Query> {
     }
 
     public static Query create(URI target, String rel, Optional<String> prompt, Iterable<Property> data) {
-        return create(new URITarget(target), rel, prompt, Optional.<String>none(), data);
+        return create(new URITarget(target), rel, prompt, Optional.<String>empty(), data);
     }
 
     public static Query create(Target target, String rel, Optional<String> prompt, Iterable<Property> data) {
-        return create(target, rel, prompt, Optional.<String>none(), data);
+        return create(target, rel, prompt, Optional.<String>empty(), data);
     }
 
     public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, Iterable<Property> data) {
@@ -51,18 +52,12 @@ public final class Query extends DataContainer<Query> {
             obj.put("encoding", "uri-template");
         }
         obj.put("rel", rel);
-        if (prompt.isSome()) {
-            obj.put("prompt", prompt.get());
-        }
-        if (name.isSome()) {
-            obj.put("name", name.get());
-        }
-        if (!CollectionOps.isEmpty(data)) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Property property : data) {
-                arr.add(property.asJson());
-            }
-            obj.put("data", arr);
+        prompt.ifPresent(value -> obj.put("prompt", value));
+        name.ifPresent(value -> obj.put("name", value));
+        if (!Iterables.isEmpty(data)) {
+            obj.put("data", StreamSupport.stream(data.spliterator(), false)
+                                         .map(Extended::asJson)
+                                         .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         return new Query(obj);
     }
@@ -97,7 +92,7 @@ public final class Query extends DataContainer<Query> {
     }
 
     public Optional<String> getName() {
-        return Optional.fromNullable(getAsString("name"));
+        return Optional.ofNullable(getAsString("name"));
     }
 
     @Override
@@ -110,19 +105,17 @@ public final class Query extends DataContainer<Query> {
     }
 
     public Optional<String> getPrompt() {
-        return Optional.fromNullable(getAsString("prompt"));
+        return Optional.ofNullable(getAsString("prompt"));
     }
 
     static List<Query> fromArray(JsonNode queries) {
-        List<Query> builder = CollectionOps.newArrayList();
-        for (JsonNode jsonNode : queries) {
-            builder.add(new Query((ObjectNode) jsonNode));
-        }
-        return Collections.unmodifiableList(builder);
+        return Collections.unmodifiableList(StreamSupport.stream(queries.spliterator(), false)
+                                                         .map(jsonNode -> new Query((ObjectNode) jsonNode))
+                                                         .collect(Collectors.toList()));
     }
 
     public void validate() {
-        Preconditions.checkArgument(getHref() != null, "Href may not be null");
-        Preconditions.checkArgument(getRel() != null, "Rel may not be null");
+        Optional.ofNullable(getHref()).orElseThrow(() -> new IllegalArgumentException("Href may not be null"));
+        Optional.ofNullable(getRel()).orElseThrow(() -> new IllegalArgumentException("Rel may not be null"));
     }
 }

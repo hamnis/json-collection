@@ -17,16 +17,16 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.funclite.Optional;
+import java.util.Optional;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
 
-import static net.hamnaberg.funclite.Optional.fromNullable;
+import static java.util.Optional.ofNullable;
 
 public final class Error extends Extended<Error> {
-    public static final Error EMPTY = Error.create(Optional.<String>none(), Optional.<String>none(), Optional.<String>none());
+    public static final Error EMPTY = Error.create(Optional.<String>empty(), Optional.<String>empty(), Optional.<String>empty());
 
     Error(ObjectNode delegate) {
         super(delegate);
@@ -58,20 +58,14 @@ public final class Error extends Extended<Error> {
     }
 
     public static Error create(String title, String code, String message) {
-        return create(fromNullable(title), fromNullable(code), fromNullable(message));
+        return create(ofNullable(title), ofNullable(code), ofNullable(message));
     }
 
     public static Error create(Optional<String> title, Optional<String> code, Optional<String> message) {
-        ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        for (String t : title) {
-            obj.put("title", t);
-        }
-        for (String t : code) {
-            obj.put("code", t);
-        }
-        for (String t : message) {
-            obj.put("message", t);
-        }
+        final ObjectNode obj = JsonNodeFactory.instance.objectNode();
+        title.ifPresent(value -> obj.put("title", value));
+        code.ifPresent(value -> obj.put("code", value));
+        message.ifPresent(value -> obj.put("message", value));
         return new Error(obj);
     }
 

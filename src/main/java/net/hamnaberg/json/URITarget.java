@@ -1,7 +1,9 @@
 package net.hamnaberg.json;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
+
+import java.util.Optional;
+
+import net.hamnaberg.json.util.Iterables;
 import net.hamnaberg.json.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +33,7 @@ public final class URITarget implements Target {
     }
 
     public URI expand(Iterable<Property> properties) {
-        if (CollectionOps.isEmpty(properties)) {
+        if (Iterables.isEmpty(properties)) {
             return href;
         }
         final String query = href.getQuery();
@@ -70,7 +72,7 @@ public final class URITarget implements Target {
                 }
                 else {
                     Optional<Value> value = property.getValue();
-                    if (value.isSome()) {
+                    if (value.isPresent()) {
                         if (sb.length() > 0) {
                             sb.append("&");
                         }

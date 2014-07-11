@@ -2,7 +2,7 @@ package net.hamnaberg.json.extension;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.hamnaberg.funclite.MapOps;
+
 
 import java.util.*;
 
@@ -32,7 +32,7 @@ public abstract class Extension<A> {
 
         @Override
         public Map<String, JsonNode> apply(Tuple2<A, B> value) {
-            Map<String, JsonNode> builder = MapOps.newHashMap();
+            Map<String, JsonNode> builder = new HashMap<>();
             builder.putAll(delegate._1.apply(value._1));
             builder.putAll(delegate._2.apply(value._2));
             return Collections.unmodifiableMap(builder);
@@ -53,7 +53,7 @@ public abstract class Extension<A> {
 
         @Override
         public Map<String, JsonNode> apply(Tuple3<A, B, C> value) {
-            Map<String, JsonNode> builder = MapOps.newHashMap();
+            Map<String, JsonNode> builder = new HashMap<>();
             builder.putAll(delegate._1.apply(value._1));
             builder.putAll(delegate._2.apply(value._2));
             builder.putAll(delegate._3.apply(value._3));

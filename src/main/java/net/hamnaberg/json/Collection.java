@@ -16,27 +16,32 @@
 
 package net.hamnaberg.json;
 
-
-import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Predicate;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import static net.hamnaberg.funclite.Optional.fromNullable;
-import static net.hamnaberg.funclite.Optional.some;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.extension.Extended;
+
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 public final class Collection extends Extended<Collection> implements Writable {
+
     Collection(ObjectNode value) {
         super(value);
     }
@@ -47,42 +52,35 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static Collection create(URI href, List<Link> links, List<Item> items, List<Query> queries, Template template, Error error) {
-        return create(fromNullable(href), links, items, queries, fromNullable(template), fromNullable(error));
+        return create(ofNullable(href), links, items, queries, ofNullable(template), ofNullable(error));
     }
 
-    public static Collection create(Optional<URI> href, List<Link> links, List<Item> items, List<Query> queries, Optional<Template> template, Optional<Error> error) {
+    public static Collection create(Optional<URI> href,
+                                    List<Link> links,
+                                    List<Item> items,
+                                    List<Query> queries,
+                                    Optional<Template> template,
+                                    Optional<Error> error) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         obj.put("version", Version.ONE.getIdentifier());
-        if (href.isSome()) {
-            obj.put("href", href.get().toString());
-        }
+        href.ifPresent(value -> obj.put("href", value.toString()));
         if (!links.isEmpty()) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Link link : links) {
-                arr.add(link.asJson());
-            }
-            obj.put("links", arr);
+            obj.put("links", links.stream()
+                                  .map(Extended::asJson)
+                                  .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         if (!items.isEmpty()) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Item i : items) {
-                arr.add(i.asJson());
-            }
-            obj.put("items", arr);
+            obj.put("items", items.stream()
+                                  .map(Extended::asJson)
+                                  .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         if (!queries.isEmpty()) {
-            ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-            for (Query i : queries) {
-                arr.add(i.asJson());
-            }
-            obj.put("queries", arr);
+            obj.put("queries", queries.stream()
+                                      .map(Extended::asJson)
+                                      .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
-        if (template.isSome()) {
-            obj.put("template", template.get().asJson());
-        }
-        if (error.isSome()) {
-            obj.put("error", error.get().asJson());
-        }
+        template.ifPresent(value -> obj.put("template", value.asJson()));
+        error.ifPresent(value -> obj.put("error", value.asJson()));
         Collection coll = new Collection(obj);
         coll.validate();
         return coll;
@@ -93,7 +91,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<URI> getHref() {
-        return delegate.has("href") ? some(URI.create(delegate.get("href").asText())) : Optional.<URI>none();
+        return delegate.has("href") ? of(URI.create(delegate.get("href").asText())) : Optional.<URI>empty();
     }
 
     public List<Link> getLinks() {
@@ -113,7 +111,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<Template> getTemplate() {
-        return hasTemplate() ? some(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>none();
+        return hasTemplate() ? of(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>empty();
     }
 
     public boolean hasError() {
@@ -121,103 +119,63 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<Error> getError() {
-        return hasError() ? some(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>none();
+        return hasError() ? of(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>empty();
     }
 
     public Optional<Link> linkByName(final String name) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return fromNullable(name).equals(input.getName());
-            }
-        });
+        return findLink(link -> ofNullable(name).equals(link.getName()));
     }
 
     public Optional<Link> linkByRelAndName(final String rel, final String name) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return rel.equals(input.getRel()) && fromNullable(name).equals(input.getName());
-            }
-        });
+        return findLink(link -> rel.equals(link.getRel()) && ofNullable(name).equals(link.getName()));
     }
 
     public Optional<Link> linkByRel(final String rel) {
-        return findLink(new Predicate<Link>() {
-            @Override
-            public boolean apply(Link input) {
-                return rel.equals(input.getRel());
-            }
-        });
+        return findLink(link -> rel.equals(link.getRel()));
     }
 
     public Optional<Query> queryByRel(final String rel) {
-        return findQuery(new Predicate<Query>() {
-            @Override
-            public boolean apply(Query input) {
-                return rel.equals(input.getRel());
-            }
-        });
+        return findQuery(query -> rel.equals(query.getRel()));
     }
 
     public Optional<Query> queryByName(final String name) {
-        return findQuery(new Predicate<Query>() {
-            @Override
-            public boolean apply(Query input) {
-                return fromNullable(name).equals(input.getName());
-            }
-        });
+        return findQuery(query -> ofNullable(name).equals(query.getName()));
     }
 
     public Optional<Query> queryByRelAndName(final String rel, final String name) {
-        return findQuery(new Predicate<Query>() {
-            @Override
-            public boolean apply(Query input) {
-                return rel.equals(input.getRel()) && fromNullable(name).equals(input.getName());
-            }
-        });
+        return findQuery(query -> rel.equals(query.getRel()) && ofNullable(name).equals(query.getName()));
     }
 
     public Optional<Link> findLink(Predicate<Link> predicate) {
-        return CollectionOps.find(getLinks(), predicate);
+        return getLinks().stream().filter(predicate).findFirst();
     }
 
     public List<Link> filterLinks(Predicate<Link> predicate) {
-        return CollectionOps.filter(getLinks(), predicate);
+        return getLinks().stream().filter(predicate).collect(Collectors.<Link>toList());
     }
 
     public Optional<Item> findItem(Predicate<Item> predicate) {
-        return CollectionOps.find(getItems(), predicate);
+        return getItems().stream().filter(predicate).findFirst();
     }
 
     public List<Item> filterItems(Predicate<Item> predicate) {
-        return CollectionOps.filter(getItems(), predicate);
+        return getItems().stream().filter(predicate).collect(Collectors.<Item>toList());
     }
 
     public List<Item> filterItemsByProfile(final URI profile) {
-        return filterItems(new Predicate<Item>() {
-            @Override
-            public boolean apply(Item item) {
-                return item.linkByRel("profile").forall(new Predicate<Link>() {
-                    @Override
-                    public boolean apply(Link link) {
-                        return link.getHref().equals(profile);
-                    }
-                });
-            }
-        });
+        return filterItems(item -> item.linkByRel("profile").map(link -> link.getHref().equals(profile)).orElse(true));
     }
 
     public Optional<Item> getFirstItem() {
-        return CollectionOps.headOption(getItems());
+        return getItems().stream().findFirst();
     }
 
     public Optional<Query> findQuery(Predicate<Query> predicate) {
-        return CollectionOps.find(getQueries(), predicate);
+        return getQueries().stream().filter(predicate).findFirst();
     }
 
     public List<Query> filterQueries(Predicate<Query> predicate) {
-        return CollectionOps.filter(getQueries(), predicate);
+        return getQueries().stream().filter(predicate).collect(Collectors.<Query>toList());
     }
 
     public Builder toBuilder() {
@@ -225,12 +183,8 @@ public final class Collection extends Extended<Collection> implements Writable {
         builder.addItems(getItems());
         builder.addLinks(getLinks());
         builder.addQueries(getQueries());
-        for (Template t : getTemplate()) {
-            builder.withTemplate(t);
-        }
-        for (Error e : getError()) {
-            builder.withError(e);
-        }
+        getTemplate().ifPresent(builder::withTemplate);
+        getError().ifPresent(builder::withError);
         return builder;
     }
 
@@ -256,25 +210,15 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public void validate() {
-        for (Link link : getLinks()) {
-            link.validate();
-        }
-        for (Item item : getItems()) {
-            item.validate();
-        }
-        for (Query query : getQueries()) {
-            query.validate();
-        }
-        for (Template t : getTemplate()) {
-            t.validate();
-        }
-        for (Error e : getError()) {
-            e.validate();
-        }
+        getLinks().stream().forEach(Link::validate);
+        getItems().stream().forEach(Item::validate);
+        getQueries().stream().forEach(Query::validate);
+        getTemplate().ifPresent(Template::validate);
+        getError().ifPresent(Error::validate);
     }
 
     public static Builder builder(URI href) {
-        return new Builder(fromNullable(href));
+        return new Builder(ofNullable(href));
     }
 
     public static Builder builder() {
@@ -282,19 +226,25 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public static class Builder {
+
         private Optional<URI> href;
+
         private final List<Item> itemBuilder = new ArrayList<Item>();
+
         private final List<Link> linkBuilder = new ArrayList<Link>();
+
         private final List<Query> queryBuilder = new ArrayList<Query>();
-        private Optional<Template> template = Optional.none();
-        private Optional<Error> error = Optional.none();
+
+        private Optional<Template> template = Optional.empty();
+
+        private Optional<Error> error = Optional.empty();
 
         public Builder() {
-            this(Optional.<URI>none());
+            this(Optional.<URI>empty());
         }
 
         public Builder(URI href) {
-            this(fromNullable(href));
+            this(ofNullable(href));
         }
 
         public Builder(Optional<URI> href) {
@@ -302,10 +252,10 @@ public final class Collection extends Extended<Collection> implements Writable {
         }
 
         public Builder withHref(URI href) {
-            this.href = fromNullable(href);
+            this.href = ofNullable(href);
             return this;
         }
-        
+
         public Builder addItem(Item item) {
             itemBuilder.add(item);
             return this;
@@ -337,19 +287,17 @@ public final class Collection extends Extended<Collection> implements Writable {
         }
 
         public Builder withError(Error error) {
-            this.error = fromNullable(error);
+            this.error = ofNullable(error);
             return this;
         }
 
         public Builder withTemplate(Template template) {
-            this.template = fromNullable(template);
+            this.template = ofNullable(template);
             return this;
         }
 
         private <A> void addToList(Iterable<A> iterable, List<A> list) {
-            for (A a : iterable) {
-                list.add(a);
-            }
+            StreamSupport.stream(iterable.spliterator(), false).forEach(list::add);
         }
 
         public Collection build() {
