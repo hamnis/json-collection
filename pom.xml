@@ -19,8 +19,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.hamnaberg.rest</groupId>
-  <artifactId>json-collection</artifactId>
-  <version>3.2.0-SNAPSHOT</version>
+    <artifactId>json-collection</artifactId>
+  <version>4.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>JSON Collection</name>
   <url>https://github.com/hamnis/json-collection</url>
@@ -70,11 +70,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>net.hamnaberg</groupId>
-      <artifactId>funclite</artifactId>
-      <version>0.2.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.4.1.1</version>
@@ -111,8 +106,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.1</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
         <plugin>

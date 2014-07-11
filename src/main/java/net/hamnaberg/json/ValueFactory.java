@@ -17,7 +17,7 @@
 package net.hamnaberg.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import net.hamnaberg.funclite.Optional;
+import java.util.Optional;
 
 import java.math.BigDecimal;
 
@@ -49,7 +49,7 @@ public class ValueFactory {
             value = new BigDecimal(value.toString());
         }
         if (value instanceof Optional) {
-            return createValue(((Optional) value).orNull());
+            return createValue(((Optional) value).orElse(null));
         }
         if (!checkValue(value)) {
             return new ValueImpl(value.toString());
@@ -61,20 +61,20 @@ public class ValueFactory {
     public static Optional<Value> createOptionalValue(Object value) {
         Value v = createValue(value);
         if (v.isNull()) {
-            return Optional.none();
+            return Optional.empty();
         }
-        return Optional.some(v);
+        return Optional.of(v);
     }
 
     public static Optional<Value> createOptionalValue(JsonNode value) {
         if (value == null) {
-            return Optional.none();
+            return Optional.empty();
         }
         Value v = createValue(value);
         if (v.isNull()) {
-            return Optional.none();
+            return Optional.empty();
         }
-        return Optional.some(v);
+        return Optional.of(v);
     }
 
     private static boolean checkValue(Object value) {

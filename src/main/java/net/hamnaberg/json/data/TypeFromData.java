@@ -1,6 +1,6 @@
 package net.hamnaberg.json.data;
 
-import net.hamnaberg.funclite.Optional;
+import java.util.Optional;
 import net.hamnaberg.json.Data;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -24,9 +24,9 @@ public class TypeFromData<A> implements FromData<Optional<A>> {
     public Optional<A> apply(Data data) {
         ObjectNode node = new JsonObjectFromData().apply(data);
         try {
-            return Optional.some(mapper.treeToValue(node, type));
+            return Optional.of(mapper.treeToValue(node, type));
         } catch (IOException e) {
-            return Optional.none();
+            return Optional.empty();
         }
     }
 }

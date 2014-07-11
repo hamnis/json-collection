@@ -16,17 +16,27 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Function;
-import net.hamnaberg.funclite.MapOps;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.json.extension.Extended;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.extension.Extended;
 
-import java.util.*;
-
-import static net.hamnaberg.json.util.StringUtils.*;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Spliterators.spliteratorUnknownSize;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
+import static net.hamnaberg.json.util.StringUtils.capitalize;
 
 public final class Property extends Extended<Property> {
     Property(ObjectNode delegate) {
@@ -34,11 +44,9 @@ public final class Property extends Extended<Property> {
     }
 
     static ArrayNode toArrayNode(Iterable<Property> data) {
-        ArrayNode arr = JsonNodeFactory.instance.arrayNode();
-        for (Property property : data) {
-            arr.add(property.asJson());
-        }
-        return arr;
+        return stream(data.spliterator(), false)
+                .map(Extended::asJson)
+                .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll);
     }
 
     public String getName() {
@@ -50,7 +58,7 @@ public final class Property extends Extended<Property> {
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.some(delegate.get("prompt").asText()) : Optional.<String>none();
+        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>empty();
     }
 
     public boolean hasValue() {
@@ -66,28 +74,22 @@ public final class Property extends Extended<Property> {
     }
 
     public List<Value> getArray() {
-        JsonNode array = delegate.get("array");
-        List<Value> builder = CollectionOps.newArrayList();
-        if (array != null && array.isArray()) {
-            for (JsonNode n : array) {
-                builder.add(ValueFactory.createValue(n));
-            }
-        }
-        return Collections.unmodifiableList(builder);
+        return Optional.ofNullable(delegate.get("array"))
+                       .map(array -> array.isArray()
+                                     ? unmodifiableList(stream(array.spliterator(), false)
+                                                                .map(ValueFactory::createValue)
+                                                                .collect(Collectors.toList()))
+                                     : Collections.EMPTY_LIST)
+                       .orElse(Collections.EMPTY_LIST);
     }
 
     public Map<String, Value> getObject() {
-        Map<String, Value> builder = MapOps.newHashMap();
-        JsonNode object = delegate.get("object");
-        if (object != null && object.isObject()) {
-            Iterator<Map.Entry<String,JsonNode>> fields = object.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> next = fields.next();
-                Value opt = ValueFactory.createValue(next.getValue());
-                builder.put(next.getKey(), opt);
-            }
-        }
-        return Collections.unmodifiableMap(builder);
+        return Optional.ofNullable(delegate.get("object"))
+                       .map(object -> object.isObject()
+                                      ? unmodifiableMap(stream(spliteratorUnknownSize(object.fields(), Spliterator.ORDERED), false)
+                                                                .collect(toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue()))))
+                                      : Collections.EMPTY_MAP)
+                       .orElse(Collections.EMPTY_MAP);
     }
 
     public Property withValue(Value value) {
@@ -110,7 +112,7 @@ public final class Property extends Extended<Property> {
     }
 
     public boolean isEmpty() {
-        return getValue().isNone() && getArray().isEmpty() && getObject().isEmpty();
+        return !getValue().isPresent() && getArray().isEmpty() && getObject().isEmpty();
     }
 
     @Override
@@ -118,11 +120,11 @@ public final class Property extends Extended<Property> {
         if (isEmpty()) {
             return "Property template with name " + getName();
         }
-        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orNull(), getArray(), getObject(), getPrompt());
+        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orElse(null), getArray(), getObject(), getPrompt());
     }
 
     public static Property template(String name) {
-        return value(name, Optional.some(capitalize(name)), Value.NONE);
+        return value(name, Optional.of(capitalize(name)), Value.NONE);
     }
 
     public static Property template(String name, Optional<String> prompt) {
@@ -131,14 +133,12 @@ public final class Property extends Extended<Property> {
 
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
         ObjectNode node = makeObject(name, prompt);
-        if (value.isSome()) {
-            node.put("value", value.get().asJson());
-        }
+        value.ifPresent(val -> node.put("value", val.asJson()));
         return new Property(node);
     }
 
     public static Property value(String name, Optional<String> prompt, Value value) {
-        return value(name, prompt, Optional.some(value));
+        return value(name, prompt, Optional.of(value));
     }
 
     public static Property value(String name, Optional<String> prompt, Object value) {
@@ -147,7 +147,7 @@ public final class Property extends Extended<Property> {
 
     public static Property value(String name, Value value) {
         return value(name,
-                Optional.fromNullable(value)
+                Optional.ofNullable(value)
         );
     }
 
@@ -159,13 +159,13 @@ public final class Property extends Extended<Property> {
 
     public static Property value(String name, Optional<Value> value) {
         return value(name,
-                Optional.some(capitalize(name)),
+                Optional.of(capitalize(name)),
                 value
         );
     }
 
     public static Property array(String name, List<Value> list) {
-        return array(name, Optional.some(capitalize(name)), list);
+        return array(name, Optional.of(capitalize(name)), list);
     }
 
     public static Property array(String name, Optional<String> prompt, List<Value> list) {
@@ -183,20 +183,18 @@ public final class Property extends Extended<Property> {
     }
 
     public static Property arrayObject(String name, List<Object> list) {
-        return arrayObject(name, Optional.some(capitalize(name)), list);
+        return arrayObject(name, Optional.of(capitalize(name)), list);
     }
 
     public static Property arrayObject(String name, Optional<String> prompt, List<Object> list) {
-        return array(name, prompt, CollectionOps.flatMap(list, new Function<Object, Iterable<Value>>() {
-            @Override
-            public Iterable<Value> apply(Object input) {
-                return ValueFactory.createOptionalValue(input);
-            }
-        }));
+        return array(name, prompt, list.stream()
+                                       .map(ValueFactory::createOptionalValue)
+                                       .flatMap(optionalValue -> optionalValue.map(value -> Stream.of(value)).orElseGet(Stream::empty))
+                                       .collect(Collectors.toList()));
     }
 
     public static Property object(String name, Map<String, Value> object) {
-        return object(name, Optional.some(capitalize(name)), object);
+        return object(name, Optional.of(capitalize(name)), object);
     }
 
     public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
@@ -214,16 +212,13 @@ public final class Property extends Extended<Property> {
     }
 
     public static Property objectMap(String name, Map<String, Object> object) {
-        return objectMap(name, Optional.some(capitalize(name)), object);
+        return objectMap(name, Optional.of(capitalize(name)), object);
     }
 
     public static Property objectMap(String name, Optional<String> prompt, Map<String, Object> object) {
-        return object(name, prompt, MapOps.mapValues(object, new Function<Object, Value>() {
-            @Override
-            public Value apply(Object input) {
-                return ValueFactory.createValue(input);
-            }
-        }));
+        return object(name, prompt, object.entrySet()
+                                          .stream()
+                                          .collect(toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue()))));
     }
 
     @Override
@@ -239,17 +234,13 @@ public final class Property extends Extended<Property> {
     private static ObjectNode makeObject(String name, Optional<String> prompt) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("name", name);
-        if (prompt.isSome()) {
-            node.put("prompt", prompt.get());
-        }
+        prompt.ifPresent(value -> node.put("prompt", value));
         return node;
     }
 
     public static List<Property> fromData(JsonNode data) {
-        List<Property> builder = CollectionOps.newArrayList();
-        for (JsonNode jsonNode : data) {
-            builder.add(new Property((ObjectNode) jsonNode));
-        }
-        return Collections.unmodifiableList(builder);
+        return unmodifiableList(stream(data.spliterator(), false)
+                                        .map(jsonNode -> new Property((ObjectNode) jsonNode))
+                                        .collect(Collectors.toList()));
     }
 }

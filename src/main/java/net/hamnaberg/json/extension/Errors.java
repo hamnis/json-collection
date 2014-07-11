@@ -2,21 +2,20 @@ package net.hamnaberg.json.extension;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.hamnaberg.funclite.Function;
-import net.hamnaberg.funclite.FunctionalMap;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.json.InternalObjectFactory;
 import net.hamnaberg.json.Error;
+import net.hamnaberg.json.InternalObjectFactory;
 
 public class Errors {
     private final Map<String, List<Error>> errors = new LinkedHashMap<String, List<Error>>();
@@ -35,17 +34,16 @@ public class Errors {
 
     private JsonNode asJson() {
         ObjectNode n = JsonNodeFactory.instance.objectNode();
-        n.putAll(FunctionalMap.create(errors).mapValues(new Function<List<Error>, JsonNode>() {
-            @Override
-            public JsonNode apply(List<Error> errors) {
-                ArrayNode n = JsonNodeFactory.instance.arrayNode();
-                for (Error error : errors) {
-                    n.add(error.asJson());
-                }
-                return n;
-            }
-        }));
+        n.putAll(errors.entrySet()
+                       .stream()
+                       .collect(Collectors.toMap(Map.Entry::getKey, entry -> toArrayNode(entry.getValue()))));
         return n;
+    }
+
+    private static ArrayNode toArrayNode(List<Error> errors) {
+        return errors.stream()
+                     .map(Extended::asJson)
+                     .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll);
     }
 
     public static class Builder {
@@ -90,18 +88,16 @@ public class Errors {
                     }
                     errors.put(next.getKey(), list);
                 }
-                return Optional.some(new Errors(errors));
+                return Optional.of(new Errors(errors));
             }
-            return Optional.none();
+            return Optional.empty();
         }
 
         @Override
         public Map<String, JsonNode> apply(Optional<Errors> value) {
-            Map<String, JsonNode> m = new HashMap<String, JsonNode>();
-            for (Errors e : value) {
-                m.put("errors", e.asJson());
-            }
-            return m;
+            return value.map(error -> Stream.of(error))
+                        .orElse(Stream.<Errors>empty())
+                        .collect(Collectors.toMap(erros -> "errors", Errors::asJson));
         }
     }
 }

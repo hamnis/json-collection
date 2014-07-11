@@ -17,9 +17,6 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.funclite.CollectionOps;
-import net.hamnaberg.funclite.Optional;
-import net.hamnaberg.funclite.Preconditions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,6 +25,9 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public final class Link extends Extended<Link> {
     Link(ObjectNode delegate) {
@@ -40,30 +40,24 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link create(URI href, String rel) {
-        return create(href, rel, Optional.<String>none(), Optional.<String>none(), Optional.<Render>none());
+        return create(href, rel, Optional.<String>empty(), Optional.<String>empty(), Optional.<Render>empty());
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt) {
-        return create(href, rel, prompt, Optional.<String>none(), Optional.<Render>none());
+        return create(href, rel, prompt, Optional.<String>empty(), Optional.<Render>empty());
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name) {
-        return create(href, rel, prompt, name, Optional.<Render>none());
+        return create(href, rel, prompt, name, Optional.<Render>empty());
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name, Optional<Render> render) {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("href", Preconditions.checkNotNull(href, "Href may not be null").toString());
-        node.put("rel", Preconditions.checkNotNull(rel, "Relation may not be null"));
-        if (prompt.isSome()) {
-            node.put("prompt", prompt.get());
-        }
-        if (render.isSome()) {
-            node.put("render", render.get().getName());
-        }
-        if (name.isSome()) {
-            node.put("name", name.get());
-        }
+        node.put("href", Optional.ofNullable(href).orElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString());
+        node.put("rel", Optional.ofNullable(rel).orElseThrow(() -> new IllegalArgumentException("Relation may not be null")));
+        prompt.ifPresent(value -> node.put("prompt", value));
+        render.ifPresent(value -> node.put("render", value.getName()));
+        name.ifPresent(value -> node.put("name", value));
         return new Link(node);
     }
 
@@ -92,7 +86,7 @@ public final class Link extends Extended<Link> {
     }
 
     public Optional<String> getPrompt() {
-        return Optional.fromNullable(getAsString("prompt"));
+        return Optional.ofNullable(getAsString("prompt"));
     }
 
     public Link withPrompt(String prompt) {
@@ -102,7 +96,7 @@ public final class Link extends Extended<Link> {
     }
 
     public Optional<String> getName() {
-        return Optional.fromNullable(getAsString("name"));
+        return Optional.ofNullable(getAsString("name"));
     }
 
     public Link withName(String name) {
@@ -127,15 +121,13 @@ public final class Link extends Extended<Link> {
     }
 
     public void validate() {
-        Preconditions.checkArgument(getHref() != null, "Href was null");
-        Preconditions.checkArgument(getRel() != null, "Rel was null");
+        Optional.ofNullable(getHref()).orElseThrow(() -> new IllegalArgumentException("Href was null"));
+        Optional.ofNullable(getRel()).orElseThrow(() -> new IllegalArgumentException("Rel was null"));
     }
 
     static List<Link> fromArray(JsonNode node) {
-        List<Link> links = CollectionOps.newArrayList();
-        for (JsonNode jsonNode : node) {
-            links.add(new Link((ObjectNode) jsonNode));
-        }
-        return Collections.unmodifiableList(links);
+        return Collections.unmodifiableList(StreamSupport.stream(node.spliterator(), false)
+                .map(jsonNode -> new Link((ObjectNode) jsonNode))
+                .collect(Collectors.toList()));
     }
 }

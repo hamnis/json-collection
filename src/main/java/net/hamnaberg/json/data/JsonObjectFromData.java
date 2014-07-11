@@ -1,15 +1,16 @@
 package net.hamnaberg.json.data;
 
-import net.hamnaberg.json.Data;
-import net.hamnaberg.json.Property;
-import net.hamnaberg.json.Value;
-import net.hamnaberg.funclite.*;
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.List;
+import net.hamnaberg.json.Data;
+import net.hamnaberg.json.Property;
+import net.hamnaberg.json.Value;
 
 public final class JsonObjectFromData implements FromData<ObjectNode> {
 
@@ -21,30 +22,23 @@ public final class JsonObjectFromData implements FromData<ObjectNode> {
             if (property.hasArray()) {
                 List<Value> arrValue = property.getArray();
                 ArrayNode arr = factory.arrayNode();
-                arr.addAll(FunctionalList.create(arrValue).map(toJSON));
+                arr.addAll(arrValue.stream().map(Value::asJson).collect(Collectors.toList()));
                 node.put(property.getName(), arr);
             }
             else if (property.hasObject()) {
                 ObjectNode object = factory.objectNode();
-                object.putAll(FunctionalMap.create(property.getObject()).mapValues(toJSON));
+                object.putAll(property.getObject()
+                                      .entrySet()
+                                      .stream()
+                                      .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().asJson())));
                 node.put(property.getName(), object);
             }
             else {
                 Optional<Value> value = property.getValue();
-                for (Value v : value) {
-                    node.put(property.getName(), v.asJson());
-                }
+                value.ifPresent(v -> node.put(property.getName(), v.asJson()));
             }
         }
         return node;
     }
-
-
-    private Function<Value,JsonNode> toJSON = new Function<Value, JsonNode>() {
-        @Override
-        public JsonNode apply(Value input) {
-            return input.asJson();
-        }
-    };
 
 }

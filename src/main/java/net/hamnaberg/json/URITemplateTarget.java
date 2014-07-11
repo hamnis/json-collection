@@ -1,12 +1,15 @@
 package net.hamnaberg.json;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import com.damnhandy.uri.template.MalformedUriTemplateException;
 import com.damnhandy.uri.template.UriTemplate;
-import com.damnhandy.uri.template.VariableExpansionException;
-import net.hamnaberg.funclite.*;
-
-import java.net.URI;
-import java.util.Map;
 
 public final class URITemplateTarget implements Target {
     private String href;
@@ -34,19 +37,22 @@ public final class URITemplateTarget implements Target {
     }
 
     public URI expand(Iterable<Property> properties) {
-        Map<String, Object> map = MapOps.newHashMap();
+        Map<String, Object> map = new HashMap<>();
         for (Property property : properties) {
             if (property.hasArray()) {
-                map.put(property.getName(), FunctionalList.create(property.getArray()).filter(NOT_NULL_PRED).map(AS_STRING));
+                map.put(property.getName(), property.getArray().stream().filter(NOT_NULL_PRED).map(AS_STRING).collect(Collectors.toList()));
             }
             else if (property.hasObject()) {
-                map.put(property.getName(), FunctionalMap.create(property.getObject()).filter(VALUE_NOT_NULL_PRED).mapValues(AS_STRING));
+                map.put(property.getName(),
+                        property.getObject()
+                                .entrySet()
+                                .stream()
+                                .filter(VALUE_NOT_NULL_PRED)
+                                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().asString())));
             }
             else {
                 Optional<Object> value = property.getValue().filter(NOT_NULL_PRED).map(AS_STRING);
-                if (value.isSome()) {
-                    map.put(property.getName(), value.get());
-                }
+                value.ifPresent(val -> map.put(property.getName(), val));
             }
         }
 
@@ -79,24 +85,9 @@ public final class URITemplateTarget implements Target {
         return href;
     }
 
-    private final Predicate<Map.Entry<String,Value>> VALUE_NOT_NULL_PRED = new Predicate<Map.Entry<String, Value>>() {
-        @Override
-        public boolean apply(Map.Entry<String, Value> input) {
-            return !input.getValue().isNull();
-        }
-    };
+    private final Predicate<Map.Entry<String,Value>> VALUE_NOT_NULL_PRED = input -> !input.getValue().isNull();
     
-    private Predicate<Value> NOT_NULL_PRED = new Predicate<Value>() {
-        @Override
-        public boolean apply(Value input) {
-            return !input.isNull();
-        }
-    };
-    private Function<Value,Object> AS_STRING = new Function<Value, Object>() {
-        @Override
-        public Object apply(Value input) {
-            return input.asString();
-        }
-    };
+    private Predicate<Value> NOT_NULL_PRED = input -> !input.isNull();
+    private Function<Value,Object> AS_STRING = Value::asString;
 
 }

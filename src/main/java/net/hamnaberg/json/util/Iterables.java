@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Erlend Hamnaberg
+ * Copyright 2013 Erlend Hamnaberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package net.hamnaberg.json;
+package net.hamnaberg.json.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.Optional;
+public final class Iterables {
 
-public interface Value {
-    boolean isBoolean();
-    boolean isString();
-    boolean isNumeric();
-    boolean isNull();
+    public static <A>  boolean isEmpty(Iterable<A> iterable) {
+        return !iterable.iterator().hasNext();
+    }
 
-    String asString();
-
-    boolean asBoolean();
-
-    Number asNumber();
-
-    JsonNode asJson();
-
-    Optional<Value> NONE = Optional.empty();
 }
