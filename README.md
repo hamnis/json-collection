@@ -4,6 +4,8 @@
 
 Examples of media type in use can be found [here](http://amundsen.com/media-types/collection/examples/)
 
+NOTE: From version 4.0, this library requires Java 8.
+
 # Maven coordinates
 
 Releases are pushed to oss.sonatype.org which again syncs with maven central.
