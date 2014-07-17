@@ -39,7 +39,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
         Data replaced = data.replace(property);
         if (!replaced.isEmpty()) {
             ObjectNode copied = copyDelegate();
-            copied.put("data", Property.toArrayNode(replaced));
+            copied.set("data", Property.toArrayNode(replaced));
             return copy(copied);
         }
         return (A)this;
@@ -68,7 +68,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
         }
 
         ObjectNode copied = copyDelegate();
-        copied.put("data", Property.toArrayNode(data));
+        copied.set("data", Property.toArrayNode(data));
         return copy(copied);
     }
 
@@ -84,7 +84,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
             return (A) this;
         }
         ObjectNode copied = copyDelegate();
-        copied.put("data", Property.toArrayNode(props));
+        copied.set("data", Property.toArrayNode(props));
         return copy(copied);
     }
 }

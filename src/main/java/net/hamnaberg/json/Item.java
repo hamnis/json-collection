@@ -50,12 +50,12 @@ public final class Item extends DataContainer<Item> {
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         href.ifPresent(uri -> node.put("href", uri.toString()));
         if (!Iterables.isEmpty(properties)) {
-            node.put("data", StreamSupport.stream(properties.spliterator(), false)
+            node.set("data", StreamSupport.stream(properties.spliterator(), false)
                                           .map(Extended::asJson)
                                           .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         if (!Iterables.isEmpty(links)) {
-            node.put("links", StreamSupport.stream(links.spliterator(), false)
+            node.set("links", StreamSupport.stream(links.spliterator(), false)
                                            .map(Extended::asJson)
                                            .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }

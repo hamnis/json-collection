@@ -30,10 +30,10 @@ import net.hamnaberg.json.Template;
 import net.hamnaberg.json.Value;
 import net.hamnaberg.json.ValueFactory;
 import net.hamnaberg.json.Version;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -102,7 +102,7 @@ public class CollectionParserTest {
         Template template = parser.parseTemplate(new InputStreamReader(getClass().getResourceAsStream("/only-template.json")));
         assertNotNull("Template was null", template);
         Map<String,Property> properties = template.getDataAsMap();
-        assertThat(properties.keySet(), JUnitMatchers.hasItems("full-name", "email", "blog", "avatar"));
+        assertThat(properties.keySet(), CoreMatchers.hasItems("full-name", "email", "blog", "avatar"));
     }
 
     @Test

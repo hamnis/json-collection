@@ -55,7 +55,7 @@ public final class Query extends DataContainer<Query> {
         prompt.ifPresent(value -> obj.put("prompt", value));
         name.ifPresent(value -> obj.put("name", value));
         if (!Iterables.isEmpty(data)) {
-            obj.put("data", StreamSupport.stream(data.spliterator(), false)
+            obj.set("data", StreamSupport.stream(data.spliterator(), false)
                                          .map(Extended::asJson)
                                          .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }

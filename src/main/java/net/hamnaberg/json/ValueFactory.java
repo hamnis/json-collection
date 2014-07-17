@@ -41,6 +41,7 @@ public class ValueFactory {
         throw new IllegalArgumentException("Illegal value " + node);
     }
 
+    @SuppressWarnings("unchecked")
     public static Value createValue(Object value) {
         if (value == null) {
             return ValueImpl.NULL;

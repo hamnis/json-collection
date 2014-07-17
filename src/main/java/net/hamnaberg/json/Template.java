@@ -45,7 +45,7 @@ public final class Template extends DataContainer<Template> implements Writable 
     public static Template create(Iterable<Property> data) {
         ObjectNode obj = JsonNodeFactory.instance.objectNode();
         if (!Iterables.isEmpty(data)) {
-            obj.put("data", Property.toArrayNode(data));
+            obj.set("data", Property.toArrayNode(data));
         }
         return new Template(obj);
     }
@@ -70,7 +70,7 @@ public final class Template extends DataContainer<Template> implements Writable 
     public void writeTo(Writer writer) throws IOException {
         ObjectMapper factory = new ObjectMapper();
         ObjectNode template = JsonNodeFactory.instance.objectNode();
-        template.put("template", asJson());
+        template.set("template", asJson());
         factory.writeValue(writer, template);
     }
 

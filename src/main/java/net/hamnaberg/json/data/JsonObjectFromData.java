@@ -23,19 +23,19 @@ public final class JsonObjectFromData implements FromData<ObjectNode> {
                 List<Value> arrValue = property.getArray();
                 ArrayNode arr = factory.arrayNode();
                 arr.addAll(arrValue.stream().map(Value::asJson).collect(Collectors.toList()));
-                node.put(property.getName(), arr);
+                node.set(property.getName(), arr);
             }
             else if (property.hasObject()) {
                 ObjectNode object = factory.objectNode();
-                object.putAll(property.getObject()
+                object.setAll(property.getObject()
                                       .entrySet()
                                       .stream()
                                       .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().asJson())));
-                node.put(property.getName(), object);
+                node.set(property.getName(), object);
             }
             else {
                 Optional<Value> value = property.getValue();
-                value.ifPresent(v -> node.put(property.getName(), v.asJson()));
+                value.ifPresent(v -> node.set(property.getName(), v.asJson()));
             }
         }
         return node;

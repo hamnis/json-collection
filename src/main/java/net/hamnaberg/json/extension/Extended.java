@@ -19,19 +19,20 @@ public abstract class Extended<T> {
         return extension.extract(delegate);
     }
 
+    @SuppressWarnings("unchecked")
     public <A> T apply(A value, Extension<A> extension) {
         Map<String, JsonNode> map = extension.apply(value);
         if (map == null || map.isEmpty()) {
             return (T)this;
         }
         ObjectNode copied = copyDelegate();
-        copied.putAll(map);
+        copied.setAll(map);
         return copy(copied);
     }
 
     protected ObjectNode copyDelegate() {
         ObjectNode copied = JsonNodeFactory.instance.objectNode();
-        copied.putAll(delegate);
+        copied.setAll(delegate);
         return copied;
     }
 

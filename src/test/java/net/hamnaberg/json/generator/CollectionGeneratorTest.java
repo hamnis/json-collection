@@ -116,7 +116,7 @@ public class CollectionGeneratorTest {
         property.put("prompt", "One");
         arrayNode.add(property);
         ObjectNode template = nodeFactory.objectNode();
-        template.put("data", arrayNode);
+        template.set("data", arrayNode);
         return template;
     }
 
@@ -130,7 +130,7 @@ public class CollectionGeneratorTest {
         property.put("prompt", "One");
         property.put("value", new BigDecimal(1));
         properties.add(property);
-        objectNode.put("data", properties);
+        objectNode.set("data", properties);
         array.add(objectNode);
         return array;
     }

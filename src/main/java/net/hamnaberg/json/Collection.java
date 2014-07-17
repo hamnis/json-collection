@@ -65,22 +65,22 @@ public final class Collection extends Extended<Collection> implements Writable {
         obj.put("version", Version.ONE.getIdentifier());
         href.ifPresent(value -> obj.put("href", value.toString()));
         if (!links.isEmpty()) {
-            obj.put("links", links.stream()
+            obj.set("links", links.stream()
                                   .map(Extended::asJson)
                                   .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         if (!items.isEmpty()) {
-            obj.put("items", items.stream()
+            obj.set("items", items.stream()
                                   .map(Extended::asJson)
                                   .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
         if (!queries.isEmpty()) {
-            obj.put("queries", queries.stream()
+            obj.set("queries", queries.stream()
                                       .map(Extended::asJson)
                                       .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
         }
-        template.ifPresent(value -> obj.put("template", value.asJson()));
-        error.ifPresent(value -> obj.put("error", value.asJson()));
+        template.ifPresent(value -> obj.set("template", value.asJson()));
+        error.ifPresent(value -> obj.set("error", value.asJson()));
         Collection coll = new Collection(obj);
         coll.validate();
         return coll;
@@ -132,6 +132,10 @@ public final class Collection extends Extended<Collection> implements Writable {
 
     public Optional<Link> linkByRel(final String rel) {
         return findLink(link -> rel.equals(link.getRel()));
+    }
+
+    public List<Link> linksByRel(final String rel) {
+        return filterLinks(link -> rel.equals(link.getRel()));
     }
 
     public Optional<Query> queryByRel(final String rel) {
@@ -195,7 +199,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     public void writeTo(Writer writer) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode obj = mapper.createObjectNode();
-        obj.put("collection", asJson());
+        obj.set("collection", asJson());
         mapper.writeValue(writer, obj);
     }
 

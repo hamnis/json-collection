@@ -79,17 +79,16 @@ public final class Property extends Extended<Property> {
                                      ? unmodifiableList(stream(array.spliterator(), false)
                                                                 .map(ValueFactory::createValue)
                                                                 .collect(Collectors.toList()))
-                                     : Collections.EMPTY_LIST)
-                       .orElse(Collections.EMPTY_LIST);
+                                     : Collections.<Value>emptyList())
+                       .orElse(Collections.<Value>emptyList());
     }
 
     public Map<String, Value> getObject() {
-        return Optional.ofNullable(delegate.get("object"))
-                       .map(object -> object.isObject()
-                                      ? unmodifiableMap(stream(spliteratorUnknownSize(object.fields(), Spliterator.ORDERED), false)
-                                                                .collect(toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue()))))
-                                      : Collections.EMPTY_MAP)
-                       .orElse(Collections.EMPTY_MAP);
+        return unmodifiableMap(Optional.ofNullable(delegate.get("object"))
+                       .filter(JsonNode::isObject).map(object ->
+                                stream(spliteratorUnknownSize(object.fields(), Spliterator.ORDERED), false)
+                                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue())))
+                ).orElse(Collections.<String, Value>emptyMap()));
     }
 
     public Property withValue(Value value) {
@@ -106,7 +105,7 @@ public final class Property extends Extended<Property> {
 
     private Property withDataValue(String name, JsonNode node, String... toRemove) {
         ObjectNode dlg = copyDelegate();
-        dlg.put(name, node);
+        dlg.set(name, node);
         dlg.remove(Arrays.asList(toRemove));
         return copy(dlg);
     }
@@ -133,7 +132,7 @@ public final class Property extends Extended<Property> {
 
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
         ObjectNode node = makeObject(name, prompt);
-        value.ifPresent(val -> node.put("value", val.asJson()));
+        value.ifPresent(val -> node.set("value", val.asJson()));
         return new Property(node);
     }
 
@@ -170,7 +169,7 @@ public final class Property extends Extended<Property> {
 
     public static Property array(String name, Optional<String> prompt, List<Value> list) {
         ObjectNode node = makeObject(name, prompt);
-        node.put("array", toArray(list));
+        node.set("array", toArray(list));
         return new Property(node);
     }
 
@@ -189,7 +188,7 @@ public final class Property extends Extended<Property> {
     public static Property arrayObject(String name, Optional<String> prompt, List<Object> list) {
         return array(name, prompt, list.stream()
                                        .map(ValueFactory::createOptionalValue)
-                                       .flatMap(optionalValue -> optionalValue.map(value -> Stream.of(value)).orElseGet(Stream::empty))
+                                       .flatMap(optionalValue -> optionalValue.map(Stream::of).orElseGet(Stream::empty))
                                        .collect(Collectors.toList()));
     }
 
@@ -199,14 +198,14 @@ public final class Property extends Extended<Property> {
 
     public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
         ObjectNode node = makeObject(name, prompt);
-        node.put("object", toObject(object));
+        node.set("object", toObject(object));
         return new Property(node);
     }
 
     private static ObjectNode toObject(Map<String, Value> object) {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         for (Map.Entry<String, Value> entry : object.entrySet()) {
-            objectNode.put(entry.getKey(), entry.getValue().asJson());
+            objectNode.set(entry.getKey(), entry.getValue().asJson());
         }
         return objectNode;
     }
