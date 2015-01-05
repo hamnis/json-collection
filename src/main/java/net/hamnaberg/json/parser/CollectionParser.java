@@ -45,7 +45,7 @@ public class CollectionParser {
     /**
      * Parses a Collection from the given stream.
      * The stream is wrapped in a BufferedReader.
-     * <p/>
+     * <p>
      * The stream is expected to be UTF-8 encoded.
      *
      * @param stream the stream
@@ -80,7 +80,7 @@ public class CollectionParser {
     /**
      * Parses a JsonCollection from the given stream.
      * The stream is wrapped in a BufferedReader.
-     * <p/>
+     * <p>
      * The stream is expected to be UTF-8 encoded.
      *
      * @param stream the stream
