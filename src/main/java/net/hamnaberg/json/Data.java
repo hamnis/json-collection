@@ -1,7 +1,5 @@
 package net.hamnaberg.json;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +15,15 @@ import net.hamnaberg.json.util.Iterables;
 
 public final class Data implements Iterable<Property> {
 
-    private List<Property> properties;
+    private final List<Property> properties;
+
+    public static Map<String, Property> getDataAsMap(Iterable<Property> properties) {
+        return Collections.unmodifiableMap(
+                StreamSupport.stream(properties.spliterator(), false).
+                        collect(Collectors.toMap(Property::getName, Function.<Property>identity()))
+        );
+    }
+
 
     public Data(Iterable<Property> props) {
         properties = Optional.ofNullable(props)
@@ -30,7 +36,7 @@ public final class Data implements Iterable<Property> {
     }
 
     public Map<String, Property> getDataAsMap() {
-        return Collections.unmodifiableMap(properties.stream().collect(Collectors.toMap(Property::getName, Function.<Property>identity())));
+        return getDataAsMap(properties);
     }
 
     public Optional<Property> findProperty(Predicate<Property> predicate) {
@@ -62,16 +68,12 @@ public final class Data implements Iterable<Property> {
         if (Iterables.isEmpty(replacement)) {
             return this;
         }
-        Map<String, Property> map = new Data(replacement).getDataAsMap();
-        List<Property> props = new ArrayList<Property>(this.properties.size());
-        for (Property current : this.properties) {
-            Property property = map.get(current.getName());
-            if (property != null) {
-                props.add(property);
-            } else {
-                props.add(current);
-            }
-        }
+        Map<String, Property> map = getDataAsMap(replacement);
+
+        List<Property> props = this.stream().
+                map(f -> map.getOrDefault(f.getName(), f)).
+                collect(Collectors.toList());
+
         return new Data(props);
     }
 
@@ -82,7 +84,7 @@ public final class Data implements Iterable<Property> {
      * @return a new copy of the template, or this if nothing was modified.
      */
     public Data replace(Property property) {
-        return replace(Arrays.asList(property));
+        return replace(Collections.singletonList(property));
     }
 
     /**
@@ -92,7 +94,7 @@ public final class Data implements Iterable<Property> {
      * @return a new copy of the template.
      */
     public Data add(Property property) {
-        return addAll(Arrays.asList(property));
+        return addAll(Collections.singletonList(property));
     }
 
     /**
@@ -128,4 +130,6 @@ public final class Data implements Iterable<Property> {
     public Iterator<Property> iterator() {
         return properties.iterator();
     }
+
+    public Stream<Property> stream() {return StreamSupport.stream(spliterator(), false); }
 }
