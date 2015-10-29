@@ -85,9 +85,9 @@ public final class URITemplateTarget implements Target {
         return href;
     }
 
-    private final Predicate<Map.Entry<String,Value>> VALUE_NOT_NULL_PRED = input -> !input.getValue().isNull();
-    
-    private Predicate<Value> NOT_NULL_PRED = input -> !input.isNull();
+    private final Predicate<Map.Entry<String,Value>> VALUE_NOT_NULL_PRED = input -> input.getValue() != Value.NULL;
+
+    private Predicate<Value> NOT_NULL_PRED = input -> input != Value.NULL;
     private Function<Value,Object> AS_STRING = Value::asString;
 
 }

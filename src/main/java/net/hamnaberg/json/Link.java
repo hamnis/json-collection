@@ -17,25 +17,18 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public final class Link extends Extended<Link> {
-    Link(ObjectNode delegate) {
+    Link(Json.JObject delegate) {
         super(delegate);
     }
 
     @Override
-    protected Link copy(ObjectNode value) {
+    protected Link copy(Json.JObject value) {
         return new Link(value);
     }
 
@@ -52,33 +45,32 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name, Optional<Render> render) {
-        ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("href", Optional.ofNullable(href).orElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString());
-        node.put("rel", Optional.ofNullable(rel).orElseThrow(() -> new IllegalArgumentException("Relation may not be null")));
-        prompt.ifPresent(value -> node.put("prompt", value));
-        render.ifPresent(value -> node.put("render", value.getName()));
-        name.ifPresent(value -> node.put("name", value));
-        return new Link(node);
+        Map<String, Json.JValue> obj = new LinkedHashMap<>();
+
+        Json.JObject node = Json.jObject(
+                Json.entry("href", Json.jString(Optional.ofNullable(href).orElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString())),
+                Json.entry("rel", Json.jString(Optional.ofNullable(rel).orElseThrow(() -> new IllegalArgumentException("Relation may not be null"))))
+        );
+        prompt.ifPresent(value -> obj.put("prompt", Json.jString(value)));
+        render.ifPresent(value -> obj.put("render", Json.jString(value.getName())));
+        name.ifPresent(value -> obj.put("name", Json.jString(value)));
+        return new Link(node.merge(Json.jObject(obj)));
     }
 
     public URI getHref() {
-        return delegate.has("href") ? URI.create(delegate.get("href").asText()) : null;
+        return delegate.getAsString("href").map(URI::create).orElse(null);
     }
 
     public Link withHref(URI href) {
-        ObjectNode node = copyDelegate();
-        node.put("href", href.toString());
-        return copy(node);
+        return copy(delegate.put("href", href.toString()));
     }
 
     public String getRel() {
-        return delegate.get("rel").asText();
+        return delegate.getAsString("rel").orElse(null);
     }
 
     public Link withRel(String rel) {
-        ObjectNode node = copyDelegate();
-        node.put("rel", rel);
-        return copy(node);
+        return copy(delegate.put("rel", rel));
     }
 
     public List<String> getParsedRel() {
@@ -90,9 +82,7 @@ public final class Link extends Extended<Link> {
     }
 
     public Link withPrompt(String prompt) {
-        ObjectNode node = copyDelegate();
-        node.put("prompt", prompt);
-        return copy(node);
+        return copy(delegate.put("prompt", prompt));
     }
 
     public Optional<String> getName() {
@@ -100,19 +90,15 @@ public final class Link extends Extended<Link> {
     }
 
     public Link withName(String name) {
-        ObjectNode node = copyDelegate();
-        node.put("name", name);
-        return copy(node);
+        return copy(delegate.put("name", name));
     }
 
     public Render getRender() {
-        return delegate.has("render") ? Render.valueOf(delegate.get("render").asText()) : Render.Link;
+        return delegate.getAsString("render").map(Render::valueOf).orElse(Render.Link);
     }
 
     public Link withRender(Render render) {
-        ObjectNode node = copyDelegate();
-        node.put("render", render.getName());
-        return copy(node);
+        return copy(delegate.put("render", render.getName()));
     }
 
     @Override
@@ -125,9 +111,7 @@ public final class Link extends Extended<Link> {
         Optional.ofNullable(getRel()).orElseThrow(() -> new IllegalArgumentException("Rel was null"));
     }
 
-    static List<Link> fromArray(JsonNode node) {
-        return Collections.unmodifiableList(StreamSupport.stream(node.spliterator(), false)
-                .map(jsonNode -> new Link((ObjectNode) jsonNode))
-                .collect(Collectors.toList()));
+    static List<Link> fromArray(Json.JArray node) {
+        return node.getListAsObjects().stream().map(Link::new).collect(Collectors.toList());
     }
 }

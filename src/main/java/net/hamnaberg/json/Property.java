@@ -16,79 +16,61 @@
 
 package net.hamnaberg.json;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.json.extension.Extended;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static net.hamnaberg.json.util.StringUtils.capitalize;
 
 public final class Property extends Extended<Property> {
-    Property(ObjectNode delegate) {
+    Property(Json.JObject delegate) {
         super(delegate);
     }
 
-    static ArrayNode toArrayNode(Iterable<Property> data) {
-        return stream(data.spliterator(), false)
+    static Json.JArray toArrayNode(Iterable<Property> data) {
+        return Json.jArray(stream(data.spliterator(), false)
                 .map(Extended::asJson)
-                .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll);
+                .collect(Collectors.toList()));
     }
 
     public String getName() {
-        return delegate.get("name").asText();
+        return delegate.getAsString("name").orElse(null);
     }
 
     public Optional<Value> getValue() {
-        return ValueFactory.createOptionalValue(delegate.get("value"));
+        return ValueFactory.createOptionalValue(delegate.get("value").orElse(Json.jNull()));
     }
 
     public Optional<String> getPrompt() {
-        return delegate.has("prompt") ? Optional.of(delegate.get("prompt").asText()) : Optional.<String>empty();
+        return delegate.getAsString("prompt");
     }
 
     public boolean hasValue() {
-        return delegate.has("value");
+        return delegate.containsKey("value");
     }
 
     public boolean hasArray() {
-        return delegate.has("array");
+        return delegate.containsKey("array");
     }
 
     public boolean hasObject() {
-        return delegate.has("object");
+        return delegate.containsKey("object");
     }
 
     public List<Value> getArray() {
-        return Optional.ofNullable(delegate.get("array"))
-                       .map(array -> array.isArray()
-                                     ? unmodifiableList(stream(array.spliterator(), false)
-                                                                .map(ValueFactory::createValue)
-                                                                .collect(Collectors.toList()))
-                                     : Collections.<Value>emptyList())
-                       .orElse(Collections.<Value>emptyList());
+        return delegate.getAsArrayOrEmpty("array").mapToList(ValueFactory::createValue);
     }
 
     public Map<String, Value> getObject() {
-        return unmodifiableMap(Optional.ofNullable(delegate.get("object"))
-                       .filter(JsonNode::isObject).map(object ->
-                                stream(spliteratorUnknownSize(object.fields(), Spliterator.ORDERED), false)
-                                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue())))
-                ).orElse(Collections.<String, Value>emptyMap()));
+        Json.JObject obj = delegate.getAsObjectOrEmpty("object");
+        return unmodifiableMap(obj.entrySet().stream().
+                map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), ValueFactory.createValue(e.getValue()))).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     public Property withValue(Value value) {
@@ -103,11 +85,9 @@ public final class Property extends Extended<Property> {
         return withDataValue("object", toObject(values), "value", "array");
     }
 
-    private Property withDataValue(String name, JsonNode node, String... toRemove) {
-        ObjectNode dlg = copyDelegate();
-        dlg.set(name, node);
-        dlg.remove(Arrays.asList(toRemove));
-        return copy(dlg);
+    private Property withDataValue(String name, Json.JValue node, String first, String second) {
+        Json.JObject updated = delegate.put(name, node);
+        return copy(updated.remove(first).remove(second));
     }
 
     public boolean isEmpty() {
@@ -122,124 +102,88 @@ public final class Property extends Extended<Property> {
         return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orElse(null), getArray(), getObject(), getPrompt());
     }
 
+    @Override
+    protected Property copy(Json.JObject value) {
+        return new Property(value);
+    }
+
+    @Override
+    public void validate() {
+    }
+
+    public <A> A fold(Function<Value, A> fValue, Function<List<Value>, A> fList, Function<Map<String, Value>, A> fObject, Supplier<A> fEmpty) {
+        if (hasValue()) {
+            return fValue.apply(getValue().orElse(Value.NULL));
+        }
+        if (hasArray()) {
+            return fList.apply(getArray());
+        }
+        if (hasObject()) {
+            return fObject.apply(getObject());
+        }
+        return fEmpty.get();
+    }
+
     public static Property template(String name) {
-        return value(name, Optional.of(capitalize(name)), Value.NONE);
+        return value(name, Optional.empty(), Optional.empty());
     }
 
     public static Property template(String name, Optional<String> prompt) {
-        return value(name, prompt, Value.NONE);
+        return value(name, prompt, Optional.empty());
     }
 
     public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
-        ObjectNode node = makeObject(name, prompt);
-        value.ifPresent(val -> node.set("value", val.asJson()));
-        return new Property(node);
+        Json.JObject node = makeObject(name, prompt);
+        return new Property(value.map(val -> node.put("value", val.asJson())).orElse(node));
     }
 
     public static Property value(String name, Optional<String> prompt, Value value) {
         return value(name, prompt, Optional.of(value));
     }
 
-    public static Property value(String name, Optional<String> prompt, Object value) {
-        return value(name, prompt, ValueFactory.createOptionalValue(value));
-    }
-
     public static Property value(String name, Value value) {
-        return value(name,
-                Optional.ofNullable(value)
-        );
-    }
-
-    public static Property value(String name, Object value) {
-        return value(name,
-                ValueFactory.createOptionalValue(value)
-        );
+        return value(name, Optional.ofNullable(value));
     }
 
     public static Property value(String name, Optional<Value> value) {
-        return value(name,
-                Optional.of(capitalize(name)),
-                value
-        );
+        return value(name, Optional.empty(), value);
     }
 
     public static Property array(String name, List<Value> list) {
-        return array(name, Optional.of(capitalize(name)), list);
+        return array(name, Optional.empty(), list);
     }
 
     public static Property array(String name, Optional<String> prompt, List<Value> list) {
-        ObjectNode node = makeObject(name, prompt);
-        node.set("array", toArray(list));
-        return new Property(node);
+        Json.JObject node = makeObject(name, prompt);
+        return new Property(node.put("array", toArray(list)));
     }
 
-    private static ArrayNode toArray(List<Value> list) {
-        ArrayNode array = JsonNodeFactory.instance.arrayNode();
-        for (Value value : list) {
-            array.add(value.asJson());
-        }
-        return array;
-    }
-
-    public static Property arrayObject(String name, List<Object> list) {
-        return arrayObject(name, Optional.of(capitalize(name)), list);
-    }
-
-    public static Property arrayObject(String name, Optional<String> prompt, List<Object> list) {
-        return array(name, prompt, list.stream()
-                                       .map(ValueFactory::createOptionalValue)
-                                       .flatMap(optionalValue -> optionalValue.map(Stream::of).orElseGet(Stream::empty))
-                                       .collect(Collectors.toList()));
-    }
-
-    public static Property object(String name, Map<String, Value> object) {
-        return object(name, Optional.of(capitalize(name)), object);
+    private static Json.JArray toArray(List<Value> list) {
+        return Json.jArray(list.stream().map(Value::asJson).collect(Collectors.toList()));
     }
 
     public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
-        ObjectNode node = makeObject(name, prompt);
-        node.set("object", toObject(object));
-        return new Property(node);
+        Json.JObject node = makeObject(name, prompt);
+        return new Property(node.put("object", toObject(object)));
     }
 
-    private static ObjectNode toObject(Map<String, Value> object) {
-        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-        for (Map.Entry<String, Value> entry : object.entrySet()) {
-            objectNode.set(entry.getKey(), entry.getValue().asJson());
-        }
-        return objectNode;
+
+    public static List<Property> fromData(Json.JArray data) {
+        return unmodifiableList(data.getListAsObjects().stream()
+                .map(Property::new)
+                .collect(Collectors.toList()));
     }
 
-    public static Property objectMap(String name, Map<String, Object> object) {
-        return objectMap(name, Optional.of(capitalize(name)), object);
+    private static Json.JObject toObject(Map<String, Value> object) {
+        Map<String, Json.JValue> map = new LinkedHashMap<>();
+        object.forEach((k, v) -> map.put(k, v.asJson()));
+        return Json.jObject(map);
     }
 
-    public static Property objectMap(String name, Optional<String> prompt, Map<String, Object> object) {
-        return object(name, prompt, object.entrySet()
-                                          .stream()
-                                          .collect(toMap(Map.Entry::getKey, entry -> ValueFactory.createValue(entry.getValue()))));
-    }
-
-    @Override
-    protected Property copy(ObjectNode value) {
-        return new Property(value);
-    }
-
-    @Override
-    public void validate() {
-
-    }
-
-    private static ObjectNode makeObject(String name, Optional<String> prompt) {
-        ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("name", name);
-        prompt.ifPresent(value -> node.put("prompt", value));
-        return node;
-    }
-
-    public static List<Property> fromData(JsonNode data) {
-        return unmodifiableList(stream(data.spliterator(), false)
-                                        .map(jsonNode -> new Property((ObjectNode) jsonNode))
-                                        .collect(Collectors.toList()));
+    private static Json.JObject makeObject(String name, Optional<String> prompt) {
+        Map<String, Json.JValue> map = new LinkedHashMap<>();
+        map.put("name", Json.jString(name));
+        prompt.ifPresent(value -> map.put("prompt", Json.jString(value)));
+        return Json.jObject(map);
     }
 }

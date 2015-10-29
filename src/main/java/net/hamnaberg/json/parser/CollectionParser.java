@@ -18,23 +18,22 @@ package net.hamnaberg.json.parser;
 
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Collection;
+import net.hamnaberg.json.io.JacksonStreamingParser;
 import net.hamnaberg.json.util.Charsets;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.*;
+import java.util.Optional;
 
 /**
  * Parser for a vnd.collection+json document.
  */
 public class CollectionParser {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JacksonStreamingParser parser = new JacksonStreamingParser();
 
     public Collection parse(Reader reader) throws IOException {
         try {
-            return parse(mapper.readTree(reader));
+            return parse(parser.parse(reader));
         } finally {
             if (reader != null) {
                 reader.close();
@@ -69,7 +68,7 @@ public class CollectionParser {
 
     public Template parseTemplate(Reader reader) throws IOException {
         try {
-            return parseTemplate(mapper.readTree(reader));
+            return parseTemplate(parser.parse(reader).asJsonObjectOrEmpty());
         } finally {
             if (reader != null) {
                 reader.close();
@@ -95,24 +94,24 @@ public class CollectionParser {
         return parseTemplate(new StringReader(input));
     }
 
-    private Collection parse(JsonNode node) throws ParseException {
-        JsonNode collectionNode = node.get("collection");
-        if (collectionNode != null) {
-            return parseCollection(collectionNode);
+    private Collection parse(Json.JValue node) throws ParseException {
+        Optional<Json.JObject> collectionNode = node.asJsonObject().flatMap(obj -> obj.getAsObject("collection"));
+        if (collectionNode.isPresent()) {
+            return parseCollection(collectionNode.get());
         }
         throw new ParseException("Missing \"collection\" property");
     }
 
-    private Collection parseCollection(JsonNode collectionNode) {
-        Collection c = objectFactory.createCollection((ObjectNode) collectionNode);
+    private Collection parseCollection(Json.JObject collectionNode) {
+        Collection c = objectFactory.createCollection(collectionNode);
         c.validate();
         return c;
     }
 
-    private Template parseTemplate(JsonNode collectionNode) throws ParseException {
-        JsonNode node = collectionNode.get("template");
-        if (node != null) {
-            return objectFactory.createTemplate((ObjectNode) node);
+    private Template parseTemplate(Json.JObject object) throws ParseException {
+        Optional<Json.JObject> node = object.getAsObject("template");
+        if (node.isPresent()) {
+            return objectFactory.createTemplate(node.get());
         }
         throw new ParseException("Missing \"template\" property");
     }

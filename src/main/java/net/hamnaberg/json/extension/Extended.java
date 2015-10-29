@@ -1,19 +1,15 @@
 package net.hamnaberg.json.extension;
 
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.hamnaberg.json.Json;
 
 public abstract class Extended<T> {
-    protected final ObjectNode delegate;
+    protected final Json.JObject delegate;
 
-    protected Extended(ObjectNode delegate) {
+    protected Extended(Json.JObject delegate) {
         this.delegate = delegate;
     }
 
-    protected abstract T copy(ObjectNode value);
+    protected abstract T copy(Json.JObject value);
 
     public <A> A getExtension(Extension<A> extension) {
         return extension.extract(delegate);
@@ -21,27 +17,19 @@ public abstract class Extended<T> {
 
     @SuppressWarnings("unchecked")
     public <A> T apply(A value, Extension<A> extension) {
-        Map<String, JsonNode> map = extension.apply(value);
-        if (map == null || map.isEmpty()) {
+        Json.JObject applied = extension.apply(value);
+        if (applied == null || applied.isEmpty()) {
             return (T)this;
         }
-        ObjectNode copied = copyDelegate();
-        copied.setAll(map);
-        return copy(copied);
+        return copy(delegate.merge(applied));
     }
 
-    protected ObjectNode copyDelegate() {
-        ObjectNode copied = JsonNodeFactory.instance.objectNode();
-        copied.setAll(delegate);
-        return copied;
-    }
-
-    public ObjectNode asJson() {
-        return copyDelegate();
+    public Json.JObject asJson() {
+        return delegate;
     }
 
     protected String getAsString(String name) {
-        return delegate.has(name) ? delegate.get(name).asText() : null;
+        return delegate.getAsString(name).orElse(null);
     }
 
     @Override

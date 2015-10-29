@@ -16,25 +16,20 @@
 
 package net.hamnaberg.json;
 
-
-
+import net.hamnaberg.json.io.JacksonStreamingSerializer;
 import net.hamnaberg.json.util.Charsets;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.hamnaberg.json.util.Iterables;
 
 import java.io.*;
 import java.net.URI;
 import java.util.Collections;
 
 public final class Template extends DataContainer<Template> implements Writable {
-    Template(ObjectNode delegate) {
+    Template(Json.JObject delegate) {
         super(delegate);
     }
 
     @Override
-    protected Template copy(ObjectNode value) {
+    protected Template copy(Json.JObject value) {
         return new Template(value);
     }
 
@@ -43,11 +38,7 @@ public final class Template extends DataContainer<Template> implements Writable 
     }
 
     public static Template create(Iterable<Property> data) {
-        ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        if (!Iterables.isEmpty(data)) {
-            obj.set("data", Property.toArrayNode(data));
-        }
-        return new Template(obj);
+        return new Template(Json.jObject("data", Property.toArrayNode(data)));
     }
 
 
@@ -68,20 +59,12 @@ public final class Template extends DataContainer<Template> implements Writable 
      * Note: Does NOT close the writer.
      */
     public void writeTo(Writer writer) throws IOException {
-        ObjectMapper factory = new ObjectMapper();
-        ObjectNode template = JsonNodeFactory.instance.objectNode();
-        template.set("template", asJson());
-        factory.writeValue(writer, template);
+        new JacksonStreamingSerializer().write(Json.jObject("template", asJson()), writer);
     }
 
     @Override
     public String toString() {
-        StringWriter writer = new StringWriter();
-        try {
-            writeTo(writer);
-        } catch (IOException ignore) {
-        }
-        return writer.toString();
+        return new JacksonStreamingSerializer().writeToString(Json.jObject("template", asJson()));
     }
 
     public void validate() {

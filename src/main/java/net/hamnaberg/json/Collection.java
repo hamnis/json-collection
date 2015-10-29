@@ -16,38 +16,33 @@
 
 package net.hamnaberg.json;
 
+import net.hamnaberg.json.extension.Extended;
+import net.hamnaberg.json.io.JacksonStreamingSerializer;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.hamnaberg.json.extension.Extended;
-
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 public final class Collection extends Extended<Collection> implements Writable {
 
-    Collection(ObjectNode value) {
+    Collection(Json.JObject value) {
         super(value);
     }
 
     @Override
-    protected Collection copy(ObjectNode value) {
+    protected Collection copy(Json.JObject value) {
         return new Collection(value);
     }
 
@@ -61,27 +56,27 @@ public final class Collection extends Extended<Collection> implements Writable {
                                     List<Query> queries,
                                     Optional<Template> template,
                                     Optional<Error> error) {
-        ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        obj.put("version", Version.ONE.getIdentifier());
-        href.ifPresent(value -> obj.put("href", value.toString()));
+        ArrayList<Map.Entry<String, Json.JValue>> object = new ArrayList<>();
+        object.add(Json.entry("version", Json.jString(Version.ONE.getIdentifier())));
+        href.ifPresent(value -> object.add(Json.entry("href", Json.jString(value.toString()))));
         if (!links.isEmpty()) {
-            obj.set("links", links.stream()
-                                  .map(Extended::asJson)
-                                  .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            object.add(Json.entry("links", Json.jArray(links.stream()
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList()))));
         }
         if (!items.isEmpty()) {
-            obj.set("items", items.stream()
-                                  .map(Extended::asJson)
-                                  .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            object.add(Json.entry("items", Json.jArray(items.stream()
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList()))));
         }
         if (!queries.isEmpty()) {
-            obj.set("queries", queries.stream()
-                                      .map(Extended::asJson)
-                                      .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            object.add(Json.entry("queries", Json.jArray(queries.stream()
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList()))));
         }
-        template.ifPresent(value -> obj.set("template", value.asJson()));
-        error.ifPresent(value -> obj.set("error", value.asJson()));
-        Collection coll = new Collection(obj);
+        template.ifPresent(value -> object.add(Json.entry("template", value.asJson())));
+        error.ifPresent(value -> object.add(Json.entry("error", value.asJson())));
+        Collection coll = new Collection(Json.jObject(object));
         coll.validate();
         return coll;
     }
@@ -91,35 +86,35 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public Optional<URI> getHref() {
-        return delegate.has("href") ? of(URI.create(delegate.get("href").asText())) : Optional.<URI>empty();
+        return delegate.getAsString("href").map(URI::create);
     }
 
     public List<Link> getLinks() {
-        return delegate.has("links") ? Link.fromArray(delegate.get("links")) : Collections.<Link>emptyList();
+        return Link.fromArray(delegate.getAsArrayOrEmpty("links"));
     }
 
     public List<Item> getItems() {
-        return delegate.has("items") ? Item.fromArray(delegate.get("items")) : Collections.<Item>emptyList();
+        return Item.fromArray(delegate.getAsArrayOrEmpty("items"));
     }
 
     public List<Query> getQueries() {
-        return delegate.has("queries") ? Query.fromArray(delegate.get("queries")) : Collections.<Query>emptyList();
+        return Query.fromArray(delegate.getAsArrayOrEmpty("queries"));
     }
 
     public boolean hasTemplate() {
-        return delegate.has("template");
+        return delegate.containsKey("template");
     }
 
     public Optional<Template> getTemplate() {
-        return hasTemplate() ? of(new Template((ObjectNode) delegate.get("template"))) : Optional.<Template>empty();
+        return delegate.getAsObject("template").map(Template::new);
     }
 
     public boolean hasError() {
-        return delegate.has("error");
+        return delegate.containsKey("error");
     }
 
     public Optional<Error> getError() {
-        return hasError() ? of(new Error((ObjectNode) delegate.get("error"))) : Optional.<Error>empty();
+        return delegate.getAsObject("error").map(Error::new);
     }
 
     public Optional<Link> linkByName(final String name) {
@@ -197,20 +192,16 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public void writeTo(Writer writer) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode obj = mapper.createObjectNode();
-        obj.set("collection", asJson());
-        mapper.writeValue(writer, obj);
+        new JacksonStreamingSerializer().write(
+                Json.jObject("collection", asJson()),
+                writer
+        );
     }
 
     @Override
     public String toString() {
-        StringWriter writer = new StringWriter();
-        try {
-            writeTo(writer);
-        } catch (IOException ignore) {
-        }
-        return writer.toString();
+        return new JacksonStreamingSerializer().
+                writeToString(Json.jObject("collection", asJson()));
     }
 
     public void validate() {

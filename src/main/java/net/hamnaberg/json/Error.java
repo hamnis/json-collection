@@ -17,9 +17,10 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.net.URI;
 
@@ -28,12 +29,12 @@ import static java.util.Optional.ofNullable;
 public final class Error extends Extended<Error> {
     public static final Error EMPTY = Error.create(Optional.<String>empty(), Optional.<String>empty(), Optional.<String>empty());
 
-    Error(ObjectNode delegate) {
+    Error(Json.JObject delegate) {
         super(delegate);
     }
 
     @Override
-    protected Error copy(ObjectNode value) {
+    protected Error copy(Json.JObject value) {
         return new Error(value);
     }
 
@@ -62,11 +63,11 @@ public final class Error extends Extended<Error> {
     }
 
     public static Error create(Optional<String> title, Optional<String> code, Optional<String> message) {
-        final ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        title.ifPresent(value -> obj.put("title", value));
-        code.ifPresent(value -> obj.put("code", value));
-        message.ifPresent(value -> obj.put("message", value));
-        return new Error(obj);
+        final Map<String, Json.JValue> obj = new LinkedHashMap<>();
+        title.ifPresent(value -> obj.put("title", Json.jString(value)));
+        code.ifPresent(value -> obj.put("code", Json.jString(value)));
+        message.ifPresent(value -> obj.put("message", Json.jString(value)));
+        return new Error(Json.jObject(obj));
     }
 
 

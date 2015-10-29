@@ -16,16 +16,13 @@
 
 package net.hamnaberg.json;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Iterables;
 
 import java.net.URI;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,7 +31,7 @@ import static java.util.Optional.ofNullable;
 
 public final class Item extends DataContainer<Item> {
 
-    Item(ObjectNode node) {
+    Item(Json.JObject node) {
         super(node);
     }
 
@@ -47,19 +44,20 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Item create(Optional<URI> href, Iterable<Property> properties, List<Link> links) {
-        ObjectNode node = JsonNodeFactory.instance.objectNode();
-        href.ifPresent(uri -> node.put("href", uri.toString()));
+        Map<String, Json.JValue> map = new LinkedHashMap<>();
+
+        href.ifPresent(uri -> map.put("href", Json.jString(uri.toString())));
         if (!Iterables.isEmpty(properties)) {
-            node.set("data", StreamSupport.stream(properties.spliterator(), false)
-                                          .map(Extended::asJson)
-                                          .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            map.put("data", Json.jArray(StreamSupport.stream(properties.spliterator(), false)
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList())));
         }
         if (!Iterables.isEmpty(links)) {
-            node.set("links", StreamSupport.stream(links.spliterator(), false)
-                                           .map(Extended::asJson)
-                                           .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            map.put("links", Json.jArray(StreamSupport.stream(links.spliterator(), false)
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList())));
         }
-        return new Item(node);
+        return new Item(Json.jObject(map));
     }
 
     public static Item create(Optional<URI> href, Iterable<Property> properties) {
@@ -75,11 +73,11 @@ public final class Item extends DataContainer<Item> {
     }
 
     public Optional<URI> getHref() {
-        return delegate.has("href") ? of(URI.create(delegate.get("href").asText())) : Optional.<URI>empty();
+        return delegate.getAsString("href").map(URI::create);
     }
 
     public List<Link> getLinks() {
-        return delegate.has("links") ? Link.fromArray(delegate.get("links")) : Collections.<Link>emptyList();
+        return Link.fromArray(delegate.getAsArrayOrEmpty("links"));
     }
 
     public Template toTemplate() {
@@ -130,7 +128,7 @@ public final class Item extends DataContainer<Item> {
     }
 
     @Override
-    protected Item copy(ObjectNode value) {
+    protected Item copy(Json.JObject value) {
         return new Item(value);
     }
 
@@ -148,10 +146,13 @@ public final class Item extends DataContainer<Item> {
         return builder.addProperties(getData()).addLinks(getLinks());
     }
 
-    static List<Item> fromArray(JsonNode queries) {
-        return Collections.unmodifiableList(StreamSupport.stream(queries.spliterator(), false)
-                                                         .map(query -> new Item((ObjectNode) query))
-                                                         .collect(Collectors.toList()));
+    static List<Item> fromArray(Json.JArray items) {
+        return Collections.unmodifiableList(
+                items.getListAsObjects().
+                stream().
+                map(Item::new).
+                collect(Collectors.toList())
+        );
     }
 
     public void validate() {

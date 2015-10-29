@@ -1,29 +1,28 @@
 package net.hamnaberg.json;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class InternalObjectFactory {
-    public Collection createCollection(ObjectNode node) {
+    public Collection createCollection(Json.JObject node) {
         return new Collection(node);
     }
 
-    public Error createError(ObjectNode node) {
+    public Error createError(Json.JObject node) {
         return new Error(node);
     }
 
-    public Link createLink(ObjectNode node) {
+    public Link createLink(Json.JObject node) {
         return new Link(node);
     }
 
-    public Property createProperty(ObjectNode node) {
+    public Property createProperty(Json.JObject node) {
         return new Property(node);
     }
 
-    public Query createQuery(ObjectNode node) {
+    public Query createQuery(Json.JObject node) {
         return new Query(node);
     }
 
-    public Template createTemplate(ObjectNode node) {
+    public Template createTemplate(Json.JObject node) {
         return new Template(node);
     }
 }

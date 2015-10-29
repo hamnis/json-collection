@@ -1,14 +1,12 @@
 package net.hamnaberg.json.extension;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import net.hamnaberg.json.Json;
 
 import java.util.*;
 
 public abstract class Extension<A> {
-    public abstract A extract(ObjectNode node);
-    public abstract Map<String, JsonNode> apply(A value);
+    public abstract A extract(Json.JObject node);
+    public abstract Json.JObject apply(A value);
 
     public static <A, B> Extension<Tuple2<A, B>> combine(Extension<A> a, Extension<B> b) {
         return new Tuple2Extension<A, B>(Tuple2.of(a, b));
@@ -26,16 +24,14 @@ public abstract class Extension<A> {
         }
 
         @Override
-        public Tuple2<A, B> extract(ObjectNode node) {
-            return new Tuple2<A, B>(delegate._1.extract(node), delegate._2.extract(node));
+        public Tuple2<A, B> extract(Json.JObject node) {
+            return new Tuple2<>(delegate._1.extract(node), delegate._2.extract(node));
         }
 
         @Override
-        public Map<String, JsonNode> apply(Tuple2<A, B> value) {
-            Map<String, JsonNode> builder = new HashMap<>();
-            builder.putAll(delegate._1.apply(value._1));
-            builder.putAll(delegate._2.apply(value._2));
-            return Collections.unmodifiableMap(builder);
+        public Json.JObject apply(Tuple2<A, B> value) {
+            Json.JObject first = delegate._1.apply(value._1);
+            return first.merge(delegate._2.apply(value._2));
         }
     }
 
@@ -47,17 +43,16 @@ public abstract class Extension<A> {
         }
 
         @Override
-        public Tuple3<A, B, C> extract(ObjectNode node) {
+        public Tuple3<A, B, C> extract(Json.JObject node) {
             return Tuple3.of(delegate._1.extract(node), delegate._2.extract(node), delegate._3.extract(node));
         }
 
         @Override
-        public Map<String, JsonNode> apply(Tuple3<A, B, C> value) {
-            Map<String, JsonNode> builder = new HashMap<>();
-            builder.putAll(delegate._1.apply(value._1));
-            builder.putAll(delegate._2.apply(value._2));
-            builder.putAll(delegate._3.apply(value._3));
-            return Collections.unmodifiableMap(builder);
+        public Json.JObject apply(Tuple3<A, B, C> value) {
+            Json.JObject first = delegate._1.apply(value._1);
+            return first
+                    .merge(delegate._2.apply(value._2))
+                    .merge(delegate._3.apply(value._3));
         }
     }
 }

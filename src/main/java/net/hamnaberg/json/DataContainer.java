@@ -1,19 +1,18 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.json.util.Iterables;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public abstract class DataContainer<A extends DataContainer> extends Extended<A> {
-    protected DataContainer(ObjectNode delegate) {
+    protected DataContainer(Json.JObject delegate) {
         super(delegate);
     }
 
     public Data getData() {
-        return new Data(delegate.has("data") ? Property.fromData(delegate.get("data")) : Collections.<Property>emptyList());
+        return new Data(Property.fromData(delegate.getAsArrayOrEmpty("data")));
     }
 
     public Map<String, Property> getDataAsMap() {
@@ -38,9 +37,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
         Data data = getData();
         Data replaced = data.replace(property);
         if (!replaced.isEmpty()) {
-            ObjectNode copied = copyDelegate();
-            copied.set("data", Property.toArrayNode(replaced));
-            return copy(copied);
+            return copy(delegate.put("data", Property.toArrayNode(replaced)));
         }
         return (A)this;
     }
@@ -67,9 +64,7 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
             return (A)this;
         }
 
-        ObjectNode copied = copyDelegate();
-        copied.set("data", Property.toArrayNode(data));
-        return copy(copied);
+        return copy(delegate.put("data", Property.toArrayNode(data)));
     }
 
     /**
@@ -83,8 +78,6 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
         if (Iterables.isEmpty(props)) {
             return (A) this;
         }
-        ObjectNode copied = copyDelegate();
-        copied.set("data", Property.toArrayNode(props));
-        return copy(copied);
+        return copy(delegate.put("data", Property.toArrayNode(props)));
     }
 }

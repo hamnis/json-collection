@@ -17,23 +17,16 @@
 package net.hamnaberg.json;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Iterables;
 
 public final class Query extends DataContainer<Query> {
 
-    Query(ObjectNode delegate) {
+    Query(Json.JObject delegate) {
         super(delegate);
     }
 
@@ -46,20 +39,20 @@ public final class Query extends DataContainer<Query> {
     }
 
     public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, Iterable<Property> data) {
-        ObjectNode obj = JsonNodeFactory.instance.objectNode();
-        obj.put("href", target.toString());
+        Map<String, Json.JValue> obj = new LinkedHashMap<>();
+        obj.put("href", Json.jString(target.toString()));
         if (target.isURITemplate()) {
-            obj.put("encoding", "uri-template");
+            obj.put("encoding", Json.jString("uri-template"));
         }
-        obj.put("rel", rel);
-        prompt.ifPresent(value -> obj.put("prompt", value));
-        name.ifPresent(value -> obj.put("name", value));
+        obj.put("rel", Json.jString(rel));
+        prompt.ifPresent(value -> obj.put("prompt", Json.jString(value)));
+        name.ifPresent(value -> obj.put("name", Json.jString(value)));
         if (!Iterables.isEmpty(data)) {
-            obj.set("data", StreamSupport.stream(data.spliterator(), false)
-                                         .map(Extended::asJson)
-                                         .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll));
+            obj.put("data", Json.jArray(StreamSupport.stream(data.spliterator(), false)
+                    .map(Extended::asJson)
+                    .collect(Collectors.toList())));
         }
-        return new Query(obj);
+        return new Query(Json.jObject(obj));
     }
 
     public static Query create(Link link) {
@@ -67,13 +60,13 @@ public final class Query extends DataContainer<Query> {
     }
 
     @Override
-    protected Query copy(ObjectNode value) {
+    protected Query copy(Json.JObject value) {
         return new Query(value);
     }
 
     public Target getHref() {
-        String href = delegate.get("href").asText();
-        if (delegate.has("encoding") && "uri-template".equals(delegate.get("encoding").asText())) {
+        String href = delegate.getAsString("href").orElse(null);
+        if (delegate.containsKey("encoding") && "uri-template".equals(delegate.getAsString("encoding").orElse(null))) {
             return new URITemplateTarget(href);
         }
         return new URITarget(href);
@@ -108,10 +101,13 @@ public final class Query extends DataContainer<Query> {
         return Optional.ofNullable(getAsString("prompt"));
     }
 
-    static List<Query> fromArray(JsonNode queries) {
-        return Collections.unmodifiableList(StreamSupport.stream(queries.spliterator(), false)
-                                                         .map(jsonNode -> new Query((ObjectNode) jsonNode))
-                                                         .collect(Collectors.toList()));
+    static List<Query> fromArray(Json.JArray queries) {
+        return Collections.unmodifiableList(
+                queries.getListAsObjects()
+                .stream()
+                .map(Query::new)
+                .collect(Collectors.toList())
+        );
     }
 
     public void validate() {

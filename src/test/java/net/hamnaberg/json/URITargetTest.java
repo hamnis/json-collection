@@ -27,7 +27,7 @@ public class URITargetTest {
         URITarget target = new URITarget(href);
 
         List<Property> properties = Arrays.asList(
-                Property.value("first_name", ValueFactory.createValue("Humle/Dumle"))
+                Property.value("first_name", Value.of("Humle/Dumle"))
         );
 
         URI expanded = target.expand(properties);
@@ -47,9 +47,9 @@ public class URITargetTest {
         URITarget target = new URITarget(URI.create("http://example.com/foo"));
         String expected = "per=loser&paal=loser&espen=winner";
         List<Property> properties = Arrays.asList(
-                Property.value("per", ValueFactory.createOptionalValue("loser")),
-                Property.value("paal", ValueFactory.createOptionalValue("loser")),
-                Property.value("espen", ValueFactory.createOptionalValue("winner"))
+                Property.value("per", Value.of("loser")),
+                Property.value("paal", Value.of("loser")),
+                Property.value("espen", Value.of("winner"))
         );
 
         URI expanded = target.expand(properties);
@@ -61,9 +61,9 @@ public class URITargetTest {
         URITarget target = new URITarget(URI.create("http://example.com/foo?baa=foo"));
         String expected = "baa=foo&per=loser&paal=loser&espen=winner";
         List<Property> properties = Arrays.asList(
-                Property.value("per", ValueFactory.createOptionalValue("loser")),
-                Property.value("paal", ValueFactory.createOptionalValue("loser")),
-                Property.value("espen", ValueFactory.createOptionalValue("winner"))
+                Property.value("per", Value.of("loser")),
+                Property.value("paal", Value.of("loser")),
+                Property.value("espen", Value.of("winner"))
         );
 
         URI expanded = target.expand(properties);
@@ -76,9 +76,9 @@ public class URITargetTest {
         URITarget target = new URITarget(URI.create("http://example.com/foo"));
         String expected = "per=loser&per=big+brother&paal=loser&paal=second+big+brother&espen=winner";
         List<Property> properties = Arrays.asList(
-                Property.array("per", Arrays.asList(ValueFactory.createValue("loser"), ValueFactory.createValue("big brother"))),
-                Property.array("paal", Arrays.asList(ValueFactory.createValue("loser"), ValueFactory.createValue("second big brother"))),
-                Property.value("espen", ValueFactory.createValue("winner"))
+                Property.array("per", Arrays.asList(Value.of("loser"), Value.of("big brother"))),
+                Property.array("paal", Arrays.asList(Value.of("loser"), Value.of("second big brother"))),
+                Property.value("espen", Value.of("winner"))
         );
 
         URI expanded = target.expand(properties);

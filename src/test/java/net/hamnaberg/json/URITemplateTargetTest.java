@@ -22,7 +22,7 @@ public class URITemplateTargetTest {
         URITemplateTarget target = new URITemplateTarget("http://example.com/{foo}");
         String expected = "http://example.com/124567";
         List<Property> properties = Arrays.asList(
-                Property.value("foo", ValueFactory.createOptionalValue(124567))
+                Property.value("foo", Value.of(124567))
         );
 
         URI expanded = target.expand(properties);

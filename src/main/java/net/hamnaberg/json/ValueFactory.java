@@ -16,78 +16,28 @@
 
 package net.hamnaberg.json;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 
-import java.math.BigDecimal;
-
 public class ValueFactory {
-    public static Value createValue(JsonNode node) {
-        if (node == null) {
-            throw new IllegalArgumentException("Node may not be null");
-        }
-        else if (node.isNumber()) {
-            return new ValueImpl(node.decimalValue());
-        }
-        else if (node.isBoolean()) {
-            return new ValueImpl(node.booleanValue());
-        }
-        else if (node.isTextual()) {
-            return new ValueImpl(node.textValue());
-        }
-        else if (node.isNull()) {
-            return ValueImpl.NULL;
-        }
-        throw new IllegalArgumentException("Illegal value " + node);
+    public static Value createValue(Json.JValue node) {
+        return node.fold(
+                j -> Value.of(j.getValue()),
+                j -> Value.of(j.isValue()),
+                j -> Value.of(j.getValue()),
+                j -> {
+                    throw new IllegalArgumentException("Illegal value " + node);
+                },
+                j -> {
+                    throw new IllegalArgumentException("Illegal value " + node);
+                },
+                () -> Value.NULL
+        );
     }
-
-    @SuppressWarnings("unchecked")
-    public static Value createValue(Object value) {
-        if (value == null) {
-            return ValueImpl.NULL;
-        }
-        if (value instanceof Number && !(value instanceof BigDecimal)) {
-            value = new BigDecimal(value.toString());
-        }
-        if (value instanceof Optional) {
-            return createValue(((Optional) value).orElse(null));
-        }
-        if (!checkValue(value)) {
-            return new ValueImpl(value.toString());
-        }
-        return new ValueImpl(value);
-    }
-
-
-    public static Optional<Value> createOptionalValue(Object value) {
+    public static Optional<Value> createOptionalValue(Json.JValue value) {
         Value v = createValue(value);
-        if (v.isNull()) {
+        if (v == Value.NULL) {
             return Optional.empty();
         }
         return Optional.of(v);
-    }
-
-    public static Optional<Value> createOptionalValue(JsonNode value) {
-        if (value == null) {
-            return Optional.empty();
-        }
-        Value v = createValue(value);
-        if (v.isNull()) {
-            return Optional.empty();
-        }
-        return Optional.of(v);
-    }
-
-    private static boolean checkValue(Object value) {
-        if (value instanceof String) {
-            return true;
-        }
-        else if (value instanceof Boolean) {
-            return true;
-        }
-        else if (value instanceof Number) {
-            return true;
-        }
-        return false;
     }
 }

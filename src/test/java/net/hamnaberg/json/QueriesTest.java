@@ -17,7 +17,7 @@ public class QueriesTest {
         Collection collection = Collection.builder().addQuery(query).build();
         Query filter = collection.queryByRel("filter").get();
         assertThat(URI.create("http://example.com"), equalTo(filter.expand()));
-        assertThat(URI.create("http://example.com?q=faff"), equalTo(filter.expand(Collections.singletonList(Property.value("q", "faff")))));
+        assertThat(URI.create("http://example.com?q=faff"), equalTo(filter.expand(Collections.singletonList(Property.value("q", Value.of("faff"))))));
 
     }
 }

@@ -1,20 +1,15 @@
 package net.hamnaberg.json.extension;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.hamnaberg.json.Error;
 import net.hamnaberg.json.InternalObjectFactory;
+import net.hamnaberg.json.Json;
 
 public class Errors {
     private final Map<String, List<Error>> errors = new LinkedHashMap<String, List<Error>>();
@@ -31,18 +26,18 @@ public class Errors {
         return Collections.emptyList();
     }
 
-    private JsonNode asJson() {
-        ObjectNode n = JsonNodeFactory.instance.objectNode();
-        n.setAll(errors.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> toArrayNode(entry.getValue()))));
-        return n;
+    private Json.JObject asJson() {
+        return Json.jObject(
+                errors.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> toArrayNode(entry.getValue())))
+        );
     }
 
-    private static ArrayNode toArrayNode(List<Error> errors) {
-        return errors.stream()
-                     .map(Extended::asJson)
-                     .collect(JsonNodeFactory.instance::arrayNode, ArrayNode::add, ArrayNode::addAll);
+    private static Json.JArray toArrayNode(List<Error> errors) {
+        return Json.jArray(errors.stream()
+                .map(Extended::asJson)
+                .collect(Collectors.toList()));
     }
 
     public static class Builder {
@@ -72,25 +67,24 @@ public class Errors {
         private InternalObjectFactory factory = new InternalObjectFactory() {};
 
         @Override
-        public Optional<Errors> extract(ObjectNode node) {
-            if (node.has("errors")) {
-                //extract stuff
-                JsonNode n = node.get("errors");
-                Stream<Map.Entry<String, JsonNode>> stream = stream(spliteratorUnknownSize(n.fields(), Spliterator.ORDERED), false);
-                Map<String, List<Error>> errors  = stream.map(e -> {
-                    List<Error> list = stream(e.getValue().spliterator(), false).map(elem -> factory.createError((ObjectNode) elem)).collect(toList());
-                    return new AbstractMap.SimpleImmutableEntry<>(e.getKey(), list);
-                }).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-                return Optional.of(new Errors(errors));
-            }
-            return Optional.empty();
+        public Optional<Errors> extract(Json.JObject node) {
+            Function<Json.JArray, List<Error>> toErrors = arr -> arr.
+                    getListAsObjects().
+                    stream().
+                    map(factory::createError).
+                    collect(Collectors.toList());
+
+            Optional<Json.JObject> errors = node.getAsObject("errors");
+            return errors.map(j -> j.entrySet().stream().map(
+                    e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), toErrors.apply(e.getValue().asJsonArrayOrEmpty()))).
+                    collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).map(Errors::new);
         }
 
         @Override
-        public Map<String, JsonNode> apply(Optional<Errors> value) {
-            return value.map(Stream::of)
-                        .orElse(Stream.<Errors>empty())
-                        .collect(Collectors.toMap(erros -> "errors", Errors::asJson));
+        public Json.JObject apply(Optional<Errors> value) {
+            return Json.jObject(value.map(Stream::of)
+                    .orElse(Stream.<Errors>empty())
+                    .collect(Collectors.toMap(errors -> "errors", Errors::asJson)));
         }
     }
 }
