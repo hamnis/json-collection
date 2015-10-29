@@ -31,7 +31,7 @@ public abstract class Extension<A> {
         @Override
         public Json.JObject apply(Tuple2<A, B> value) {
             Json.JObject first = delegate._1.apply(value._1);
-            return first.merge(delegate._2.apply(value._2));
+            return first.concat(delegate._2.apply(value._2));
         }
     }
 
@@ -51,8 +51,8 @@ public abstract class Extension<A> {
         public Json.JObject apply(Tuple3<A, B, C> value) {
             Json.JObject first = delegate._1.apply(value._1);
             return first
-                    .merge(delegate._2.apply(value._2))
-                    .merge(delegate._3.apply(value._3));
+                    .concat(delegate._2.apply(value._2))
+                    .concat(delegate._3.apply(value._3));
         }
     }
 }

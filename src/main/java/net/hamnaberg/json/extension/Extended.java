@@ -21,7 +21,7 @@ public abstract class Extended<T> {
         if (applied == null || applied.isEmpty()) {
             return (T)this;
         }
-        return copy(delegate.merge(applied));
+        return copy(delegate.concat(applied));
     }
 
     public Json.JObject asJson() {

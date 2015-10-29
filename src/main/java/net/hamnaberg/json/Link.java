@@ -54,7 +54,7 @@ public final class Link extends Extended<Link> {
         prompt.ifPresent(value -> obj.put("prompt", Json.jString(value)));
         render.ifPresent(value -> obj.put("render", Json.jString(value.getName())));
         name.ifPresent(value -> obj.put("name", Json.jString(value)));
-        return new Link(node.merge(Json.jObject(obj)));
+        return new Link(node.concat(Json.jObject(obj)));
     }
 
     public URI getHref() {
