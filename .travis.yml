@@ -1,0 +1,11 @@
+language: java
+sudo: false
+jdk:
+- oraclejdk8
+after_success:
+- '[[ $TRAVIS_BRANCH == "master" ]] && {  mvn -q --settings .travis-settings.xml -DskipTests
+  deploy; };'
+env:
+  global:
+  - secure: O2LZoZRE0kGOLMkv9M835THlnsX6+S8O4XsyhDCwPo+hvjEowZPaNCsqpcUejIHZO0n9UHSgzhxBuWG7PV79d+/qDh8pcL3F+8rjjiVTYBd27gSZsfTix+AKHJZOy+mxkgU8LSQMQ6VZ1uuN709Ap9gKt6ba6rkJNKp3QE5mRec=
+  - secure: iFWQCJ2Q7jt5In6K5jjHKP/SdXZ9PG/ZFcjAMVCJKUjgGCtnfUcJB7aHZNWtTxYXBAdf974GJwMZu72Iwh1RhfMiG+GAP+LvH6wqv71FsvTn5l4o7xARzAoOHkQ0a2bgOOl/akqZeECQSok2eqiOFtPWgSwOwGf+1EqPiuMnnSs=
