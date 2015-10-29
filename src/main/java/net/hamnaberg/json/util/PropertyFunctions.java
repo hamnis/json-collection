@@ -1,5 +1,6 @@
 package net.hamnaberg.json.util;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -19,7 +20,7 @@ public final class PropertyFunctions {
     private static final Function<Value, Optional<String>> valueStringF =
             input -> input.fold(optF(), s -> Optional.of(s.value), optF(), Optional::empty);
 
-    private static final Function<Value, Optional<Number>> valueNumberF =
+    private static final Function<Value, Optional<BigDecimal>> valueNumberF =
             input -> input.fold(optF(), optF(), n -> Optional.of(n.value), Optional::empty);
 
     private static final Function<Value, Optional<Boolean>> valueBooleanF =
@@ -27,7 +28,7 @@ public final class PropertyFunctions {
 
     public static final Function<Property, Optional<String>> propertyToValueStringF = input -> input.getValue().flatMap(valueStringF);
 
-    public static final Function<Property, Optional<Number>> propertyToValueNumberF = input -> input.getValue().flatMap(valueNumberF);
+    public static final Function<Property, Optional<BigDecimal>> propertyToValueNumberF = input -> input.getValue().flatMap(valueNumberF);
 
     public static final Function<Property, Optional<Boolean>> propertyToValueBooleanF = input -> input.getValue().flatMap(valueBooleanF);
 
