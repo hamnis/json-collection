@@ -28,7 +28,6 @@ import net.hamnaberg.json.Property;
 import net.hamnaberg.json.Query;
 import net.hamnaberg.json.Template;
 import net.hamnaberg.json.Value;
-import net.hamnaberg.json.ValueFactory;
 import net.hamnaberg.json.Version;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;

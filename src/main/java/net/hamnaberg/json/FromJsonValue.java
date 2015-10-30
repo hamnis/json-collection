@@ -18,7 +18,7 @@ package net.hamnaberg.json;
 
 import java.util.Optional;
 
-public class ValueFactory {
+class FromJsonValue {
     public static Value createValue(Json.JValue node) {
         return node.fold(
                 j -> Value.of(j.getValue()),

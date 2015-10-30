@@ -43,7 +43,7 @@ public final class Property extends Extended<Property> {
     }
 
     public Optional<Value> getValue() {
-        return ValueFactory.createOptionalValue(delegate.get("value").orElse(Json.jNull()));
+        return FromJsonValue.createOptionalValue(delegate.get("value").orElse(Json.jNull()));
     }
 
     public Optional<String> getPrompt() {
@@ -63,13 +63,13 @@ public final class Property extends Extended<Property> {
     }
 
     public List<Value> getArray() {
-        return delegate.getAsArrayOrEmpty("array").mapToList(ValueFactory::createValue);
+        return delegate.getAsArrayOrEmpty("array").mapToList(FromJsonValue::createValue);
     }
 
     public Map<String, Value> getObject() {
         Json.JObject obj = delegate.getAsObjectOrEmpty("object");
         return unmodifiableMap(obj.entrySet().stream().
-                map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), ValueFactory.createValue(e.getValue()))).
+                map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), FromJsonValue.createValue(e.getValue()))).
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
