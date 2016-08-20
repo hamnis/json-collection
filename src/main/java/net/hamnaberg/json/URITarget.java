@@ -1,7 +1,7 @@
 package net.hamnaberg.json;
 
 
-import java.util.Optional;
+import javaslang.control.Option;
 
 import net.hamnaberg.json.util.Iterables;
 import net.hamnaberg.json.util.StringUtils;
@@ -71,8 +71,8 @@ public final class URITarget implements Target {
                     }
                 }
                 else {
-                    Optional<Value> value = property.getValue();
-                    if (value.isPresent()) {
+                    Option<Value> value = property.getValue();
+                    if (value.isDefined()) {
                         if (sb.length() > 0) {
                             sb.append("&");
                         }

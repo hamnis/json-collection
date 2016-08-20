@@ -16,7 +16,7 @@
 
 package net.hamnaberg.json;
 
-import java.util.Optional;
+import javaslang.control.Option;
 
 class FromJsonValue {
     public static Value createValue(Json.JValue node) {
@@ -33,11 +33,11 @@ class FromJsonValue {
                 () -> Value.NULL
         );
     }
-    public static Optional<Value> createOptionalValue(Json.JValue value) {
+    public static Option<Value> createOptionValue(Json.JValue value) {
         Value v = createValue(value);
         if (v == Value.NULL) {
-            return Optional.empty();
+            return Option.none();
         }
-        return Optional.of(v);
+        return Option.of(v);
     }
 }

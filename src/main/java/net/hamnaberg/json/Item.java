@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Iterables;
 
@@ -26,8 +27,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import static javaslang.control.Option.of;
 
 public final class Item extends DataContainer<Item> {
 
@@ -36,17 +36,17 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Item create(URI href, Iterable<Property> properties) {
-        return create(ofNullable(href), properties, Collections.<Link>emptyList());
+        return create(of(href), properties, Collections.<Link>emptyList());
     }
 
     public static Item create(URI href, Iterable<Property> properties, List<Link> links) {
-        return create(ofNullable(href), properties, links);
+        return create(of(href), properties, links);
     }
 
-    public static Item create(Optional<URI> href, Iterable<Property> properties, List<Link> links) {
+    public static Item create(Option<URI> href, Iterable<Property> properties, List<Link> links) {
         Map<String, Json.JValue> map = new LinkedHashMap<>();
 
-        href.ifPresent(uri -> map.put("href", Json.jString(uri.toString())));
+        href.forEach(uri -> map.put("href", Json.jString(uri.toString())));
         if (!Iterables.isEmpty(properties)) {
             map.put("data", Json.jArray(StreamSupport.stream(properties.spliterator(), false)
                     .map(Extended::asJson)
@@ -60,19 +60,19 @@ public final class Item extends DataContainer<Item> {
         return new Item(Json.jObject(map));
     }
 
-    public static Item create(Optional<URI> href, Iterable<Property> properties) {
+    public static Item create(Option<URI> href, Iterable<Property> properties) {
         return create(href, properties, Collections.<Link>emptyList());
     }
 
-    public static Item create(Optional<URI> href) {
+    public static Item create(Option<URI> href) {
         return create(href, Collections.<Property>emptyList(), Collections.<Link>emptyList());
     }
 
     public static Item create() {
-        return create(Optional.<URI>empty());
+        return create(Option.none());
     }
 
-    public Optional<URI> getHref() {
+    public Option<URI> getHref() {
         return delegate.getAsString("href").map(URI::create);
     }
 
@@ -107,20 +107,20 @@ public final class Item extends DataContainer<Item> {
 
     }
 
-    public Optional<Link> linkByRel(final String rel) {
+    public Option<Link> linkByRel(final String rel) {
         return findLink(input -> rel.equals(input.getRel()));
     }
 
-    public Optional<Link> linkByName(final String name) {
-        return findLink(input -> ofNullable(name).equals(input.getName()));
+    public Option<Link> linkByName(final String name) {
+        return findLink(input -> of(name).equals(input.getName()));
     }
 
-    public Optional<Link> linkByRelAndName(final String rel, final String name) {
-        return findLink(input -> rel.equals(input.getRel()) && ofNullable(name).equals(input.getName()));
+    public Option<Link> linkByRelAndName(final String rel, final String name) {
+        return findLink(input -> rel.equals(input.getRel()) && of(name).equals(input.getName()));
     }
 
-    public Optional<Link> findLink(Predicate<Link> predicate) {
-        return getLinks().stream().filter(predicate).findFirst();
+    public Option<Link> findLink(Predicate<Link> predicate) {
+        return Option.ofOptional(getLinks().stream().filter(predicate).findFirst());
     }
 
     public List<Link> findLinks(Predicate<Link> predicate) {
@@ -134,7 +134,7 @@ public final class Item extends DataContainer<Item> {
 
     @Override
     public String toString() {
-        return String.format("Item with href %s, properties %s and links %s", getHref().orElse(null), getData(), getLinks());
+        return String.format("Item with href %s, properties %s and links %s", getHref().getOrElse((URI)null), getData(), getLinks());
     }
 
     public Collection toCollection() {
@@ -148,10 +148,9 @@ public final class Item extends DataContainer<Item> {
 
     static List<Item> fromArray(Json.JArray items) {
         return Collections.unmodifiableList(
-                items.getListAsObjects().
-                stream().
-                map(Item::new).
-                collect(Collectors.toList())
+                items.getListAsObjects()
+                        .map(Item::new)
+                        .toJavaList()
         );
     }
 
@@ -160,7 +159,7 @@ public final class Item extends DataContainer<Item> {
     }
 
     public static Builder builder(URI href) {
-        return new Builder(ofNullable(href));
+        return new Builder(of(href));
     }
 
     public static Builder builder() {
@@ -171,24 +170,24 @@ public final class Item extends DataContainer<Item> {
      * Mutable not thread-safe builder.
      */
     public static class Builder {
-        private Optional<URI> href;
+        private Option<URI> href;
         private List<Property> props = new ArrayList<Property>();
         private List<Link> links = new ArrayList<Link>();
 
         public Builder() {
-            this(Optional.<URI>empty());
+            this(Option.none());
         }
 
         public Builder(URI href) {
-            this(ofNullable(href));
+            this(of(href));
         }
 
-        public Builder(Optional<URI> href) {
+        public Builder(Option<URI> href) {
             this.href = href;
         }
 
         public Builder withHref(URI href) {
-            this.href = ofNullable(href);
+            this.href = of(href);
             return this;
         }
 

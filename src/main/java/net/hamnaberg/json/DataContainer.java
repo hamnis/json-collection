@@ -1,5 +1,6 @@
 package net.hamnaberg.json;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Iterables;
 
@@ -19,11 +20,11 @@ public abstract class DataContainer<A extends DataContainer> extends Extended<A>
        return getData().getDataAsMap();
     }
 
-    public Optional<Property> findProperty(Predicate<Property> predicate) {
+    public Option<Property> findProperty(Predicate<Property> predicate) {
         return getData().findProperty(predicate);
     }
 
-    public Optional<Property> propertyByName(final String name) {
+    public Option<Property> propertyByName(final String name) {
         return getData().propertyByName(name);
     }
 

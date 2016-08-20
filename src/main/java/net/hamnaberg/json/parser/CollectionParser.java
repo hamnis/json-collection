@@ -22,7 +22,7 @@ import net.hamnaberg.json.io.JacksonStreamingParser;
 import net.hamnaberg.json.util.Charsets;
 
 import java.io.*;
-import java.util.Optional;
+import javaslang.control.Option;
 
 /**
  * Parser for a vnd.collection+json document.
@@ -95,8 +95,8 @@ public class CollectionParser {
     }
 
     private Collection parse(Json.JValue node) throws ParseException {
-        Optional<Json.JObject> collectionNode = node.asJsonObject().flatMap(obj -> obj.getAsObject("collection"));
-        if (collectionNode.isPresent()) {
+        Option<Json.JObject> collectionNode = node.asJsonObject().flatMap(obj -> obj.getAsObject("collection"));
+        if (collectionNode.isDefined()) {
             return parseCollection(collectionNode.get());
         }
         throw new ParseException("Missing \"collection\" property");
@@ -109,8 +109,8 @@ public class CollectionParser {
     }
 
     private Template parseTemplate(Json.JObject object) throws ParseException {
-        Optional<Json.JObject> node = object.getAsObject("template");
-        if (node.isPresent()) {
+        Option<Json.JObject> node = object.getAsObject("template");
+        if (node.isDefined()) {
             return objectFactory.createTemplate(node.get());
         }
         throw new ParseException("Missing \"template\" property");

@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.Collection;
 import net.hamnaberg.json.Item;
 import net.hamnaberg.json.Property;
@@ -52,7 +53,7 @@ public class CollectionParserTest {
     public void parseMinimal() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         Assert.assertEquals(Version.ONE, collection.getVersion());
         assertEquals(0, collection.getLinks().size());
     }
@@ -61,7 +62,7 @@ public class CollectionParserTest {
     public void parseMinimalWithoutVersion() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/minimal-without-version.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertEquals(Version.ONE, collection.getVersion());
         assertEquals(0, collection.getLinks().size());
     }
@@ -70,13 +71,13 @@ public class CollectionParserTest {
     public void parseSingleItemCollection() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/item.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertEquals(3, collection.getLinks().size());
         assertEquals(1, collection.getItems().size());
-        Optional<Item> item = collection.getFirstItem();
-        assertTrue("Item was null", item.isPresent());
-        assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref().orElse(null));
-        assertEquals(Property.value("full-name", Optional.of("Full Name"), Optional.of(Value.of("J. Doe"))), item.get().getData().get(0).get());
+        Option<Item> item = collection.getFirstItem();
+        assertTrue("Item was null", item.isDefined());
+        assertEquals(URI.create("http://example.org/friends/jdoe"), item.get().getHref().getOrElse((URI)null));
+        assertEquals(Property.value("full-name", Option.of("Full Name"), Option.of(Value.of("J. Doe"))), item.get().getData().get(0).get());
         assertEquals(2, item.get().getLinks().size());
     }
 
@@ -84,7 +85,7 @@ public class CollectionParserTest {
     public void parseErrorCollection() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/error.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertNotNull("Error was null", collection.getError());
     }
 
@@ -92,7 +93,7 @@ public class CollectionParserTest {
     public void parseTemplateCollection() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/template.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertNotNull("Template was null", collection.getTemplate());
     }
 
@@ -108,7 +109,7 @@ public class CollectionParserTest {
     public void parseQueriesCollection() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/queries.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertEquals(1, collection.getQueries().size());
         Query query = collection.getQueries().get(0);
         assertEquals("search", query.getData().get(0).get().getName());
@@ -118,13 +119,13 @@ public class CollectionParserTest {
     public void parseValuesExtension() throws IOException {
         Collection collection = parser.parse(new InputStreamReader(getClass().getResourceAsStream("/value-extension.json")));
         assertNotNull(collection);
-        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().orElse(null));
+        assertEquals(URI.create("http://example.org/friends/"), collection.getHref().getOrElse((URI)null));
         assertEquals(1, collection.getItems().size());
-        Optional<Item> first = collection.getFirstItem();
-        assertTrue(first.isPresent());
-        Optional<Property> complex = first.flatMap(input -> input.findProperty(input1 -> "complex".equals(input1.getName())));
-        assertTrue(complex.isPresent());
-        assertFalse(complex.get().getValue().isPresent());
+        Option<Item> first = collection.getFirstItem();
+        assertTrue(first.isDefined());
+        Option<Property> complex = first.flatMap(input -> input.findProperty(input1 -> "complex".equals(input1.getName())));
+        assertTrue(complex.isDefined());
+        assertFalse(complex.get().getValue().isDefined());
         Map<String,Value> object = complex.get().getObject();
         assertTrue(object.containsKey("foo"));
         assertEquals(Value.of("bar"), object.get("foo"));

@@ -20,14 +20,13 @@ import net.hamnaberg.json.extension.Extended;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
+import javaslang.control.Option;
 
 import java.net.URI;
 
-import static java.util.Optional.ofNullable;
 
 public final class Error extends Extended<Error> {
-    public static final Error EMPTY = Error.create(Optional.<String>empty(), Optional.<String>empty(), Optional.<String>empty());
+    public static final Error EMPTY = Error.create(Option.<String>none(), Option.<String>none(), Option.<String>none());
 
     Error(Json.JObject delegate) {
         super(delegate);
@@ -59,14 +58,14 @@ public final class Error extends Extended<Error> {
     }
 
     public static Error create(String title, String code, String message) {
-        return create(ofNullable(title), ofNullable(code), ofNullable(message));
+        return create(Option.of(title), Option.of(code), Option.of(message));
     }
 
-    public static Error create(Optional<String> title, Optional<String> code, Optional<String> message) {
+    public static Error create(Option<String> title, Option<String> code, Option<String> message) {
         final Map<String, Json.JValue> obj = new LinkedHashMap<>();
-        title.ifPresent(value -> obj.put("title", Json.jString(value)));
-        code.ifPresent(value -> obj.put("code", Json.jString(value)));
-        message.ifPresent(value -> obj.put("message", Json.jString(value)));
+        title.forEach(value -> obj.put("title", Json.jString(value)));
+        code.forEach(value -> obj.put("code", Json.jString(value)));
+        message.forEach(value -> obj.put("message", Json.jString(value)));
         return new Error(Json.jObject(obj));
     }
 

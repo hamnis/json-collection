@@ -16,11 +16,11 @@
 
 package net.hamnaberg.json;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class Link extends Extended<Link> {
     Link(Json.JObject delegate) {
@@ -33,32 +33,32 @@ public final class Link extends Extended<Link> {
     }
 
     public static Link create(URI href, String rel) {
-        return create(href, rel, Optional.<String>empty(), Optional.<String>empty(), Optional.<Render>empty());
+        return create(href, rel, Option.none(), Option.none(), Option.none());
     }
 
-    public static Link create(URI href, String rel, Optional<String> prompt) {
-        return create(href, rel, prompt, Optional.<String>empty(), Optional.<Render>empty());
+    public static Link create(URI href, String rel, Option<String> prompt) {
+        return create(href, rel, prompt, Option.none(), Option.none());
     }
 
-    public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name) {
-        return create(href, rel, prompt, name, Optional.<Render>empty());
+    public static Link create(URI href, String rel, Option<String> prompt, Option<String> name) {
+        return create(href, rel, prompt, name, Option.none());
     }
 
-    public static Link create(URI href, String rel, Optional<String> prompt, Optional<String> name, Optional<Render> render) {
+    public static Link create(URI href, String rel, Option<String> prompt, Option<String> name, Option<Render> render) {
         Map<String, Json.JValue> obj = new LinkedHashMap<>();
 
         Json.JObject node = Json.jObject(
-                Json.entry("href", Json.jString(Optional.ofNullable(href).orElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString())),
-                Json.entry("rel", Json.jString(Optional.ofNullable(rel).orElseThrow(() -> new IllegalArgumentException("Relation may not be null"))))
+                Json.entry("href", Json.jString(Option.of(href).getOrElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString())),
+                Json.entry("rel", Json.jString(Option.of(rel).getOrElseThrow(() -> new IllegalArgumentException("Relation may not be null"))))
         );
-        prompt.ifPresent(value -> obj.put("prompt", Json.jString(value)));
-        render.ifPresent(value -> obj.put("render", Json.jString(value.getName())));
-        name.ifPresent(value -> obj.put("name", Json.jString(value)));
+        prompt.forEach(value -> obj.put("prompt", Json.jString(value)));
+        render.forEach(value -> obj.put("render", Json.jString(value.getName())));
+        name.forEach(value -> obj.put("name", Json.jString(value)));
         return new Link(node.concat(Json.jObject(obj)));
     }
 
     public URI getHref() {
-        return delegate.getAsString("href").map(URI::create).orElse(null);
+        return delegate.getAsString("href").map(URI::create).getOrElse((URI)null);
     }
 
     public Link withHref(URI href) {
@@ -66,7 +66,7 @@ public final class Link extends Extended<Link> {
     }
 
     public String getRel() {
-        return delegate.getAsString("rel").orElse(null);
+        return delegate.getAsString("rel").getOrElse((String)null);
     }
 
     public Link withRel(String rel) {
@@ -77,16 +77,16 @@ public final class Link extends Extended<Link> {
         return Arrays.asList(getRel().split("\\s"));
     }
 
-    public Optional<String> getPrompt() {
-        return Optional.ofNullable(getAsString("prompt"));
+    public Option<String> getPrompt() {
+        return Option.of(getAsString("prompt"));
     }
 
     public Link withPrompt(String prompt) {
         return copy(delegate.put("prompt", prompt));
     }
 
-    public Optional<String> getName() {
-        return Optional.ofNullable(getAsString("name"));
+    public Option<String> getName() {
+        return Option.of(getAsString("name"));
     }
 
     public Link withName(String name) {
@@ -94,7 +94,7 @@ public final class Link extends Extended<Link> {
     }
 
     public Render getRender() {
-        return delegate.getAsString("render").map(Render::valueOf).orElse(Render.Link);
+        return delegate.getAsString("render").map(Render::valueOf).getOrElse(Render.Link);
     }
 
     public Link withRender(Render render) {
@@ -107,11 +107,11 @@ public final class Link extends Extended<Link> {
     }
 
     public void validate() {
-        Optional.ofNullable(getHref()).orElseThrow(() -> new IllegalArgumentException("Href was null"));
-        Optional.ofNullable(getRel()).orElseThrow(() -> new IllegalArgumentException("Rel was null"));
+        Option.of(getHref()).getOrElseThrow(() -> new IllegalArgumentException("Href was null"));
+        Option.of(getRel()).getOrElseThrow(() -> new IllegalArgumentException("Rel was null"));
     }
 
     static List<Link> fromArray(Json.JArray node) {
-        return node.getListAsObjects().stream().map(Link::new).collect(Collectors.toList());
+        return node.getListAsObjects().map(Link::new).toJavaList();
     }
 }

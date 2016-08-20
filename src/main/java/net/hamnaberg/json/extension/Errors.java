@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.Error;
 import net.hamnaberg.json.InternalObjectFactory;
 import net.hamnaberg.json.Json;
@@ -63,27 +64,26 @@ public class Errors {
     }
 
 
-    public static class Ext extends Extension<Optional<Errors>> {
+    public static class Ext extends Extension<Option<Errors>> {
         private InternalObjectFactory factory = new InternalObjectFactory() {};
 
         @Override
-        public Optional<Errors> extract(Json.JObject node) {
+        public Option<Errors> extract(Json.JObject node) {
             Function<Json.JArray, List<Error>> toErrors = arr -> arr.
                     getListAsObjects().
-                    stream().
                     map(factory::createError).
-                    collect(Collectors.toList());
+                    toJavaList();
 
-            Optional<Json.JObject> errors = node.getAsObject("errors");
+            Option<Json.JObject> errors = node.getAsObject("errors");
             return errors.map(j -> j.entrySet().stream().map(
                     e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), toErrors.apply(e.getValue().asJsonArrayOrEmpty()))).
                     collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).map(Errors::new);
         }
 
         @Override
-        public Json.JObject apply(Optional<Errors> value) {
+        public Json.JObject apply(Option<Errors> value) {
             return Json.jObject(value.map(Stream::of)
-                    .orElse(Stream.<Errors>empty())
+                    .getOrElse(Stream.<Errors>empty())
                     .collect(Collectors.toMap(errors -> "errors", Errors::asJson)));
         }
     }

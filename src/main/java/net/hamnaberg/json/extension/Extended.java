@@ -29,7 +29,7 @@ public abstract class Extended<T> {
     }
 
     protected String getAsString(String name) {
-        return delegate.getAsString(name).orElse(null);
+        return delegate.getAsString(name).getOrElse((String)null);
     }
 
     @Override

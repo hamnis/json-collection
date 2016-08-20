@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import javaslang.control.Option;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -26,9 +26,9 @@ public final class Data implements Iterable<Property> {
 
 
     public Data(Iterable<Property> props) {
-        properties = Optional.ofNullable(props)
+        properties = Option.of(props)
                              .map(x -> StreamSupport.stream(x.spliterator(), false).collect(Collectors.toList()))
-                             .orElseThrow(() -> new IllegalArgumentException("Properties in Data may not be null"));
+                             .getOrElseThrow(() -> new IllegalArgumentException("Properties in Data may not be null"));
     }
 
     public boolean isEmpty() {
@@ -39,23 +39,23 @@ public final class Data implements Iterable<Property> {
         return getDataAsMap(properties);
     }
 
-    public Optional<Property> findProperty(Predicate<Property> predicate) {
-        return properties.stream().filter(predicate).findFirst();
+    public Option<Property> findProperty(Predicate<Property> predicate) {
+        return Option.ofOptional(properties.stream().filter(predicate).findFirst());
     }
 
-    public Optional<Property> propertyByName(final String name) {
+    public Option<Property> propertyByName(final String name) {
         return findProperty(input -> name.equals(input.getName()));
     }
 
-    public Optional<Property> get(int index) {
+    public Option<Property> get(int index) {
         int count = 0;
         for (Property property : properties) {
             if (index == count) {
-                return Optional.of(property);
+                return Option.of(property);
             }
             count++;
         }
-        return Optional.empty();
+        return Option.none();
     }
 
     /**

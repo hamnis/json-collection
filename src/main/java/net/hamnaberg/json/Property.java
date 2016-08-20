@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 
 import java.util.*;
@@ -39,14 +40,14 @@ public final class Property extends Extended<Property> {
     }
 
     public String getName() {
-        return delegate.getAsString("name").orElse(null);
+        return delegate.getAsString("name").getOrElse((String)null);
     }
 
-    public Optional<Value> getValue() {
-        return FromJsonValue.createOptionalValue(delegate.get("value").orElse(Json.jNull()));
+    public Option<Value> getValue() {
+        return FromJsonValue.createOptionValue(delegate.get("value").getOrElse(Json.jNull()));
     }
 
-    public Optional<String> getPrompt() {
+    public Option<String> getPrompt() {
         return delegate.getAsString("prompt");
     }
 
@@ -63,7 +64,7 @@ public final class Property extends Extended<Property> {
     }
 
     public List<Value> getArray() {
-        return delegate.getAsArrayOrEmpty("array").mapToList(FromJsonValue::createValue);
+        return delegate.getAsArrayOrEmpty("array").mapToList(FromJsonValue::createValue).toJavaList();
     }
 
     public Map<String, Value> getObject() {
@@ -91,7 +92,7 @@ public final class Property extends Extended<Property> {
     }
 
     public boolean isEmpty() {
-        return !getValue().isPresent() && getArray().isEmpty() && getObject().isEmpty();
+        return !getValue().isDefined() && getArray().isEmpty() && getObject().isEmpty();
     }
 
     @Override
@@ -99,7 +100,7 @@ public final class Property extends Extended<Property> {
         if (isEmpty()) {
             return "Property template with name " + getName();
         }
-        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().orElse(null), getArray(), getObject(), getPrompt());
+        return String.format("Property with name %s, value %s, array %s, object %s, prompt %s", getName(), getValue().getOrElse((Value)null), getArray(), getObject(), getPrompt());
     }
 
     @Override
@@ -113,7 +114,7 @@ public final class Property extends Extended<Property> {
 
     public <A> A fold(Function<Value, A> fValue, Function<List<Value>, A> fList, Function<Map<String, Value>, A> fObject, Supplier<A> fEmpty) {
         if (hasValue()) {
-            return fValue.apply(getValue().orElse(Value.NULL));
+            return fValue.apply(getValue().getOrElse(Value.NULL));
         }
         if (hasArray()) {
             return fList.apply(getArray());
@@ -125,35 +126,35 @@ public final class Property extends Extended<Property> {
     }
 
     public static Property template(String name) {
-        return value(name, Optional.empty(), Optional.empty());
+        return value(name, Option.none(), Option.none());
     }
 
-    public static Property template(String name, Optional<String> prompt) {
-        return value(name, prompt, Optional.empty());
+    public static Property template(String name, Option<String> prompt) {
+        return value(name, prompt, Option.none());
     }
 
-    public static Property value(String name, Optional<String> prompt, Optional<Value> value) {
+    public static Property value(String name, Option<String> prompt, Option<Value> value) {
         Json.JObject node = makeObject(name, prompt);
-        return new Property(value.map(val -> node.put("value", val.asJson())).orElse(node));
+        return new Property(value.map(val -> node.put("value", val.asJson())).getOrElse(node));
     }
 
-    public static Property value(String name, Optional<String> prompt, Value value) {
-        return value(name, prompt, Optional.of(value));
+    public static Property value(String name, Option<String> prompt, Value value) {
+        return value(name, prompt, Option.of(value));
     }
 
     public static Property value(String name, Value value) {
-        return value(name, Optional.ofNullable(value));
+        return value(name, Option.of(value));
     }
 
-    public static Property value(String name, Optional<Value> value) {
-        return value(name, Optional.empty(), value);
+    public static Property value(String name, Option<Value> value) {
+        return value(name, Option.none(), value);
     }
 
     public static Property array(String name, List<Value> list) {
-        return array(name, Optional.empty(), list);
+        return array(name, Option.none(), list);
     }
 
-    public static Property array(String name, Optional<String> prompt, List<Value> list) {
+    public static Property array(String name, Option<String> prompt, List<Value> list) {
         Json.JObject node = makeObject(name, prompt);
         return new Property(node.put("array", toArray(list)));
     }
@@ -162,16 +163,16 @@ public final class Property extends Extended<Property> {
         return Json.jArray(list.stream().map(Value::asJson).collect(Collectors.toList()));
     }
 
-    public static Property object(String name, Optional<String> prompt, Map<String, Value> object) {
+    public static Property object(String name, Option<String> prompt, Map<String, Value> object) {
         Json.JObject node = makeObject(name, prompt);
         return new Property(node.put("object", toObject(object)));
     }
 
 
     public static List<Property> fromData(Json.JArray data) {
-        return unmodifiableList(data.getListAsObjects().stream()
+        return unmodifiableList(data.getListAsObjects()
                 .map(Property::new)
-                .collect(Collectors.toList()));
+                .toJavaList());
     }
 
     private static Json.JObject toObject(Map<String, Value> object) {
@@ -180,10 +181,10 @@ public final class Property extends Extended<Property> {
         return Json.jObject(map);
     }
 
-    private static Json.JObject makeObject(String name, Optional<String> prompt) {
+    private static Json.JObject makeObject(String name, Option<String> prompt) {
         Map<String, Json.JValue> map = new LinkedHashMap<>();
         map.put("name", Json.jString(name));
-        prompt.ifPresent(value -> map.put("prompt", Json.jString(value)));
+        prompt.forEach(value -> map.put("prompt", Json.jString(value)));
         return Json.jObject(map);
     }
 }

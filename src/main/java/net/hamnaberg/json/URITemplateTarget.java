@@ -3,7 +3,7 @@ package net.hamnaberg.json;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import javaslang.control.Option;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -51,8 +51,8 @@ public final class URITemplateTarget implements Target {
                                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().asString())));
             }
             else {
-                Optional<Object> value = property.getValue().filter(NOT_NULL_PRED).map(AS_STRING);
-                value.ifPresent(val -> map.put(property.getName(), val));
+                Option<Object> value = property.getValue().filter(NOT_NULL_PRED).map(AS_STRING);
+                value.forEach(val -> map.put(property.getName(), val));
             }
         }
 

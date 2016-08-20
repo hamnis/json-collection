@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 import net.hamnaberg.json.util.Iterables;
 
@@ -30,23 +31,23 @@ public final class Query extends DataContainer<Query> {
         super(delegate);
     }
 
-    public static Query create(URI target, String rel, Optional<String> prompt, Iterable<Property> data) {
-        return create(new URITarget(target), rel, prompt, Optional.<String>empty(), data);
+    public static Query create(URI target, String rel, Option<String> prompt, Iterable<Property> data) {
+        return create(new URITarget(target), rel, prompt, Option.none(), data);
     }
 
-    public static Query create(Target target, String rel, Optional<String> prompt, Iterable<Property> data) {
-        return create(target, rel, prompt, Optional.<String>empty(), data);
+    public static Query create(Target target, String rel, Option<String> prompt, Iterable<Property> data) {
+        return create(target, rel, prompt, Option.none(), data);
     }
 
-    public static Query create(Target target, String rel, Optional<String> prompt, Optional<String> name, Iterable<Property> data) {
+    public static Query create(Target target, String rel, Option<String> prompt, Option<String> name, Iterable<Property> data) {
         Map<String, Json.JValue> obj = new LinkedHashMap<>();
         obj.put("href", Json.jString(target.toString()));
         if (target.isURITemplate()) {
             obj.put("encoding", Json.jString("uri-template"));
         }
         obj.put("rel", Json.jString(rel));
-        prompt.ifPresent(value -> obj.put("prompt", Json.jString(value)));
-        name.ifPresent(value -> obj.put("name", Json.jString(value)));
+        prompt.forEach(value -> obj.put("prompt", Json.jString(value)));
+        name.forEach(value -> obj.put("name", Json.jString(value)));
         if (!Iterables.isEmpty(data)) {
             obj.put("data", Json.jArray(StreamSupport.stream(data.spliterator(), false)
                     .map(Extended::asJson)
@@ -65,8 +66,8 @@ public final class Query extends DataContainer<Query> {
     }
 
     public Target getHref() {
-        String href = delegate.getAsString("href").orElse(null);
-        if (delegate.containsKey("encoding") && "uri-template".equals(delegate.getAsString("encoding").orElse(null))) {
+        String href = delegate.getAsString("href").getOrElse((String)null);
+        if (delegate.containsKey("encoding") && "uri-template".equals(delegate.getAsString("encoding").getOrElse((String)null))) {
             return new URITemplateTarget(href);
         }
         return new URITarget(href);
@@ -84,8 +85,8 @@ public final class Query extends DataContainer<Query> {
         return getAsString("rel");
     }
 
-    public Optional<String> getName() {
-        return Optional.ofNullable(getAsString("name"));
+    public Option<String> getName() {
+        return Option.of(getAsString("name"));
     }
 
     @Override
@@ -97,21 +98,20 @@ public final class Query extends DataContainer<Query> {
         return Arrays.asList(getRel().split("\\s"));
     }
 
-    public Optional<String> getPrompt() {
-        return Optional.ofNullable(getAsString("prompt"));
+    public Option<String> getPrompt() {
+        return Option.of(getAsString("prompt"));
     }
 
     static List<Query> fromArray(Json.JArray queries) {
         return Collections.unmodifiableList(
                 queries.getListAsObjects()
-                .stream()
                 .map(Query::new)
-                .collect(Collectors.toList())
+                .toJavaList()
         );
     }
 
     public void validate() {
-        Optional.ofNullable(getHref()).orElseThrow(() -> new IllegalArgumentException("Href may not be null"));
-        Optional.ofNullable(getRel()).orElseThrow(() -> new IllegalArgumentException("Rel may not be null"));
+        Option.of(getHref()).getOrElseThrow(() -> new IllegalArgumentException("Href may not be null"));
+        Option.of(getRel()).getOrElseThrow(() -> new IllegalArgumentException("Rel may not be null"));
     }
 }

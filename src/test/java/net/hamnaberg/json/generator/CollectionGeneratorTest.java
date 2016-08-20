@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json.generator;
 
+import javaslang.control.Option;
 import net.hamnaberg.json.Collection;
 import net.hamnaberg.json.Error;
 import net.hamnaberg.json.*;
@@ -59,7 +60,7 @@ public class CollectionGeneratorTest {
     @Test
     public void itemsCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), Arrays.asList(Property.value("one", Optional.of("One"), Value.of(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), Arrays.asList(Property.value("one", Option.of("One"), Value.of(1))), Collections.<Link>emptyList()));
         Json.JObject collection = Collection.builder(COLLECTION_URI).addItems(items).build().asJson();
         assertNotNull(collection);
         assertEquals("1.0", collection.getAsString("version").get());
@@ -71,7 +72,7 @@ public class CollectionGeneratorTest {
     public void templateCollection() throws Exception {
         Json.JObject collection = new Collection.Builder(
                 COLLECTION_URI).withTemplate(
-                Template.create(Arrays.asList(Property.value("one", Optional.of("One"), Optional.<Value>empty())))
+                Template.create(Arrays.asList(Property.value("one", Option.of("One"), Option.<Value>none())))
         ).build().asJson();
 
         assertNotNull(collection);
@@ -82,7 +83,7 @@ public class CollectionGeneratorTest {
 
     @Test
     public void canParseGeneratedTemplate() throws Exception {
-        Template template = Template.create(Arrays.asList(Property.value("one", Optional.of("One"), Optional.<Value>empty())));
+        Template template = Template.create(Arrays.asList(Property.value("one", Option.of("One"), Option.<Value>none())));
         StringWriter writer = new StringWriter();
         template.writeTo(writer);
         Template parsed = new CollectionParser().parseTemplate(writer.toString());
@@ -92,7 +93,7 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedCollection() throws Exception {
         List<Item> items = new ArrayList<Item>();
-        items.add(Item.create(COLLECTION_URI.resolve("item/1"), Arrays.asList(Property.value("one", Optional.of("One"), Value.of(1))), Collections.<Link>emptyList()));
+        items.add(Item.create(COLLECTION_URI.resolve("item/1"), Arrays.asList(Property.value("one", Option.of("One"), Value.of(1))), Collections.<Link>emptyList()));
 
         Collection collection = Collection.builder(COLLECTION_URI).addItems(items).build();
         String generated = collection.toString();
@@ -114,7 +115,7 @@ public class CollectionGeneratorTest {
             Json.jObject(
                     Json.entry("href", Json.jString(COLLECTION_URI.resolve("item/1").toString())),
                     Json.entry("data", Json.jArray(
-                            Property.value("one", Optional.of("One"), Value.of(1)).asJson()
+                            Property.value("one", Option.of("One"), Value.of(1)).asJson()
                     ))
             )
         );
