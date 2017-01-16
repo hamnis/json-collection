@@ -16,6 +16,7 @@
 
 package net.hamnaberg.json;
 
+import javaslang.Tuple;
 import javaslang.control.Option;
 import net.hamnaberg.json.extension.Extended;
 
@@ -69,9 +70,7 @@ public final class Property extends Extended<Property> {
 
     public Map<String, Value> getObject() {
         Json.JObject obj = delegate.getAsObjectOrEmpty("object");
-        return unmodifiableMap(obj.entrySet().stream().
-                map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), FromJsonValue.createValue(e.getValue()))).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        return obj.underlying.map((k, v) -> Tuple.of(k, FromJsonValue.createValue(v))).toJavaMap();
     }
 
     public Property withValue(Value value) {

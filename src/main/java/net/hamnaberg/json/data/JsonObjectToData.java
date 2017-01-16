@@ -15,10 +15,10 @@ public class JsonObjectToData implements ToData<Json.JObject> {
 
     @Override
     public Data apply(Json.JObject from) {
-        List<Property> properties = from.entrySet().stream().map(j -> {
+        List<Property> properties = from.stream().map(j -> {
             Map<String, Json.JValue> map = new LinkedHashMap<>();
-            map.put("name", Json.jString(j.getKey()));
-            j.getValue().foldUnit(
+            map.put("name", Json.jString(j._1));
+            j._2.foldUnit(
                     js -> map.put("value", js),
                     jb -> map.put("value", jb),
                     jn -> map.put("value", jn),

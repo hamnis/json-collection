@@ -5,8 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toMap;
-
+import javaslang.Tuple;
 import javaslang.control.Option;
 import net.hamnaberg.json.Error;
 import net.hamnaberg.json.InternalObjectFactory;
@@ -75,9 +74,9 @@ public class Errors {
                     toJavaList();
 
             Option<Json.JObject> errors = node.getAsObject("errors");
-            return errors.map(j -> j.entrySet().stream().map(
-                    e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), toErrors.apply(e.getValue().asJsonArrayOrEmpty()))).
-                    collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).map(Errors::new);
+            return errors.map(
+                    j -> j.underlying.map((k, v) -> Tuple.of(k, toErrors.apply(v.asJsonArrayOrEmpty()))).toJavaMap()
+            ).map(Errors::new);
         }
 
         @Override

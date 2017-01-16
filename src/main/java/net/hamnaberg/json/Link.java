@@ -48,8 +48,8 @@ public final class Link extends Extended<Link> {
         Map<String, Json.JValue> obj = new LinkedHashMap<>();
 
         Json.JObject node = Json.jObject(
-                Json.entry("href", Json.jString(Option.of(href).getOrElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString())),
-                Json.entry("rel", Json.jString(Option.of(rel).getOrElseThrow(() -> new IllegalArgumentException("Relation may not be null"))))
+                Json.tuple("href", Json.jString(Option.of(href).getOrElseThrow(() -> new IllegalArgumentException("Href may not be null")).toString())),
+                Json.tuple("rel", Json.jString(Option.of(rel).getOrElseThrow(() -> new IllegalArgumentException("Relation may not be null"))))
         );
         prompt.forEach(value -> obj.put("prompt", Json.jString(value)));
         render.forEach(value -> obj.put("render", Json.jString(value.getName())));

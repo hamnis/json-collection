@@ -34,7 +34,7 @@ public final class Template extends DataContainer<Template> implements Writable 
     }
 
     public static Template create() {
-        return create(Collections.<Property>emptyList());
+        return create(Collections.emptyList());
     }
 
     public static Template create(Iterable<Property> data) {
@@ -60,6 +60,7 @@ public final class Template extends DataContainer<Template> implements Writable 
      */
     public void writeTo(Writer writer) throws IOException {
         JsonSerializer.write(Json.jObject("template", asJson()), writer);
+        writer.flush();
     }
 
     @Override

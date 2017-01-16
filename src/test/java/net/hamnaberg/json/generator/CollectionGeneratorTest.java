@@ -50,16 +50,16 @@ public class CollectionGeneratorTest {
         assertEquals(COLLECTION_URI.toString(), collection.getAsString("href").get());
         Json.JObject errorNode = collection.getAsObjectOrEmpty("error");
         Json.JObject node = Json.jObject(
-                Json.entry("title", Json.jString("Hello")),
-                Json.entry("code", Json.jString("Warning")),
-                Json.entry("message", Json.jString("Hello"))
+                Json.tuple("title", Json.jString("Hello")),
+                Json.tuple("code", Json.jString("Warning")),
+                Json.tuple("message", Json.jString("Hello"))
         );
         assertEquals(node, errorNode);
     }
 
     @Test
     public void itemsCollection() throws Exception {
-        List<Item> items = new ArrayList<Item>();
+        List<Item> items = new ArrayList<>();
         items.add(Item.create(COLLECTION_URI.resolve("item/1"), Arrays.asList(Property.value("one", Option.of("One"), Value.of(1))), Collections.<Link>emptyList()));
         Json.JObject collection = Collection.builder(COLLECTION_URI).addItems(items).build().asJson();
         assertNotNull(collection);
@@ -84,10 +84,11 @@ public class CollectionGeneratorTest {
     @Test
     public void canParseGeneratedTemplate() throws Exception {
         Template template = Template.create(Arrays.asList(Property.value("one", Option.of("One"), Option.<Value>none())));
-        StringWriter writer = new StringWriter();
-        template.writeTo(writer);
-        Template parsed = new CollectionParser().parseTemplate(writer.toString());
-        assertEquals(template, parsed);
+        try(StringWriter writer = new StringWriter()) {
+            template.writeTo(writer);
+            Template parsed = new CollectionParser().parseTemplate(writer.toString());
+            assertEquals(template, parsed);
+        }
     }
 
     @Test
@@ -104,8 +105,8 @@ public class CollectionGeneratorTest {
     private Json.JObject createTemplate() {
         return Json.jObject("data", Json.jArray(
                 Json.jObject(
-                        Json.entry("name", Json.jString("one")),
-                        Json.entry("prompt", Json.jString("One"))
+                        Json.tuple("name", Json.jString("one")),
+                        Json.tuple("prompt", Json.jString("One"))
                 )
         ));
     }
@@ -113,8 +114,8 @@ public class CollectionGeneratorTest {
     private Json.JArray createItems() {
         return Json.jArray(
             Json.jObject(
-                    Json.entry("href", Json.jString(COLLECTION_URI.resolve("item/1").toString())),
-                    Json.entry("data", Json.jArray(
+                    Json.tuple("href", Json.jString(COLLECTION_URI.resolve("item/1").toString())),
+                    Json.tuple("data", Json.jArray(
                             Property.value("one", Option.of("One"), Value.of(1)).asJson()
                     ))
             )
