@@ -18,7 +18,7 @@ package net.hamnaberg.json.parser;
 
 import net.hamnaberg.json.*;
 import net.hamnaberg.json.Collection;
-import net.hamnaberg.json.io.JacksonStreamingParser;
+import net.hamnaberg.json.jackson.JacksonStreamingParser;
 import net.hamnaberg.json.util.Charsets;
 
 import java.io.*;

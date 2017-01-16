@@ -17,7 +17,6 @@
 package net.hamnaberg.json;
 
 import net.hamnaberg.json.extension.Extended;
-import net.hamnaberg.json.io.JacksonStreamingSerializer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javaslang.control.Option;
+import net.hamnaberg.json.io.JsonSerializer;
+
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -194,7 +195,7 @@ public final class Collection extends Extended<Collection> implements Writable {
     }
 
     public void writeTo(Writer writer) throws IOException {
-        new JacksonStreamingSerializer().write(
+        JsonSerializer.write(
                 Json.jObject("collection", asJson()),
                 writer
         );
@@ -202,8 +203,7 @@ public final class Collection extends Extended<Collection> implements Writable {
 
     @Override
     public String toString() {
-        return new JacksonStreamingSerializer().
-                writeToString(Json.jObject("collection", asJson()));
+        return Json.jObject("collection", asJson()).nospaces();
     }
 
     public void validate() {

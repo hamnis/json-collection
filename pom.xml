@@ -72,12 +72,12 @@
     <dependency>
       <groupId>net.hamnaberg.json</groupId>
       <artifactId>immutable-json-jackson</artifactId>
-      <version>3.0.0</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>net.hamnaberg.json</groupId>
       <artifactId>immutable-json-codec</artifactId>
-      <version>3.0.0</version>
+      <version>4.0.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>

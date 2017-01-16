@@ -16,7 +16,7 @@
 
 package net.hamnaberg.json;
 
-import net.hamnaberg.json.io.JacksonStreamingSerializer;
+import net.hamnaberg.json.io.JsonSerializer;
 import net.hamnaberg.json.util.Charsets;
 
 import java.io.*;
@@ -59,12 +59,12 @@ public final class Template extends DataContainer<Template> implements Writable 
      * Note: Does NOT close the writer.
      */
     public void writeTo(Writer writer) throws IOException {
-        new JacksonStreamingSerializer().write(Json.jObject("template", asJson()), writer);
+        JsonSerializer.write(Json.jObject("template", asJson()), writer);
     }
 
     @Override
     public String toString() {
-        return new JacksonStreamingSerializer().writeToString(Json.jObject("template", asJson()));
+        return Json.jObject("template", asJson()).nospaces();
     }
 
     public void validate() {
