@@ -70,7 +70,7 @@ public final class Property extends Extended<Property> {
 
     public Map<String, Value> getObject() {
         Json.JObject obj = delegate.getAsObjectOrEmpty("object");
-        return obj.underlying.map((k, v) -> Tuple.of(k, FromJsonValue.createValue(v))).toJavaMap();
+        return obj.value.map((k, v) -> Tuple.of(k, FromJsonValue.createValue(v))).toJavaMap();
     }
 
     public Property withValue(Value value) {

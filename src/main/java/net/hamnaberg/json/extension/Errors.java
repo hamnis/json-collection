@@ -75,7 +75,7 @@ public class Errors {
 
             Option<Json.JObject> errors = node.getAsObject("errors");
             return errors.map(
-                    j -> j.underlying.map((k, v) -> Tuple.of(k, toErrors.apply(v.asJsonArrayOrEmpty()))).toJavaMap()
+                    j -> j.value.map((k, v) -> Tuple.of(k, toErrors.apply(v.asJsonArrayOrEmpty()))).toJavaMap()
             ).map(Errors::new);
         }
 
