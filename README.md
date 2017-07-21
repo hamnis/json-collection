@@ -16,7 +16,7 @@ Releases are pushed to oss.sonatype.org which again syncs with maven central.
         <version>6.0.0</version>
     </dependency>
 
-#Javadoc
+# Javadoc
 http://javadoc.io/doc/net.hamnaberg.rest/json-collection/6.0.0
 
 # Example using Apache HTTPClient
